@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>年間シングルヒット曲ランキング | #mp8090 × ナウヤン同盟</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <header class="site-header">
+    <div class="header-deco" aria-hidden="true"></div>
+    <div class="header-inner">
+      <a href="top.html" class="header-back-link">← ナウヤン同盟の部屋へ</a>
+      <p class="header-badge">mp8090のリクエスト 参考用</p>
+      <h1 class="site-title"><span class="title-note" aria-hidden="true">🎵</span> 年間シングルヒット曲ランキング</h1>
+      <p class="site-subtitle">LuckyFM「Music Pick Up 80's &amp; 90's」の非公式ファンサイトです</p>
+    </div>
+  </header>
+
+  <nav class="year-nav" aria-label="年度選択">
+    <div class="year-nav-inner">
+      <div class="top-page-links">
+        <a href="setuplits.html" class="top-page-link-btn">📋 Set Up List</a>
+      </div>
+      <span class="nav-label" aria-hidden="true">◀ YEAR SELECT ▶</span>
+      <div class="year-buttons" id="yearButtons" role="group" aria-label="年度ボタン"></div>
+    </div>
+  </nav>
+
+  <main class="main-content" id="main">
+
+    <div id="loadingMsg" class="loading-msg" aria-live="polite">
+      <span class="loading-icon" aria-hidden="true">🎶</span>
+      データを読み込み中…
+    </div>
+
+    <div id="errorMsg" class="error-msg" hidden aria-live="assertive"></div>
+
+    <section id="chartSection" hidden>
+      <div class="chart-header">
+        <h2 id="currentYearTitle" class="chart-title"></h2>
+        <div class="chart-header-right">
+          <span id="chartCount" class="chart-count"></span>
+          <div id="rankShortcuts" class="rank-shortcuts" role="group" aria-label="順位ショートカット"></div>
+        </div>
+      </div>
+
+      <div class="table-scroll-hint" aria-hidden="true">← スクロールで横に表示 →</div>
+
+      <div class="table-wrapper" role="region" aria-label="ランキングテーブル" tabindex="0">
+        <table class="ranking-table">
+          <thead>
+            <tr>
+              <th class="col-rank" scope="col">順位</th>
+              <th class="col-title" scope="col">タイトル / アーティスト</th>
+              <th class="col-date" scope="col">発売日</th>
+              <th class="col-yt" scope="col">YouTube</th>
+            </tr>
+          </thead>
+          <tbody id="rankingBody"></tbody>
+        </table>
+      </div>
+
+      <p class="key-hint" aria-hidden="true">← → キーで年を切り替えられます</p>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p class="footer-credit">
+        ランキングデータ出典:
+        <a href="https://entamedata.web.fc2.com/" target="_blank" rel="noopener noreferrer">
+          PRiVATE LiFE エンタメデータランキング
+        </a>
+      </p>
+      <p class="footer-disclaimer">※本サイトは非公式のファンサイトです</p>
+    </div>
+  </footer>
+
+  <button id="backToTop" class="back-to-top" aria-label="ページ先頭へ戻る">↑ TOP</button>
+
+  <script src="app.js"></script>
+</body>
+</html>
