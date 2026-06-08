@@ -865,9 +865,6 @@
           body.appendChild(empty);
         } else {
           for (const ep of eps) {
-            // 仕様1: ep26以下かつspecial_feature null → 表示しない
-            if (ep.episode_no <= 26 && !ep.special_feature) continue;
-
             const hasTracks = ep.tracks && ep.tracks.length > 0;
             const hasImage  = !!ep.image_file;
             const [y, mo, d] = ep.air_date.split('-').map(Number);
@@ -875,8 +872,8 @@
 
             const badge = document.createElement('button');
 
-            // 仕様2: ep27以上かつspecial_feature null → 控えめ表示のみ、クリック不可
-            if (!ep.special_feature) {
+            // ep27以上かつspecial_feature null → 控えめ表示のみ、クリック不可
+            if (ep.episode_no >= 27 && !ep.special_feature) {
               badge.className = 'cal-badge minimal';
               badge.disabled = true;
               const l1 = document.createElement('span');
@@ -887,7 +884,7 @@
               continue;
             }
 
-            const featurePart = ' ' + ep.special_feature;
+            const featurePart = ep.special_feature ? ' ' + ep.special_feature : '';
             const l1 = document.createElement('span');
             l1.className = 'cal-badge-l1';
             l1.textContent = `#${ep.episode_no}${featurePart}｜PUY ${ep.puy_year}年`;
