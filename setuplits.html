@@ -876,8 +876,8 @@
 
             const badge = document.createElement('button');
 
-            // ep27以上かつspecial_feature null → 控えめ表示のみ、クリック不可
-            if (ep.episode_no >= 27 && !ep.special_feature) {
+            // ep27以上かつspecial_feature null かつ tracks なし → 控えめ表示のみ、クリック不可
+            if (ep.episode_no >= 27 && !ep.special_feature && (!ep.tracks || ep.tracks.length === 0)) {
               badge.className = 'cal-badge minimal';
               badge.disabled = true;
               const l1 = document.createElement('span');
