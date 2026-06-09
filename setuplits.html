@@ -667,7 +667,11 @@
       btn.textContent = String(y);
       btn.addEventListener('click', e => {
         e.preventDefault();
-        document.getElementById(`year-${y}`)?.scrollIntoView({ behavior: 'smooth' });
+        const section = document.getElementById(`year-${y}`);
+        if (!section) return;
+        const navHeight = document.querySelector('.sul-nav')?.offsetHeight ?? 0;
+        const top = section.getBoundingClientRect().top + window.scrollY - navHeight;
+        window.scrollTo({ top, behavior: 'smooth' });
       });
       yearButtons.appendChild(btn);
     }
