@@ -565,6 +565,20 @@
     .cal-badge.minimal:hover { background: #EDEAE4; }
     .cal-badge-l1 { display: block; font-weight: 600; }
     .cal-badge-l2 { display: block; font-size: 0.68rem; opacity: 0.88; margin-top: 0.1rem; }
+    .ep-new-badge {
+      display: inline-block;
+      background: linear-gradient(135deg, #ff3b30, #ff9500);
+      color: #fff;
+      font-size: 0.62rem;
+      font-weight: 700;
+      padding: 0.1em 0.45em;
+      border-radius: 0.3em;
+      letter-spacing: 0.03em;
+      vertical-align: middle;
+      margin-left: 0.3em;
+      line-height: 1.4;
+      box-shadow: 0 1px 4px rgba(255, 60, 0, 0.35);
+    }
     .cal-track-btn {
       display: block;
       width: 100%;
@@ -651,6 +665,16 @@
 
   (() => {
     const episodes    = SETUPLIST_DATA;
+
+    // ── 最新3件のepisode_noを算出（air_dateが有効なエピソードを降順ソートして上位3件）──
+    const latestEpNos = new Set(
+      [...episodes]
+        .filter(ep => ep.air_date)
+        .sort((a, b) => b.air_date.localeCompare(a.air_date))
+        .slice(0, 3)
+        .map(ep => ep.episode_no)
+    );
+
     const yearButtons = document.getElementById('yearButtons');
     const loadingMsg  = document.getElementById('loadingMsg');
     const listArea    = document.getElementById('listArea');
@@ -754,6 +778,13 @@
         li.appendChild(epNo);
         li.appendChild(date);
         li.appendChild(feature);
+
+        if (latestEpNos.has(ep.episode_no)) {
+          const newBadge = document.createElement('span');
+          newBadge.className = 'ep-new-badge';
+          newBadge.textContent = 'New';
+          li.appendChild(newBadge);
+        }
 
         if (hasImage) {
           const icon = document.createElement('span');
@@ -895,6 +926,12 @@
               l1.className = 'cal-badge-l1';
               l1.textContent = `#${ep.episode_no} | ${airFmt}`;
               badge.appendChild(l1);
+              if (latestEpNos.has(ep.episode_no)) {
+                const nb = document.createElement('span');
+                nb.className = 'ep-new-badge';
+                nb.textContent = 'New';
+                badge.appendChild(nb);
+              }
               body.appendChild(badge);
               continue;
             }
@@ -908,6 +945,12 @@
             l2.textContent = airFmt;
             badge.appendChild(l1);
             badge.appendChild(l2);
+            if (latestEpNos.has(ep.episode_no)) {
+              const nb = document.createElement('span');
+              nb.className = 'ep-new-badge';
+              nb.textContent = 'New';
+              badge.appendChild(nb);
+            }
 
             if (hasImage) {
               badge.className = 'cal-badge';
