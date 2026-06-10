@@ -212,6 +212,29 @@
       padding-top: 2rem;
       padding-bottom: 2rem;
     }
+
+    /* ===== フッター ===== */
+    .site-footer {
+      text-align: center;
+      padding: 2rem 1rem 2.5rem;
+      margin-top: 2rem;
+      border-top: 1px solid var(--border-gold, #b8860b);
+      color: var(--text-muted, #a08060);
+      font-size: 0.85rem;
+      line-height: 2;
+    }
+    .site-footer a {
+      color: var(--accent-cyan, #00d4d4);
+      text-decoration: none;
+      font-weight: 700;
+    }
+    .site-footer a:hover {
+      text-decoration: underline;
+    }
+    .footer-note {
+      font-size: 0.75rem;
+      opacity: 0.7;
+    }
   </style>
 </head>
 <body>
@@ -329,10 +352,21 @@
   </main>
 
   <footer class="site-footer">
-    <div class="footer-inner">
-      <p class="footer-disclaimer">※本サイトはLuckyFM「Music Pick Up 80's &amp; 90's」のファンサイトです</p>
-    </div>
+    <p class="footer-updated">最終更新日: <span id="lastUpdated"></span></p>
+    <p class="footer-hashtag">
+      <a href="https://twitter.com/hashtag/mp8090" target="_blank" rel="noopener noreferrer">#mp8090</a>
+      でリスナーと繋がろう！
+    </p>
+    <p class="footer-note">※本サイトは非公式のファンサイトです</p>
   </footer>
+
+  <script>
+  // フッター: 最終更新日（ファイルの最終変更日時を使用）
+  document.getElementById('lastUpdated').textContent =
+    new Date(document.lastModified).toLocaleDateString('ja-JP', {
+      year: 'numeric', month: 'long', day: 'numeric'
+    });
+  </script>
 
 </body>
 </html>
