@@ -702,6 +702,37 @@ a {
   text-decoration: underline;
 }
 
+/* ===== トップページ誘導帯バナー ===== */
+.top-banner-strip {
+  display: block;
+  background: linear-gradient(90deg, var(--gold-d), var(--gold), var(--gold-d));
+  color: var(--text-dark);
+  text-align: center;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 0.5rem 1rem;
+  text-decoration: none;
+  letter-spacing: 0.04em;
+  transition: filter 0.2s;
+}
+.top-banner-strip:hover {
+  filter: brightness(1.1);
+}
+.top-banner-strip .strip-arrow {
+  display: inline-block;
+  margin-left: 0.4em;
+  transition: transform 0.2s;
+}
+.top-banner-strip:hover .strip-arrow {
+  transform: translateX(4px);
+}
+@media (max-width: 600px) {
+  .top-banner-strip {
+    font-size: 0.78rem;
+    padding: 0.45rem 0.75rem;
+  }
+}
+
 .footer-disclaimer {
   color: #6B5035;
   font-family: var(--font-sans);
