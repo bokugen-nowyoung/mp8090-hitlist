@@ -261,13 +261,36 @@
       white-space: nowrap;
       border: 0;
     }
+    .banner-wrap {
+      position: relative;
+      line-height: 0;
+    }
+    .bokugen-icon-link {
+      position: absolute;
+      /* 円アイコン部分に重ねる（画像に対する割合指定） */
+      left: 77.5%;
+      top: 55%;
+      width: 21%;
+      height: 40%;
+      border-radius: 50%;
+      cursor: pointer;
+      z-index: 2;
+    }
+    /* ホバー時にわずかに反応（任意・分かりやすさ用） */
+    .bokugen-icon-link:hover {
+      box-shadow: 0 0 0 3px rgba(0,180,180,0.5);
+    }
   </style>
 </head>
 <body>
 
   <header class="site-header-banner">
     <h1 class="visually-hidden">ナウヤン同盟の部屋 - LuckyFM「Music Pick Up 80's & 90's」石井哲也アナウンサー公認・ファンサイト #mp8090</h1>
-    <img src="images/ogp.jpg" alt="ナウヤン同盟の部屋 - LuckyFM「Music Pick Up 80's & 90's」ファンサイト #mp8090" class="banner-img">
+    <div class="banner-wrap">
+      <img src="images/ogp.jpg" alt="ナウヤン同盟の部屋 - LuckyFM「Music Pick Up 80's & 90's」ファンサイト #mp8090" class="banner-img">
+      <a href="https://x.com/franz_gogo" target="_blank" rel="noopener noreferrer"
+         class="bokugen-icon-link" aria-label="制作者ぼくげんのXアカウントへ"></a>
+    </div>
   </header>
 
   <main class="main-content">
