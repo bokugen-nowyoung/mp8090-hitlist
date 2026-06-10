@@ -680,14 +680,6 @@
   (() => {
     const episodes    = SETUPLIST_DATA;
 
-    // ── 最新3件のepisode_noを算出（air_dateが有効なエピソードを降順ソートして上位3件）──
-    const latestEpNos = new Set(
-      [...episodes]
-        .filter(ep => ep.air_date)
-        .sort((a, b) => b.air_date.localeCompare(a.air_date))
-        .slice(0, 3)
-        .map(ep => ep.episode_no)
-    );
 
     const yearButtons = document.getElementById('yearButtons');
     const loadingMsg  = document.getElementById('loadingMsg');
@@ -792,13 +784,6 @@
         li.appendChild(epNo);
         li.appendChild(date);
         li.appendChild(feature);
-
-        if (latestEpNos.has(ep.episode_no)) {
-          const newBadge = document.createElement('span');
-          newBadge.className = 'ep-new-badge';
-          newBadge.textContent = 'New';
-          li.appendChild(newBadge);
-        }
 
         if (ep.episode_no === NEW_EPISODE_NO) {
           const reqBadge = document.createElement('span');
@@ -947,12 +932,6 @@
               l1.className = 'cal-badge-l1';
               l1.textContent = `#${ep.episode_no} | ${airFmt}`;
               badge.appendChild(l1);
-              if (latestEpNos.has(ep.episode_no)) {
-                const nb = document.createElement('span');
-                nb.className = 'ep-new-badge';
-                nb.textContent = 'New';
-                badge.appendChild(nb);
-              }
               if (ep.episode_no === NEW_EPISODE_NO) {
                 const rb = document.createElement('span');
                 rb.className = 'badge-new';
@@ -972,12 +951,6 @@
             l2.textContent = airFmt;
             badge.appendChild(l1);
             badge.appendChild(l2);
-            if (latestEpNos.has(ep.episode_no)) {
-              const nb = document.createElement('span');
-              nb.className = 'ep-new-badge';
-              nb.textContent = 'New';
-              badge.appendChild(nb);
-            }
             if (ep.episode_no === NEW_EPISODE_NO) {
               const rb = document.createElement('span');
               rb.className = 'badge-new';
