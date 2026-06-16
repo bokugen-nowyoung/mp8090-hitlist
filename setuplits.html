@@ -608,6 +608,47 @@
       margin-top: 0.2rem;
     }
     .cal-track-btn:hover { background: rgba(0,109,119,0.28); }
+
+    /* ── 狐吉くんへの感謝 付箋スタンプ ── */
+    .site-header { position: relative; }
+    .thanks-fusen {
+      position: absolute;
+      top: 20px;
+      right: 24px;
+      z-index: 5;
+      background: linear-gradient(145deg, #f5a04a 0%, #e8823a 100%);
+      color: #fff;
+      padding: 8px 14px;
+      border-radius: 6px;
+      transform: rotate(4deg);
+      box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+      text-align: center;
+      line-height: 1.2;
+      pointer-events: none;
+    }
+    .thanks-fusen .tf-top {
+      display: block;
+      font-size: 0.6rem;
+      letter-spacing: 0.08em;
+      font-weight: 600;
+      opacity: 0.95;
+    }
+    .thanks-fusen .tf-name {
+      display: block;
+      font-size: 1.05rem;
+      font-weight: 800;
+      margin-top: 1px;
+    }
+    @media (max-width: 600px) {
+      .thanks-fusen {
+        top: 14px;
+        right: 12px;
+        padding: 5px 9px;
+        border-radius: 5px;
+      }
+      .thanks-fusen .tf-top { font-size: 0.5rem; letter-spacing: 0.05em; }
+      .thanks-fusen .tf-name { font-size: 0.8rem; }
+    }
   </style>
 </head>
 <body>
@@ -615,6 +656,10 @@
 
   <header class="site-header">
     <div class="header-deco" aria-hidden="true"></div>
+    <div class="thanks-fusen" aria-label="Special Thanks 狐吉くん">
+      <span class="tf-top">Special Thanks!!</span>
+      <span class="tf-name">狐吉くん🦊</span>
+    </div>
     <div class="header-inner">
       <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:0.9rem;">
         <a href="index.html" class="header-back-link" style="margin-bottom:0;">← ランキングページへ</a>
