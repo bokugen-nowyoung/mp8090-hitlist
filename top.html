@@ -265,6 +265,20 @@
       position: relative;
       line-height: 0;
     }
+    /* ピンクのマスキングテープ（画像左上隅の黄色テープを隠す） */
+    .banner-wrap::before {
+      content: "";
+      position: absolute;
+      top: 4%;
+      left: -2%;
+      width: 22%;
+      height: 11%;
+      background: #e85f99;
+      transform: rotate(-24deg);
+      box-shadow: 0 2px 6px rgba(0,0,0,0.18);
+      opacity: 1;
+      z-index: 3;
+    }
     .bokugen-icon-link {
       position: absolute;
       /* 円アイコン部分に重ねる（画像に対する割合指定） */
