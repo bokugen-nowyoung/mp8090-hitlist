@@ -760,7 +760,7 @@
       byYear.get(y).push(ep);
     }
     for (const eps of byYear.values()) {
-      eps.sort((a, b) => a.episode_no - b.episode_no);
+      eps.sort((a, b) => b.episode_no - a.episode_no);
     }
     const years = [...byYear.keys()].sort((a, b) => a - b);
 
