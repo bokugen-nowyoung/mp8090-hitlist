@@ -95,6 +95,40 @@
       }
     }
 
+    /* ── YEAR SELECT アコーディオン ──
+       PC: 年ボタンは常に表示。見出しはボタン化するが矢印は隠し、
+           クリックしても表示は変わらない（cursor も通常のまま）。
+       スマホ(≤600px): 見出しタップで年ボタンを開閉。初期は閉じる。 */
+    .sul-nav .nav-label.year-accordion-toggle {
+      /* button 要素の既定見た目をリセットし、nav-label の文字スタイルは活かす */
+      width: 100%;
+      background: none;
+      border: none;
+      padding: 0;
+      text-align: left;
+      cursor: default;
+    }
+    .year-accordion-arrow {
+      display: none;                /* PCでは非表示 */
+      margin-left: 0.6em;
+      letter-spacing: 0;
+      flex-shrink: 0;
+    }
+    .year-accordion-arrow::before { content: "\25BC"; }   /* ▼ 閉じている */
+    #listNav:not(.year-collapsed) .year-accordion-arrow::before { content: "\25B2"; } /* ▲ 開いている */
+
+    @media (max-width: 600px) {
+      .sul-nav .nav-label.year-accordion-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;            /* タップ可能 */
+      }
+      .year-accordion-arrow { display: inline-block; }
+      /* 閉じている間は年ボタンを隠す（id+class でグリッド/フレックス指定より優先） */
+      #listNav.year-collapsed .year-buttons { display: none; }
+    }
+
     /* ── Main content ── */
     .sul-main {
       max-width: 860px;
@@ -709,8 +743,12 @@
         <button class="sul-tab-btn active" data-tab="list" role="tab" aria-selected="true">📋 リスト表示</button>
         <button class="sul-tab-btn" data-tab="calendar" role="tab" aria-selected="false">📅 カレンダー表示</button>
       </div>
-      <div id="listNav">
-        <span class="nav-label" aria-hidden="true">◀ YEAR SELECT ▶</span>
+      <div id="listNav" class="year-collapsed">
+        <button type="button" class="nav-label year-accordion-toggle" id="yearAccordionToggle"
+                aria-expanded="false" aria-controls="yearButtons">
+          <span class="nav-label-text">◀ YEAR SELECT ▶</span>
+          <span class="year-accordion-arrow" aria-hidden="true"></span>
+        </button>
         <div class="year-buttons" id="yearButtons" role="group" aria-label="年別ボタン"></div>
       </div>
     </div>
@@ -765,6 +803,17 @@
     const calArea     = document.getElementById('calArea');
     const listNav     = document.getElementById('listNav');
     const backToTop   = document.getElementById('backToTop');
+    const yearToggle  = document.getElementById('yearAccordionToggle');
+    const mqMobile    = window.matchMedia('(max-width: 600px)');
+
+    // ── YEAR SELECT アコーディオン開閉（スマホのみ意味を持つ） ──
+    function setYearOpen(open) {
+      listNav.classList.toggle('year-collapsed', !open);
+      yearToggle.setAttribute('aria-expanded', String(open));
+    }
+    yearToggle.addEventListener('click', () => {
+      setYearOpen(listNav.classList.contains('year-collapsed'));
+    });
 
     // ── group by puy_year for list view ──
     const byYear = new Map();
@@ -786,6 +835,9 @@
       btn.textContent = String(y);
       btn.addEventListener('click', e => {
         e.preventDefault();
+        // スマホでは年を選んだらアコーディオンを閉じてリストを見やすくする。
+        // 高さ計測の前に閉じることで、縮んだナビ帯に合わせて正しい位置へスクロールする。
+        if (mqMobile.matches) setYearOpen(false);
         const section = document.getElementById(`year-${y}`);
         if (!section) return;
         const navHeight = document.querySelector('.sul-nav')?.offsetHeight ?? 0;
