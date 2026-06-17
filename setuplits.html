@@ -21,13 +21,20 @@
   <link rel="stylesheet" href="style.css">
   <style>
     /* ── Set Up List 専用スタイル ── */
+    /* トップページへ戻る金色の帯だけをスクロール時に上部固定する。
+       背景は style.css の金色グラデーション（不透明）のまま。
+       z-index は本文・↑TOP ボタン(z-index:500)より前面、
+       モーダル(z-index:1000)より背面に置く。 */
+    .top-banner-strip {
+      position: sticky;
+      top: 0;
+      z-index: 900;
+    }
+    /* ナビ帯（リスト/カレンダー切替・YEAR SELECT）は固定せず通常スクロール */
     .sul-nav {
       background: var(--bg-nav);
       border-bottom: 2px solid #3A1C00;
       padding: 0.75rem 1rem;
-      position: sticky;
-      top: 0;
-      z-index: 200;
       box-shadow: 0 3px 12px rgba(0,0,0,0.45);
     }
     .sul-nav-inner {
