@@ -1224,11 +1224,25 @@
     }, { passive: true });
     backToTop.style.display = 'none';
     backToTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-  })();
 
-  </script>
+    // ===== URLパラメータ ?ep=NNN で該当回モーダルを自動オープン =====
+    try {
+      var epParam = new URLSearchParams(location.search).get('ep');
+      if (epParam) {
+        var epNo = Number(epParam);
+        if (epNo) {
+          var t = episodes.find(function(e){ return e.episode_no === epNo; });
+          if (t) { openModal(t); }
+        }
+      }
+    } catch (err) { /* 何もしない */ }
+
+  })();
+</script>
 </body>
 </html>
+
+
 
 
 

@@ -280,6 +280,74 @@
     .bokugen-icon-link:hover {
       box-shadow: 0 0 0 3px rgba(0,180,180,0.5);
     }
+    /* ===== お知らせバー（マーキー）===== */
+    .notice-bar {
+      max-width: 720px;
+      margin: 1rem auto 0;
+      background: var(--accent-cyan, #006D77);
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.12);
+    }
+    .notice-bar-label {
+      flex-shrink: 0;
+      background: #e85f99;
+      color: #fff;
+      font-family: var(--font-sans, sans-serif);
+      font-size: 0.7rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      padding: 0.5rem 0.9rem;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .notice-bar-viewport {
+      flex: 1;
+      overflow: hidden;
+      white-space: nowrap;
+    }
+    .notice-bar-track {
+      display: inline-block;
+      white-space: nowrap;
+      padding-left: 100%;
+      animation: noticeScroll 18s linear infinite;
+    }
+    .notice-bar:hover .notice-bar-track {
+      animation-play-state: paused;
+    }
+    .notice-item {
+      display: inline-block;
+      color: #fff;
+      font-family: var(--font-sans, sans-serif);
+      font-size: 0.82rem;
+      font-weight: 600;
+      text-decoration: none;
+      padding: 0.5rem 0;
+      margin-right: 3rem;
+      cursor: pointer;
+    }
+    .notice-item:hover {
+      text-decoration: underline;
+    }
+    .notice-item.is-static {
+      cursor: default;
+    }
+    .notice-item.is-static:hover {
+      text-decoration: none;
+    }
+    @keyframes noticeScroll {
+      0%   { transform: translateX(0); }
+      100% { transform: translateX(-100%); }
+    }
+    @media (max-width: 600px) {
+      .notice-bar { margin-top: 0.75rem; }
+      .notice-item { font-size: 0.76rem; }
+    }
   </style>
 </head>
 <body>
@@ -292,6 +360,14 @@
          class="bokugen-icon-link" aria-label="制作者ぼくげんのXアカウントへ"></a>
     </div>
   </header>
+
+  <!-- お知らせバー（マーキー） -->
+  <div class="notice-bar" id="noticeBar" aria-label="お知らせ">
+    <span class="notice-bar-label"><span aria-hidden="true">📢</span> NEWS</span>
+    <div class="notice-bar-viewport">
+      <div class="notice-bar-track" id="noticeTrack"><!-- JSで生成 --></div>
+    </div>
+  </div>
 
   <main class="main-content">
     <div class="top-grid">
@@ -401,6 +477,53 @@
     new Date(document.lastModified).toLocaleDateString('ja-JP', {
       year: 'numeric', month: 'long', day: 'numeric'
     });
+  </script>
+
+  <script>
+  // ===== お知らせバー =====
+  // 最新放送回番号（setuplits.html の NEW_EPISODE_NO と手動で揃える）
+  const NEW_EPISODE_NO = 276;
+
+  // 手動の自由文お知らせ（必要に応じて編集）。
+  //   text  : 表示する文言
+  //   ep    : クリックで開く回番号（数値）。リンク不要なら null
+  const MANUAL_NOTICES = [
+    // 例: { text: '300回記念ページ公開！', ep: null },
+    // 例: { text: '工藤静香特集の回はこちら', ep: 109 },
+  ];
+
+  (function buildNotices() {
+    const track = document.getElementById('noticeTrack');
+    if (!track) return;
+
+    const notices = [];
+    // 自動生成：最新回1件
+    notices.push({
+      text: '📋 Set Up List #' + NEW_EPISODE_NO + ' を更新！',
+      ep: NEW_EPISODE_NO
+    });
+    // 手動分を追加
+    MANUAL_NOTICES.forEach(n => notices.push(n));
+
+    notices.forEach(n => {
+      let el;
+      if (n.ep != null) {
+        el = document.createElement('a');
+        el.href = 'setuplits.html?ep=' + n.ep;
+        el.className = 'notice-item';
+      } else {
+        el = document.createElement('span');
+        el.className = 'notice-item is-static';
+      }
+      el.textContent = n.text;
+      track.appendChild(el);
+    });
+
+    // 1件だけだと流れ切ったあと空白が続くので、滑らかなループのため複製して連結
+    if (notices.length > 0) {
+      track.innerHTML += track.innerHTML;
+    }
+  })();
   </script>
 
 </body>
