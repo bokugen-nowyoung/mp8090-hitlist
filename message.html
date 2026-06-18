@@ -191,6 +191,20 @@
     text-align: right;
     line-height: var(--line-h);
   }
+  /* handwritten autograph image */
+  .sig-image-wrap {
+    text-align: right;
+    margin-top: 6px;
+  }
+  .sig-image {
+    width: clamp(180px, 42vw, 260px);
+    height: auto;
+    display: inline-block;
+    /* 便箋に直接書いたように、わずかに傾けて余白を添える */
+    transform: rotate(-1.5deg);
+    margin-right: clamp(4px, 2vw, 18px);
+    mix-blend-mode: multiply;
+  }
 
   .auth-note {
     position: relative; max-width: 860px;
@@ -271,7 +285,9 @@
 
     <div class="signature">
       <p class="sig-date">2026.6.23</p>
-      <p class="sig-label">（ ここに石井アナウンサーの直筆サインが入ります ）</p>
+      <div class="sig-image-wrap">
+        <img src="images/ishii-signature.png" alt="石井哲也アナウンサー 直筆サイン" class="sig-image">
+      </div>
     </div>
   </main>
 
