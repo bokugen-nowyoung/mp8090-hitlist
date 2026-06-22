@@ -1,6 +1,15 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-FNMWP78WDW"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-FNMWP78WDW');
+  </script>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>ナウヤン同盟の部屋 | LuckyFM mp8090 石井哲也公認 ファンサイト</title>
@@ -348,6 +357,38 @@
       .notice-bar { margin-top: 0.75rem; }
       .notice-item { font-size: 0.76rem; }
     }
+    /* ===== 訪問者カウンター（デジタル時計風） ===== */
+    .visitor-counter {
+      max-width: 720px;
+      margin: 0.6rem auto 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .visitor-counter-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: #111;
+      border: 1px solid var(--accent-cyan, #006D77);
+      border-radius: var(--r-sm, 6px);
+      padding: 0.25rem 0.7rem;
+      font-family: var(--font-mono, 'Share Tech Mono', monospace);
+      font-size: 0.68rem;
+      letter-spacing: 0.05em;
+      color: #ffffff;
+    }
+    .visitor-counter-label {
+      opacity: 0.75;
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+    }
+    .visitor-counter-value {
+      font-size: 0.78rem;
+      font-weight: 700;
+      min-width: 1.5em;
+      text-align: right;
+    }
   </style>
 </head>
 <body>
@@ -367,6 +408,15 @@
     <div class="notice-bar-viewport">
       <div class="notice-bar-track" id="noticeTrack"><!-- JSで生成 --></div>
     </div>
+  </div>
+
+  <!-- 訪問者カウンター -->
+  <div class="visitor-counter">
+    <span class="visitor-counter-badge" aria-label="このサイトの訪問者数">
+      <span aria-hidden="true">🎶</span>
+      <span class="visitor-counter-label">NOW &amp; YOUNG</span>
+      <span class="visitor-counter-value" id="visitorCount">----</span>
+    </span>
   </div>
 
   <main class="main-content">
@@ -523,6 +573,48 @@
     if (notices.length > 0) {
       track.innerHTML += track.innerHTML;
     }
+  })();
+  </script>
+
+  <script>
+  // ===== 訪問者カウンター（1日1回のみカウント） =====
+  (function () {
+    const el = document.getElementById('visitorCount');
+    if (!el) return;
+
+    const STORAGE_KEY = 'mp8090_visit_last_date';
+    const today = new Date().toISOString().slice(0, 10); // YYYY-MM-DD
+    let lastVisit = null;
+    try {
+      lastVisit = localStorage.getItem(STORAGE_KEY);
+    } catch (e) {
+      // localStorage が使えない環境（プライベートモード等）は毎回hit扱いにフォールバック
+    }
+
+    const shouldCountToday = (lastVisit !== today);
+    const endpoint = shouldCountToday
+      ? 'https://countapi.mileshilliard.com/api/v1/hit/mp8090_now_yang_visits'
+      : 'https://countapi.mileshilliard.com/api/v1/get/mp8090_now_yang_visits';
+
+    fetch(endpoint)
+      .then(res => res.json())
+      .then(data => {
+        if (data && typeof data.value !== 'undefined') {
+          el.textContent = data.value;
+          if (shouldCountToday) {
+            try {
+              localStorage.setItem(STORAGE_KEY, today);
+            } catch (e) {
+              // 保存できなくても表示には影響しない
+            }
+          }
+        } else {
+          el.textContent = '---';
+        }
+      })
+      .catch(() => {
+        el.textContent = '---';
+      });
   })();
   </script>
 
