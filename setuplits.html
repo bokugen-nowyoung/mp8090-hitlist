@@ -1269,12 +1269,14 @@
     modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modalOverlay.hidden) closeModal(); });
     modalPrev.addEventListener('click', () => {
-      const nextIndex = (currentEpIndex + 1) % navEpisodes.length;
-      openModal(navEpisodes[nextIndex]);
+      const step = (navMode === 'global') ? -1 : 1;
+      const idx = (currentEpIndex + step + navEpisodes.length) % navEpisodes.length;
+      openModal(navEpisodes[idx]);
     });
     modalNext.addEventListener('click', () => {
-      const prevIndex = (currentEpIndex - 1 + navEpisodes.length) % navEpisodes.length;
-      openModal(navEpisodes[prevIndex]);
+      const step = (navMode === 'global') ? 1 : -1;
+      const idx = (currentEpIndex + step + navEpisodes.length) % navEpisodes.length;
+      openModal(navEpisodes[idx]);
     });
 
     // ── back to top ──
