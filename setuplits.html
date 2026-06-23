@@ -372,8 +372,20 @@
     }
     .ep-modal-side-nav:hover { background: linear-gradient(135deg, #C01878 0%, #E03098 100%); transform: scale(1.06); }
     @media (max-width: 720px) {
-      .ep-modal-side-nav { width: 2.1rem; height: 2.1rem; font-size: 0.9rem; }
-      .ep-modal-overlay { gap: 0.3rem; padding: 1.5rem 0.4rem; }
+      .ep-modal { position: relative; }
+      .ep-modal-overlay { gap: 0; padding: 1rem 0.5rem; }
+      .ep-modal-side-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 1002;
+        width: 2.1rem;
+        height: 2.1rem;
+        font-size: 0.9rem;
+      }
+      .ep-modal-side-nav:hover { transform: translateY(-50%) scale(1.06); }
+      .ep-modal-side-prev { left: 0.35rem; }
+      .ep-modal-side-next { right: 0.35rem; }
     }
     .ep-modal-close {
       position: absolute;
