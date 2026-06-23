@@ -211,6 +211,18 @@ a {
   margin: 0 auto;
 }
 
+@media (min-width: 601px) {
+  .year-nav-inner {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+  }
+  .year-nav-inner .nav-label {
+    flex-shrink: 0;
+    margin-bottom: 0;
+  }
+}
+
 .nav-label {
   display: block;
   font-family: var(--font-mono);
