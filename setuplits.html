@@ -317,8 +317,9 @@
       background: rgba(0,0,0,0.62);
       z-index: 1000;
       display: flex;
-      align-items: flex-start;
+      align-items: center;
       justify-content: center;
+      gap: 0.6rem;
       padding: 1.5rem 1rem;
       overflow-y: auto;
     }
@@ -353,12 +354,10 @@
       display: block;
     }
     .ep-modal-side-nav {
-      position: fixed;
-      top: 50%;
-      transform: translateY(-50%);
-      z-index: 1001;
-      background: rgba(255,255,255,0.15);
-      border: 1px solid rgba(255,255,255,0.45);
+      flex-shrink: 0;
+      align-self: center;
+      background: linear-gradient(135deg, #9B1060 0%, #C01878 100%);
+      border: 2px solid #fff;
       color: #fff;
       border-radius: 50%;
       width: 2.6rem;
@@ -368,14 +367,13 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background 0.12s;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.35);
+      transition: background 0.12s, transform 0.12s;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.45);
     }
-    .ep-modal-side-nav:hover { background: rgba(255,255,255,0.32); }
-    .ep-modal-side-prev { left: clamp(0.5rem, 4vw, 2rem); }
-    .ep-modal-side-next { right: clamp(0.5rem, 4vw, 2rem); }
+    .ep-modal-side-nav:hover { background: linear-gradient(135deg, #C01878 0%, #E03098 100%); transform: scale(1.06); }
     @media (max-width: 720px) {
-      .ep-modal-side-nav { width: 2.2rem; height: 2.2rem; font-size: 0.95rem; }
+      .ep-modal-side-nav { width: 2.1rem; height: 2.1rem; font-size: 0.9rem; }
+      .ep-modal-overlay { gap: 0.3rem; padding: 1.5rem 0.4rem; }
     }
     .ep-modal-close {
       position: absolute;
