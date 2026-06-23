@@ -62,6 +62,19 @@
       flex-wrap: wrap;
       gap: 0.3rem;
     }
+    .year-select-row {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.6rem;
+    }
+    .year-side-arrow {
+      flex-shrink: 0;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      color: var(--accent-mg);
+      opacity: 0.75;
+    }
     .sul-year-btn {
       background: var(--bg-nav-btn);
       color: #C08050;
@@ -126,7 +139,7 @@
       }
       .year-accordion-arrow { display: inline-block; }
       /* 閉じている間は年ボタンを隠す（id+class でグリッド/フレックス指定より優先） */
-      #listNav.year-collapsed .year-buttons { display: none; }
+      #listNav.year-collapsed .year-select-row { display: none; }
     }
 
     /* ── Main content ── */
@@ -789,10 +802,14 @@
       <div id="listNav" class="year-collapsed">
         <button type="button" class="nav-label year-accordion-toggle" id="yearAccordionToggle"
                 aria-expanded="false" aria-controls="yearButtons">
-          <span class="nav-label-text">◀ YEAR SELECT ▶</span>
+          <span class="nav-label-text">YEAR SELECT</span>
           <span class="year-accordion-arrow" aria-hidden="true"></span>
         </button>
-        <div class="year-buttons" id="yearButtons" role="group" aria-label="年別ボタン"></div>
+        <div class="year-select-row">
+          <span class="year-side-arrow" aria-hidden="true">◀</span>
+          <div class="year-buttons" id="yearButtons" role="group" aria-label="年別ボタン"></div>
+          <span class="year-side-arrow" aria-hidden="true">▶</span>
+        </div>
       </div>
     </div>
   </nav>
