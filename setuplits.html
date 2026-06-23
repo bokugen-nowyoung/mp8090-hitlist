@@ -342,11 +342,6 @@
       flex-shrink: 0;
       position: relative;
     }
-    .ep-modal-hdr-row {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
     .ep-modal-title {
       color: #fff;
       font-family: var(--font-mono);
@@ -356,27 +351,32 @@
       line-height: 1.4;
       text-shadow: 1px 1px 4px rgba(0,0,0,0.4);
       display: block;
-      flex: 1;
-      min-width: 0;
     }
-    .ep-modal-nav-btn {
+    .ep-modal-side-nav {
+      position: fixed;
+      top: 50%;
+      transform: translateY(-50%);
+      z-index: 1001;
       background: rgba(255,255,255,0.15);
-      border: 1px solid rgba(255,255,255,0.35);
+      border: 1px solid rgba(255,255,255,0.45);
       color: #fff;
       border-radius: 50%;
-      width: 2rem;
-      height: 2rem;
-      font-size: 0.85rem;
+      width: 2.6rem;
+      height: 2.6rem;
+      font-size: 1.1rem;
       cursor: pointer;
       display: flex;
       align-items: center;
       justify-content: center;
       transition: background 0.12s;
-      flex-shrink: 0;
-      padding: 0;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.35);
     }
-    .ep-modal-nav-btn:hover { background: rgba(255,255,255,0.32); }
-    .ep-modal-nav-btn[hidden] { display: none; }
+    .ep-modal-side-nav:hover { background: rgba(255,255,255,0.32); }
+    .ep-modal-side-prev { left: clamp(0.5rem, 4vw, 2rem); }
+    .ep-modal-side-next { right: clamp(0.5rem, 4vw, 2rem); }
+    @media (max-width: 720px) {
+      .ep-modal-side-nav { width: 2.2rem; height: 2.2rem; font-size: 0.95rem; }
+    }
     .ep-modal-close {
       position: absolute;
       top: 0.55rem;
@@ -802,17 +802,15 @@
   <!-- ── Episode detail modal ── -->
   <div id="epModalOverlay" class="ep-modal-overlay" hidden
        role="dialog" aria-modal="true" aria-labelledby="epModalTitle">
+    <button class="ep-modal-side-nav ep-modal-side-prev" id="epModalPrev" aria-label="新しい回へ">◀</button>
     <div class="ep-modal">
       <div class="ep-modal-hdr">
-        <div class="ep-modal-hdr-row">
-          <button class="ep-modal-nav-btn" id="epModalPrev" aria-label="新しい回へ">◀</button>
-          <span class="ep-modal-title" id="epModalTitle"></span>
-          <button class="ep-modal-nav-btn" id="epModalNext" aria-label="古い回へ">▶</button>
-        </div>
+        <span class="ep-modal-title" id="epModalTitle"></span>
         <button class="ep-modal-close" id="epModalClose" aria-label="閉じる">✕</button>
       </div>
       <div class="ep-modal-body" id="epModalBody"></div>
     </div>
+    <button class="ep-modal-side-nav ep-modal-side-next" id="epModalNext" aria-label="古い回へ">▶</button>
   </div>
 
   <script>
@@ -1239,8 +1237,6 @@
 
       yearEpisodes = episodes.filter(e => e.puy_year === ep.puy_year).sort((a, b) => a.episode_no - b.episode_no);
       currentEpIndex = yearEpisodes.findIndex(e => e.episode_no === ep.episode_no);
-      modalPrev.hidden = !(currentEpIndex < yearEpisodes.length - 1);
-      modalNext.hidden = !(currentEpIndex > 0);
 
       modalOverlay.removeAttribute('hidden');
       document.body.style.overflow = 'hidden';
@@ -1257,10 +1253,12 @@
     modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modalOverlay.hidden) closeModal(); });
     modalPrev.addEventListener('click', () => {
-      if (currentEpIndex < yearEpisodes.length - 1) openModal(yearEpisodes[currentEpIndex + 1]);
+      const nextIndex = (currentEpIndex + 1) % yearEpisodes.length;
+      openModal(yearEpisodes[nextIndex]);
     });
     modalNext.addEventListener('click', () => {
-      if (currentEpIndex > 0) openModal(yearEpisodes[currentEpIndex - 1]);
+      const prevIndex = (currentEpIndex - 1 + yearEpisodes.length) % yearEpisodes.length;
+      openModal(yearEpisodes[prevIndex]);
     });
 
     // ── back to top ──
