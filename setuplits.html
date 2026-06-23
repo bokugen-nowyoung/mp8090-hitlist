@@ -342,6 +342,11 @@
       flex-shrink: 0;
       position: relative;
     }
+    .ep-modal-hdr-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
     .ep-modal-title {
       color: #fff;
       font-family: var(--font-mono);
@@ -351,7 +356,27 @@
       line-height: 1.4;
       text-shadow: 1px 1px 4px rgba(0,0,0,0.4);
       display: block;
+      flex: 1;
+      min-width: 0;
     }
+    .ep-modal-nav-btn {
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.35);
+      color: #fff;
+      border-radius: 50%;
+      width: 2rem;
+      height: 2rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.12s;
+      flex-shrink: 0;
+      padding: 0;
+    }
+    .ep-modal-nav-btn:hover { background: rgba(255,255,255,0.32); }
+    .ep-modal-nav-btn[hidden] { display: none; }
     .ep-modal-close {
       position: absolute;
       top: 0.55rem;
@@ -779,7 +804,11 @@
        role="dialog" aria-modal="true" aria-labelledby="epModalTitle">
     <div class="ep-modal">
       <div class="ep-modal-hdr">
-        <span class="ep-modal-title" id="epModalTitle"></span>
+        <div class="ep-modal-hdr-row">
+          <button class="ep-modal-nav-btn" id="epModalPrev" aria-label="新しい回へ">◀</button>
+          <span class="ep-modal-title" id="epModalTitle"></span>
+          <button class="ep-modal-nav-btn" id="epModalNext" aria-label="古い回へ">▶</button>
+        </div>
         <button class="ep-modal-close" id="epModalClose" aria-label="閉じる">✕</button>
       </div>
       <div class="ep-modal-body" id="epModalBody"></div>
@@ -1147,6 +1176,11 @@
     const modalTitle   = document.getElementById('epModalTitle');
     const modalBody    = document.getElementById('epModalBody');
     const modalClose   = document.getElementById('epModalClose');
+    const modalPrev    = document.getElementById('epModalPrev');
+    const modalNext    = document.getElementById('epModalNext');
+
+    const sortedEpisodes = episodes.slice().sort((a, b) => a.episode_no - b.episode_no);
+    let currentEpIndex = -1;
 
     function escHtml(s) {
       return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -1203,6 +1237,10 @@
         modalBody.appendChild(p);
       }
 
+      currentEpIndex = sortedEpisodes.findIndex(e => e.episode_no === ep.episode_no);
+      modalPrev.hidden = !(currentEpIndex < sortedEpisodes.length - 1);
+      modalNext.hidden = !(currentEpIndex > 0);
+
       modalOverlay.removeAttribute('hidden');
       document.body.style.overflow = 'hidden';
       modalClose.focus();
@@ -1217,6 +1255,12 @@
     modalClose.addEventListener('click', closeModal);
     modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modalOverlay.hidden) closeModal(); });
+    modalPrev.addEventListener('click', () => {
+      if (currentEpIndex < sortedEpisodes.length - 1) openModal(sortedEpisodes[currentEpIndex + 1]);
+    });
+    modalNext.addEventListener('click', () => {
+      if (currentEpIndex > 0) openModal(sortedEpisodes[currentEpIndex - 1]);
+    });
 
     // ── back to top ──
     window.addEventListener('scroll', () => {
