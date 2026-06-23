@@ -1179,7 +1179,7 @@
     const modalPrev    = document.getElementById('epModalPrev');
     const modalNext    = document.getElementById('epModalNext');
 
-    const sortedEpisodes = episodes.slice().sort((a, b) => a.episode_no - b.episode_no);
+    let yearEpisodes = [];
     let currentEpIndex = -1;
 
     function escHtml(s) {
@@ -1237,8 +1237,9 @@
         modalBody.appendChild(p);
       }
 
-      currentEpIndex = sortedEpisodes.findIndex(e => e.episode_no === ep.episode_no);
-      modalPrev.hidden = !(currentEpIndex < sortedEpisodes.length - 1);
+      yearEpisodes = episodes.filter(e => e.puy_year === ep.puy_year).sort((a, b) => a.episode_no - b.episode_no);
+      currentEpIndex = yearEpisodes.findIndex(e => e.episode_no === ep.episode_no);
+      modalPrev.hidden = !(currentEpIndex < yearEpisodes.length - 1);
       modalNext.hidden = !(currentEpIndex > 0);
 
       modalOverlay.removeAttribute('hidden');
@@ -1256,10 +1257,10 @@
     modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modalOverlay.hidden) closeModal(); });
     modalPrev.addEventListener('click', () => {
-      if (currentEpIndex < sortedEpisodes.length - 1) openModal(sortedEpisodes[currentEpIndex + 1]);
+      if (currentEpIndex < yearEpisodes.length - 1) openModal(yearEpisodes[currentEpIndex + 1]);
     });
     modalNext.addEventListener('click', () => {
-      if (currentEpIndex > 0) openModal(sortedEpisodes[currentEpIndex - 1]);
+      if (currentEpIndex > 0) openModal(yearEpisodes[currentEpIndex - 1]);
     });
 
     // ── back to top ──
