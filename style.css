@@ -239,6 +239,15 @@ a {
   gap: 0.3rem;
 }
 
+/* PC表示: 10列固定で 80年代 / 90年代 の2行に分ける */
+@media (min-width: 481px) {
+  .year-buttons {
+    display: grid;
+    grid-template-columns: repeat(10, auto);
+    justify-content: center;
+  }
+}
+
 /* Tuner-button style */
 .year-btn {
   background: var(--bg-nav-btn);
