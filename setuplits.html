@@ -929,7 +929,7 @@
           li.setAttribute('role', 'button');
           li.setAttribute('tabindex', '0');
           li.title = '曲目一覧を表示';
-          const openTracks = () => openModal(ep);
+          const openTracks = () => openModal(ep, 'year');
           li.addEventListener('click', openTracks);
           li.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openTracks(); } });
         } else {
@@ -971,7 +971,7 @@
             trackBtn.textContent = '📋';
             trackBtn.title = '曲目一覧を表示';
             trackBtn.setAttribute('aria-label', '曲目一覧を表示');
-            trackBtn.addEventListener('click', e => { e.stopPropagation(); openModal(ep); });
+            trackBtn.addEventListener('click', e => { e.stopPropagation(); openModal(ep, 'year'); });
             li.appendChild(trackBtn);
           }
         } else if (hasTracks) {
@@ -1134,13 +1134,13 @@
                 const trackBtn = document.createElement('button');
                 trackBtn.className = 'cal-track-btn';
                 trackBtn.textContent = '📋 曲目一覧を見る';
-                trackBtn.addEventListener('click', () => openModal(ep));
+                trackBtn.addEventListener('click', () => openModal(ep, 'global'));
                 body.appendChild(trackBtn);
               }
             } else if (hasTracks) {
               badge.className = 'cal-badge';
               badge.title = '曲目一覧を表示';
-              badge.addEventListener('click', () => openModal(ep));
+              badge.addEventListener('click', () => openModal(ep, 'global'));
               body.appendChild(badge);
             } else {
               badge.className = 'cal-badge no-data';
@@ -1187,8 +1187,9 @@
     const modalPrev    = document.getElementById('epModalPrev');
     const modalNext    = document.getElementById('epModalNext');
 
-    let yearEpisodes = [];
+    let navEpisodes = [];
     let currentEpIndex = -1;
+    let navMode = 'year';
 
     function escHtml(s) {
       return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -1228,7 +1229,8 @@
       return wrap;
     }
 
-    function openModal(ep) {
+    function openModal(ep, mode) {
+      if (mode) navMode = mode;
       const [y, m, d] = (ep.air_date || '').split('-').map(Number);
       const airFmt = ep.air_date ? `${y}.${m}.${d}` : '—';
       let titleText = `#${ep.episode_no} ｜ PUY ${ep.puy_year}年 ｜ ${airFmt}`;
@@ -1245,8 +1247,12 @@
         modalBody.appendChild(p);
       }
 
-      yearEpisodes = episodes.filter(e => e.puy_year === ep.puy_year).sort((a, b) => a.episode_no - b.episode_no);
-      currentEpIndex = yearEpisodes.findIndex(e => e.episode_no === ep.episode_no);
+      if (navMode === 'global') {
+        navEpisodes = episodes.slice().sort((a, b) => a.episode_no - b.episode_no);
+      } else {
+        navEpisodes = episodes.filter(e => e.puy_year === ep.puy_year).sort((a, b) => a.episode_no - b.episode_no);
+      }
+      currentEpIndex = navEpisodes.findIndex(e => e.episode_no === ep.episode_no);
 
       modalOverlay.removeAttribute('hidden');
       document.body.style.overflow = 'hidden';
@@ -1263,12 +1269,12 @@
     modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modalOverlay.hidden) closeModal(); });
     modalPrev.addEventListener('click', () => {
-      const nextIndex = (currentEpIndex + 1) % yearEpisodes.length;
-      openModal(yearEpisodes[nextIndex]);
+      const nextIndex = (currentEpIndex + 1) % navEpisodes.length;
+      openModal(navEpisodes[nextIndex]);
     });
     modalNext.addEventListener('click', () => {
-      const prevIndex = (currentEpIndex - 1 + yearEpisodes.length) % yearEpisodes.length;
-      openModal(yearEpisodes[prevIndex]);
+      const prevIndex = (currentEpIndex - 1 + navEpisodes.length) % navEpisodes.length;
+      openModal(navEpisodes[prevIndex]);
     });
 
     // ── back to top ──
