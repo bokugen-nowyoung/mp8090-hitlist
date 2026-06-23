@@ -1010,16 +1010,22 @@
     const calEps = episodes.filter(ep => ep.air_date);
 
     // 直近の確定回より後、その年の年末まで毎週分の「放送予定」空枠を自動生成
+    function fmtLocalISO(dt) {
+      const yy = dt.getFullYear();
+      const mm = String(dt.getMonth() + 1).padStart(2, '0');
+      const dd = String(dt.getDate()).padStart(2, '0');
+      return `${yy}-${mm}-${dd}`;
+    }
     if (calEps.length > 0) {
       const lastEp = calEps.reduce((latest, ep) => (ep.air_date > latest.air_date ? ep : latest), calEps[0]);
       let cursor = new Date(lastEp.air_date + 'T00:00:00');
       let epNo = lastEp.episode_no;
       const yearEnd = new Date(cursor.getFullYear(), 11, 31);
       while (true) {
-        cursor = new Date(cursor.getTime() + 7 * 86400000);
+        cursor = new Date(cursor.getFullYear(), cursor.getMonth(), cursor.getDate() + 7);
         if (cursor > yearEnd) break;
         epNo += 1;
-        const iso = cursor.toISOString().slice(0, 10);
+        const iso = fmtLocalISO(cursor);
         calEps.push({
           episode_no: epNo,
           puy_year: null,
