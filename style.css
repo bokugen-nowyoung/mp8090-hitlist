@@ -808,10 +808,15 @@ a {
     font-size: clamp(1.05rem, 5vw, 1.3rem);
   }
 
+  .year-buttons {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+  }
+
   .year-btn {
     font-size: 0.7rem;
     padding: 0.24rem 0.38rem;
-    min-width: 3.1rem;
+    min-width: 0;
   }
 
   .ranking-table td {
@@ -844,7 +849,7 @@ a {
 @media (max-width: 360px) {
   .year-btn {
     font-size: 0.62rem;
-    min-width: 2.7rem;
+    min-width: 0;
     padding: 0.2rem 0.3rem;
   }
 }
