@@ -1143,7 +1143,7 @@
     }
 
     // ── 1エピソード分の<li>を生成（年別リスト・検索結果の両方で使用） ──
-    function createEpisodeItem(ep) {
+    function createEpisodeItem(ep, mode = 'year') {
       const hasTracks = ep.tracks && ep.tracks.length > 0;
       const hasImage  = !!ep.image_file;
 
@@ -1161,7 +1161,7 @@
         li.setAttribute('role', 'button');
         li.setAttribute('tabindex', '0');
         li.title = '曲目一覧を表示';
-        const openTracks = () => openModal(ep, 'year');
+        const openTracks = () => openModal(ep, mode);
         li.addEventListener('click', openTracks);
         li.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openTracks(); } });
       } else {
@@ -1203,7 +1203,7 @@
           trackBtn.textContent = '📋';
           trackBtn.title = '曲目一覧を表示';
           trackBtn.setAttribute('aria-label', '曲目一覧を表示');
-          trackBtn.addEventListener('click', e => { e.stopPropagation(); openModal(ep, 'year'); });
+          trackBtn.addEventListener('click', e => { e.stopPropagation(); openModal(ep, mode); });
           li.appendChild(trackBtn);
         }
       } else if (hasTracks) {
@@ -1516,6 +1516,7 @@
     let navEpisodes = [];
     let currentEpIndex = -1;
     let navMode = 'year';
+    let lastSearchResults = [];
 
     function escHtml(s) {
       return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -1575,6 +1576,8 @@
 
       if (navMode === 'global') {
         navEpisodes = episodes.slice().sort((a, b) => a.episode_no - b.episode_no);
+      } else if (navMode === 'search') {
+        navEpisodes = lastSearchResults.slice().sort((a, b) => a.episode_no - b.episode_no);
       } else {
         navEpisodes = episodes.filter(e => e.puy_year === ep.puy_year).sort((a, b) => a.episode_no - b.episode_no);
       }
@@ -1822,6 +1825,7 @@
       if (!hasAnyCriteria(c)) return;
 
       const results = episodes.filter(ep => episodeMatches(ep, c)).sort((a, b) => b.episode_no - a.episode_no);
+      lastSearchResults = results;
       addHistory(c);
       renderSearchResults(results);
 
@@ -1864,7 +1868,7 @@
       const ul = document.createElement('ul');
       ul.className = 'sul-list search-results-list';
       for (const ep of results) {
-        ul.appendChild(createEpisodeItem(ep));
+        ul.appendChild(createEpisodeItem(ep, 'search'));
       }
       searchResultsArea.appendChild(ul);
     }
