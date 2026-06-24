@@ -101,19 +101,25 @@
       border-bottom: 1px solid rgba(255,255,255,0.12);
     }
     .search-toggle-btn {
-      width: 100%;
-      background: none;
-      border: none;
-      color: var(--gold-l);
-      font-family: var(--font-mono);
+      background: linear-gradient(135deg, #9B1060 0%, #C01878 100%);
+      color: #fff;
+      border: 1px solid #7A0850;
+      border-bottom: 3px solid #5A0040;
+      border-radius: var(--r-sm);
+      font-family: var(--font-sans);
       font-size: 0.82rem;
-      letter-spacing: 0.05em;
-      padding: 0.55rem 0.2rem;
-      text-align: left;
+      font-weight: 700;
+      letter-spacing: 0.03em;
+      padding: 0.35rem 0.95rem;
       cursor: pointer;
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 0.4rem;
+      transition: background 0.12s;
+      box-shadow: 0 1px 4px rgba(0,0,0,0.3);
+    }
+    .search-toggle-btn:hover {
+      background: linear-gradient(135deg, #C01878 0%, #E03098 100%);
     }
     .search-toggle-arrow { transition: transform 0.15s; }
     .search-toggle-btn[aria-expanded="true"] .search-toggle-arrow { transform: rotate(180deg); }
@@ -717,6 +723,7 @@
     /* ── Tab bar ── */
     .sul-tab-bar {
       display: flex;
+      flex-wrap: wrap;
       gap: 0.4rem;
       margin-bottom: 0.6rem;
     }
@@ -987,12 +994,12 @@
       <div class="sul-tab-bar" role="tablist">
         <button class="sul-tab-btn active" data-tab="list" role="tab" aria-selected="true">📋 リスト表示</button>
         <button class="sul-tab-btn" data-tab="calendar" role="tab" aria-selected="false">📅 カレンダー表示</button>
-      </div>
-
-      <div id="searchPanel" class="search-panel">
         <button type="button" class="search-toggle-btn" id="searchToggleBtn" aria-expanded="false" aria-controls="searchPanelBody">
           🔍 検索 <span class="search-toggle-arrow" aria-hidden="true">▾</span>
         </button>
+      </div>
+
+      <div id="searchPanel" class="search-panel">
         <div id="searchPanelBody" class="search-panel-body" hidden>
           <div class="search-grid">
             <label class="search-field">
