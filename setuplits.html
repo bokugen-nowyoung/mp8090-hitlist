@@ -251,6 +251,18 @@
       justify-content: space-between;
       gap: 0.6rem;
       margin-bottom: 1rem;
+      flex-wrap: wrap;
+    }
+    .search-results-left {
+      display: flex;
+      align-items: baseline;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+      min-width: 0;
+    }
+    .search-results-condition {
+      color: #9A7850;
+      font-size: 0.82rem;
     }
     .search-results-count {
       font-family: var(--font-mono);
@@ -1827,7 +1839,7 @@
       const results = episodes.filter(ep => episodeMatches(ep, c)).sort((a, b) => b.episode_no - a.episode_no);
       lastSearchResults = results;
       addHistory(c);
-      renderSearchResults(results);
+      renderSearchResults(results, c);
 
       // 検索結果がすぐ見えるよう、検索条件パネルは自動的に折りたたむ
       searchPanelBody.hidden = true;
@@ -1844,20 +1856,31 @@
       window.scrollTo({ top, behavior: 'smooth' });
     }
 
-    function renderSearchResults(results) {
+    function renderSearchResults(results, criteria) {
       searchResultsArea.innerHTML = '';
 
       const header = document.createElement('div');
       header.className = 'search-results-header';
+
+      const left = document.createElement('div');
+      left.className = 'search-results-left';
       const count = document.createElement('span');
       count.className = 'search-results-count';
       count.textContent = `検索結果：${results.length}件`;
+      left.appendChild(count);
+      if (criteria) {
+        const cond = document.createElement('span');
+        cond.className = 'search-results-condition';
+        cond.textContent = `（${describeCriteria(criteria)}）`;
+        left.appendChild(cond);
+      }
+
       const backBtn = document.createElement('button');
       backBtn.type = 'button';
       backBtn.className = 'search-clear-btn';
       backBtn.textContent = '✕ 検索結果を閉じる';
       backBtn.addEventListener('click', clearSearch);
-      header.appendChild(count);
+      header.appendChild(left);
       header.appendChild(backBtn);
       searchResultsArea.appendChild(header);
 
