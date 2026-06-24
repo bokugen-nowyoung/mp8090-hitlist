@@ -44,6 +44,12 @@
     @media (max-width: 600px) {
       .sul-nav { top: 34px; }
     }
+    /* 検索パネルを開いている間はsticky固定を解除する（パネルが画面より縦長になり、
+       sticky状態だとスクロールしても見た目が変わらず「スクロールできない」ように感じる不具合の対策） */
+    .sul-nav.search-open {
+      position: static;
+      top: auto;
+    }
     .sul-nav-inner {
       max-width: 860px;
       margin: 0 auto;
@@ -1675,11 +1681,16 @@
     const searchHistoryChips= document.getElementById('searchHistoryChips');
     const searchResultsArea = document.getElementById('searchResultsArea');
 
+    const sulNavEl = document.querySelector('.sul-nav');
+
     // パネル開閉
-    searchToggleBtn.addEventListener('click', () => {
-      const open = searchPanelBody.hidden;
+    function setSearchPanelOpen(open) {
       searchPanelBody.hidden = !open;
       searchToggleBtn.setAttribute('aria-expanded', String(open));
+      if (sulNavEl) sulNavEl.classList.toggle('search-open', open);
+    }
+    searchToggleBtn.addEventListener('click', () => {
+      setSearchPanelOpen(searchPanelBody.hidden);
     });
 
     // PUY単年セレクト・複数選択チェックボックスを生成（1980〜1999固定）
@@ -1844,6 +1855,7 @@
       }
       searchPanelBody.hidden = false;
       searchToggleBtn.setAttribute('aria-expanded', 'true');
+      if (sulNavEl) sulNavEl.classList.add('search-open');
     }
 
     // ── 検索実行・結果表示 ──
@@ -1859,6 +1871,7 @@
       // 検索結果がすぐ見えるよう、検索条件パネルは自動的に折りたたむ
       searchPanelBody.hidden = true;
       searchToggleBtn.setAttribute('aria-expanded', 'false');
+      if (sulNavEl) sulNavEl.classList.remove('search-open');
 
       listArea.hidden = true;
       calArea.hidden = true;
