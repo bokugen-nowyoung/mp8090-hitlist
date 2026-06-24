@@ -1031,6 +1031,27 @@
     }
     if (calEps.length > 0) {
       const lastEp = calEps.reduce((latest, ep) => (ep.air_date > latest.air_date ? ep : latest), calEps[0]);
+      const existingNos = new Set(calEps.map(ep => ep.episode_no));
+
+      // 後方の欠番（例：#280→#289の間の#281〜288）を埋める
+      let backCursor = new Date(lastEp.air_date + 'T00:00:00');
+      let backEpNo = lastEp.episode_no;
+      while (true) {
+        backCursor = new Date(backCursor.getFullYear(), backCursor.getMonth(), backCursor.getDate() - 7);
+        backEpNo -= 1;
+        if (backEpNo <= 0 || existingNos.has(backEpNo)) break;
+        calEps.push({
+          episode_no: backEpNo,
+          puy_year: null,
+          air_date: fmtLocalISO(backCursor),
+          special_feature: null,
+          image_file: null,
+          tracks: null,
+          _placeholder: true
+        });
+      }
+
+      // 前方（その年の年末まで）の空枠を生成
       let cursor = new Date(lastEp.air_date + 'T00:00:00');
       let epNo = lastEp.episode_no;
       const yearEnd = new Date(cursor.getFullYear(), 11, 31);
