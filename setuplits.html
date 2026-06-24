@@ -1614,6 +1614,14 @@
     }
 
     modalClose.addEventListener('click', closeModal);
+
+    // ブラウザがページをキャッシュ（bfcache）から復元した際、モーダルのoverflow:hiddenが
+    // 引き継がれてスクロールできなくなることがあるため、強制的にリセットする
+    window.addEventListener('pageshow', (event) => {
+      if (event.persisted) {
+        closeModal();
+      }
+    });
     modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modalOverlay.hidden) closeModal(); });
     modalPrev.addEventListener('click', () => {
