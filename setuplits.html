@@ -95,7 +95,184 @@
       }
     }
 
-    /* ── YEAR SELECT アコーディオン ──
+    /* ── 検索パネル ── */
+    .search-panel {
+      border-top: 1px solid rgba(255,255,255,0.12);
+      border-bottom: 1px solid rgba(255,255,255,0.12);
+    }
+    .search-toggle-btn {
+      width: 100%;
+      background: none;
+      border: none;
+      color: var(--gold-l);
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      letter-spacing: 0.05em;
+      padding: 0.55rem 0.2rem;
+      text-align: left;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .search-toggle-arrow { transition: transform 0.15s; }
+    .search-toggle-btn[aria-expanded="true"] .search-toggle-arrow { transform: rotate(180deg); }
+    .search-panel-body {
+      padding: 0.3rem 0.2rem 0.9rem;
+    }
+    .search-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 0.6rem;
+      margin-bottom: 0.7rem;
+    }
+    .search-field-wide { grid-column: 1 / -1; }
+    .search-field {
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+    .search-label {
+      color: var(--gold-l);
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      letter-spacing: 0.04em;
+    }
+    .search-field input,
+    .search-puy-row select {
+      background: var(--bg-nav-btn);
+      color: #EADFC8;
+      border: 1px solid #4A2600;
+      border-radius: var(--r-sm);
+      padding: 0.4rem 0.55rem;
+      font-size: 0.85rem;
+      font-family: inherit;
+      width: 100%;
+    }
+    .search-field input::placeholder { color: #8A7050; }
+    .search-puy-block { margin-bottom: 0.7rem; }
+    .search-puy-row {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .search-puy-row select { width: auto; min-width: 7rem; }
+    .search-decade-btn {
+      background: var(--bg-nav-btn);
+      color: #C08050;
+      border: 1px solid #4A2600;
+      border-radius: var(--r-sm);
+      padding: 0.32rem 0.6rem;
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      cursor: pointer;
+    }
+    .search-decade-btn:hover { background: var(--bg-nav-btn-h); color: var(--gold-l); }
+    .search-decade-clear { opacity: 0.8; }
+    .search-puy-checks {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+      margin-top: 0.4rem;
+    }
+    .search-puy-check {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.25rem;
+      background: var(--bg-nav-btn);
+      border: 1px solid #4A2600;
+      border-radius: var(--r-sm);
+      padding: 0.22rem 0.45rem;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: #C08050;
+      cursor: pointer;
+    }
+    .search-puy-check input { cursor: pointer; }
+    .search-puy-check.checked {
+      background: var(--accent-mg);
+      color: #fff;
+      border-color: var(--accent-mg);
+    }
+    .search-actions {
+      display: flex;
+      gap: 0.6rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.6rem;
+    }
+    .search-run-btn {
+      background: linear-gradient(135deg, #9B1060 0%, #C01878 100%);
+      color: #fff;
+      border: none;
+      border-radius: var(--r-sm);
+      padding: 0.5rem 1.1rem;
+      font-size: 0.85rem;
+      font-weight: 700;
+      cursor: pointer;
+    }
+    .search-run-btn:hover { background: linear-gradient(135deg, #C01878 0%, #E03098 100%); }
+    .search-clear-btn {
+      background: none;
+      color: #C08050;
+      border: 1px solid #4A2600;
+      border-radius: var(--r-sm);
+      padding: 0.5rem 1rem;
+      font-size: 0.85rem;
+      cursor: pointer;
+    }
+    .search-clear-btn:hover { color: var(--gold-l); border-color: var(--gold-d); }
+    .search-history {
+      font-size: 0.78rem;
+      color: #C08050;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .search-history-chips {
+      display: inline-flex;
+      flex-wrap: wrap;
+      gap: 0.35rem;
+    }
+    .search-history-chip {
+      background: var(--bg-nav-btn);
+      border: 1px solid #4A2600;
+      border-radius: 999px;
+      color: #C08050;
+      font-size: 0.72rem;
+      padding: 0.2rem 0.6rem;
+      cursor: pointer;
+    }
+    .search-history-chip:hover { background: var(--bg-nav-btn-h); color: var(--gold-l); }
+    .search-results-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.6rem;
+      margin-bottom: 1rem;
+    }
+    .search-results-count {
+      font-family: var(--font-mono);
+      color: var(--text-muted);
+      font-size: 0.85rem;
+    }
+    .search-results-list {
+      background: #fff;
+      border-radius: var(--r-lg);
+      box-shadow: var(--shadow-md);
+      overflow: hidden;
+      border: 1px solid var(--border-table);
+      list-style: none;
+    }
+    .search-no-results {
+      text-align: center;
+      color: var(--text-muted);
+      padding: 2.5rem 1rem;
+      font-size: 0.95rem;
+    }
+
+
        PC: 年ボタンは常に表示。見出しはボタン化するが矢印は隠し、
            クリックしても表示は変わらない（cursor も通常のまま）。
        スマホ(≤600px): 見出しタップで年ボタンを開閉。初期は閉じる。 */
@@ -799,6 +976,65 @@
         <button class="sul-tab-btn active" data-tab="list" role="tab" aria-selected="true">📋 リスト表示</button>
         <button class="sul-tab-btn" data-tab="calendar" role="tab" aria-selected="false">📅 カレンダー表示</button>
       </div>
+
+      <div id="searchPanel" class="search-panel">
+        <button type="button" class="search-toggle-btn" id="searchToggleBtn" aria-expanded="false" aria-controls="searchPanelBody">
+          🔍 検索 <span class="search-toggle-arrow" aria-hidden="true">▾</span>
+        </button>
+        <div id="searchPanelBody" class="search-panel-body" hidden>
+          <div class="search-grid">
+            <label class="search-field">
+              <span class="search-label">アーティスト名</span>
+              <input type="text" id="searchArtist" placeholder="例：B'z">
+            </label>
+            <label class="search-field">
+              <span class="search-label">曲名</span>
+              <input type="text" id="searchTitle" placeholder="例：負けないで">
+            </label>
+            <label class="search-field">
+              <span class="search-label">放送回（#）</span>
+              <input type="number" id="searchEpNo" placeholder="例：100" min="1">
+            </label>
+            <label class="search-field">
+              <span class="search-label">放送日</span>
+              <input type="date" id="searchAirDate">
+            </label>
+            <label class="search-field">
+              <span class="search-label">特集テーマ</span>
+              <input type="text" id="searchFeature" placeholder="例：B'z特集">
+            </label>
+            <label class="search-field search-field-wide">
+              <span class="search-label">フリーワード（曲名・アーティスト名・特集テーマ）</span>
+              <input type="text" id="searchFree" placeholder="例：松田聖子">
+            </label>
+          </div>
+
+          <div class="search-puy-block">
+            <div class="search-puy-row">
+              <span class="search-label">PUY（単年）</span>
+              <select id="searchPuySingle">
+                <option value="">指定なし</option>
+              </select>
+              <button type="button" class="search-decade-btn" id="searchDecade80">80年代</button>
+              <button type="button" class="search-decade-btn" id="searchDecade90">90年代</button>
+              <button type="button" class="search-decade-btn search-decade-clear" id="searchDecadeClear">年クリア</button>
+            </div>
+            <div class="search-label" style="margin-top:0.5rem;">PUY（複数選択）</div>
+            <div class="search-puy-checks" id="searchPuyChecks"></div>
+          </div>
+
+          <div class="search-actions">
+            <button type="button" class="search-run-btn" id="searchRunBtn">この条件で検索</button>
+            <button type="button" class="search-clear-btn" id="searchClearBtn">検索をクリア</button>
+          </div>
+
+          <div class="search-history" id="searchHistory" hidden>
+            <span class="search-label">最近の検索：</span>
+            <span class="search-history-chips" id="searchHistoryChips"></span>
+          </div>
+        </div>
+      </div>
+
       <div id="listNav" class="year-collapsed">
         <button type="button" class="nav-label year-accordion-toggle" id="yearAccordionToggle"
                 aria-expanded="false" aria-controls="yearButtons">
@@ -817,6 +1053,7 @@
     </div>
     <div id="listArea" hidden></div>
     <div id="calArea" hidden></div>
+    <div id="searchResultsArea" hidden></div>
   </main>
 
   <footer class="site-footer">
@@ -905,6 +1142,86 @@
       yearButtons.appendChild(btn);
     }
 
+    // ── 1エピソード分の<li>を生成（年別リスト・検索結果の両方で使用） ──
+    function createEpisodeItem(ep) {
+      const hasTracks = ep.tracks && ep.tracks.length > 0;
+      const hasImage  = !!ep.image_file;
+
+      const li = document.createElement('li');
+      if (hasImage) {
+        li.className = 'sul-item has-image';
+        li.setAttribute('role', 'button');
+        li.setAttribute('tabindex', '0');
+        li.title = '画像を新しいタブで開く';
+        const openImg = () => window.open(`images/setuplits/${ep.image_file}`, '_blank');
+        li.addEventListener('click', openImg);
+        li.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openImg(); } });
+      } else if (hasTracks) {
+        li.className = 'sul-item has-tracks';
+        li.setAttribute('role', 'button');
+        li.setAttribute('tabindex', '0');
+        li.title = '曲目一覧を表示';
+        const openTracks = () => openModal(ep, 'year');
+        li.addEventListener('click', openTracks);
+        li.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openTracks(); } });
+      } else {
+        li.className = 'sul-item no-data';
+      }
+
+      const epNo = document.createElement('span');
+      epNo.className = 'sul-ep-no';
+      epNo.textContent = `#${ep.episode_no}`;
+
+      const date = document.createElement('span');
+      date.className = 'sul-date';
+      date.textContent = ep.air_date ? ep.air_date.replace(/-/g, '.') : '—';
+
+      const feature = document.createElement('span');
+      feature.className = 'sul-feature';
+      feature.textContent = ep.special_feature || '—';
+
+      li.appendChild(epNo);
+      li.appendChild(date);
+      li.appendChild(feature);
+
+      if (ep.episode_no === NEW_EPISODE_NO) {
+        const reqBadge = document.createElement('span');
+        reqBadge.className = 'badge-new';
+        reqBadge.textContent = 'New';
+        li.appendChild(reqBadge);
+      }
+
+      if (hasImage) {
+        const icon = document.createElement('span');
+        icon.className = 'sul-img-icon';
+        icon.setAttribute('aria-hidden', 'true');
+        icon.textContent = '🖼';
+        li.appendChild(icon);
+        if (hasTracks) {
+          const trackBtn = document.createElement('button');
+          trackBtn.className = 'sul-track-btn';
+          trackBtn.textContent = '📋';
+          trackBtn.title = '曲目一覧を表示';
+          trackBtn.setAttribute('aria-label', '曲目一覧を表示');
+          trackBtn.addEventListener('click', e => { e.stopPropagation(); openModal(ep, 'year'); });
+          li.appendChild(trackBtn);
+        }
+      } else if (hasTracks) {
+        const badge = document.createElement('span');
+        badge.className = 'sul-badge-pending';
+        badge.style.cssText = 'background:#006D77;color:#fff;';
+        badge.textContent = '📋 曲目あり';
+        li.appendChild(badge);
+      } else {
+        const badge = document.createElement('span');
+        badge.className = 'sul-badge-pending';
+        badge.textContent = 'データ準備中';
+        li.appendChild(badge);
+      }
+
+      return li;
+    }
+
     // ── render list sections ──
     const frag = document.createDocumentFragment();
 
@@ -933,82 +1250,7 @@
       ul.className = 'sul-list';
 
       for (const ep of eps) {
-        const hasTracks = ep.tracks && ep.tracks.length > 0;
-        const hasImage  = !!ep.image_file;
-
-        const li = document.createElement('li');
-        if (hasImage) {
-          li.className = 'sul-item has-image';
-          li.setAttribute('role', 'button');
-          li.setAttribute('tabindex', '0');
-          li.title = '画像を新しいタブで開く';
-          const openImg = () => window.open(`images/setuplits/${ep.image_file}`, '_blank');
-          li.addEventListener('click', openImg);
-          li.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openImg(); } });
-        } else if (hasTracks) {
-          li.className = 'sul-item has-tracks';
-          li.setAttribute('role', 'button');
-          li.setAttribute('tabindex', '0');
-          li.title = '曲目一覧を表示';
-          const openTracks = () => openModal(ep, 'year');
-          li.addEventListener('click', openTracks);
-          li.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openTracks(); } });
-        } else {
-          li.className = 'sul-item no-data';
-        }
-
-        const epNo = document.createElement('span');
-        epNo.className = 'sul-ep-no';
-        epNo.textContent = `#${ep.episode_no}`;
-
-        const date = document.createElement('span');
-        date.className = 'sul-date';
-        date.textContent = ep.air_date ? ep.air_date.replace(/-/g, '.') : '—';
-
-        const feature = document.createElement('span');
-        feature.className = 'sul-feature';
-        feature.textContent = ep.special_feature || '—';
-
-        li.appendChild(epNo);
-        li.appendChild(date);
-        li.appendChild(feature);
-
-        if (ep.episode_no === NEW_EPISODE_NO) {
-          const reqBadge = document.createElement('span');
-          reqBadge.className = 'badge-new';
-          reqBadge.textContent = 'New';
-          li.appendChild(reqBadge);
-        }
-
-        if (hasImage) {
-          const icon = document.createElement('span');
-          icon.className = 'sul-img-icon';
-          icon.setAttribute('aria-hidden', 'true');
-          icon.textContent = '🖼';
-          li.appendChild(icon);
-          if (hasTracks) {
-            const trackBtn = document.createElement('button');
-            trackBtn.className = 'sul-track-btn';
-            trackBtn.textContent = '📋';
-            trackBtn.title = '曲目一覧を表示';
-            trackBtn.setAttribute('aria-label', '曲目一覧を表示');
-            trackBtn.addEventListener('click', e => { e.stopPropagation(); openModal(ep, 'year'); });
-            li.appendChild(trackBtn);
-          }
-        } else if (hasTracks) {
-          const badge = document.createElement('span');
-          badge.className = 'sul-badge-pending';
-          badge.style.cssText = 'background:#006D77;color:#fff;';
-          badge.textContent = '📋 曲目あり';
-          li.appendChild(badge);
-        } else {
-          const badge = document.createElement('span');
-          badge.className = 'sul-badge-pending';
-          badge.textContent = 'データ準備中';
-          li.appendChild(badge);
-        }
-
-        ul.appendChild(li);
+        ul.appendChild(createEpisodeItem(ep));
       }
 
       section.appendChild(ul);
@@ -1381,6 +1623,275 @@
         }
       }
     } catch (err) { /* 何もしない */ }
+
+    // ===== 検索機能 =====
+    const searchPanel       = document.getElementById('searchPanel');
+    const searchToggleBtn   = document.getElementById('searchToggleBtn');
+    const searchPanelBody   = document.getElementById('searchPanelBody');
+    const searchArtist      = document.getElementById('searchArtist');
+    const searchTitleInput  = document.getElementById('searchTitle');
+    const searchEpNo        = document.getElementById('searchEpNo');
+    const searchAirDate     = document.getElementById('searchAirDate');
+    const searchFeature     = document.getElementById('searchFeature');
+    const searchFree        = document.getElementById('searchFree');
+    const searchPuySingle   = document.getElementById('searchPuySingle');
+    const searchPuyChecks   = document.getElementById('searchPuyChecks');
+    const searchDecade80    = document.getElementById('searchDecade80');
+    const searchDecade90    = document.getElementById('searchDecade90');
+    const searchDecadeClear = document.getElementById('searchDecadeClear');
+    const searchRunBtn      = document.getElementById('searchRunBtn');
+    const searchClearBtn    = document.getElementById('searchClearBtn');
+    const searchHistoryWrap = document.getElementById('searchHistory');
+    const searchHistoryChips= document.getElementById('searchHistoryChips');
+    const searchResultsArea = document.getElementById('searchResultsArea');
+
+    // パネル開閉
+    searchToggleBtn.addEventListener('click', () => {
+      const open = searchPanelBody.hidden;
+      searchPanelBody.hidden = !open;
+      searchToggleBtn.setAttribute('aria-expanded', String(open));
+    });
+
+    // PUY単年セレクト・複数選択チェックボックスを生成（1980〜1999固定）
+    const puyAllYears = [];
+    for (let y = 1980; y <= 1999; y++) puyAllYears.push(y);
+
+    for (const y of puyAllYears) {
+      const opt = document.createElement('option');
+      opt.value = String(y);
+      opt.textContent = `${y}年`;
+      searchPuySingle.appendChild(opt);
+    }
+
+    const puyCheckboxes = [];
+    for (const y of puyAllYears) {
+      const label = document.createElement('label');
+      label.className = 'search-puy-check';
+      const cb = document.createElement('input');
+      cb.type = 'checkbox';
+      cb.value = String(y);
+      cb.addEventListener('change', () => label.classList.toggle('checked', cb.checked));
+      label.appendChild(cb);
+      label.appendChild(document.createTextNode(`${y}`));
+      searchPuyChecks.appendChild(label);
+      puyCheckboxes.push(cb);
+    }
+
+    function setDecadeChecked(fromYear, toYear) {
+      for (const cb of puyCheckboxes) {
+        const y = Number(cb.value);
+        const on = y >= fromYear && y <= toYear;
+        cb.checked = on;
+        cb.closest('.search-puy-check').classList.toggle('checked', on);
+      }
+    }
+    searchDecade80.addEventListener('click', () => setDecadeChecked(1980, 1989));
+    searchDecade90.addEventListener('click', () => setDecadeChecked(1990, 1999));
+    searchDecadeClear.addEventListener('click', () => setDecadeChecked(0, -1));
+
+    // ── 検索条件を1件のエピソードに対して判定 ──
+    function episodeMatches(ep, c) {
+      const tracks = ep.tracks || [];
+
+      if (c.artist) {
+        const ok = tracks.some(t => (t.artist || '').toLowerCase().includes(c.artist));
+        if (!ok) return false;
+      }
+      if (c.title) {
+        const ok = tracks.some(t => (t.title || '').toLowerCase().includes(c.title));
+        if (!ok) return false;
+      }
+      if (c.epNo !== null) {
+        if (ep.episode_no !== c.epNo) return false;
+      }
+      if (c.airDate) {
+        if (ep.air_date !== c.airDate) return false;
+      }
+      if (c.feature) {
+        if (!(ep.special_feature || '').toLowerCase().includes(c.feature)) return false;
+      }
+      if (c.puySingle !== null) {
+        if (ep.puy_year !== c.puySingle) return false;
+      }
+      if (c.puyMulti.length > 0) {
+        if (!c.puyMulti.includes(ep.puy_year)) return false;
+      }
+      if (c.free) {
+        const inTracks = tracks.some(t =>
+          (t.title || '').toLowerCase().includes(c.free) ||
+          (t.artist || '').toLowerCase().includes(c.free)
+        );
+        const inFeature = (ep.special_feature || '').toLowerCase().includes(c.free);
+        if (!inTracks && !inFeature) return false;
+      }
+      return true;
+    }
+
+    function readCriteria() {
+      return {
+        artist:    searchArtist.value.trim().toLowerCase(),
+        title:     searchTitleInput.value.trim().toLowerCase(),
+        epNo:      searchEpNo.value ? Number(searchEpNo.value) : null,
+        airDate:   searchAirDate.value || '',
+        feature:   searchFeature.value.trim().toLowerCase(),
+        free:      searchFree.value.trim().toLowerCase(),
+        puySingle: searchPuySingle.value ? Number(searchPuySingle.value) : null,
+        puyMulti:  puyCheckboxes.filter(cb => cb.checked).map(cb => Number(cb.value))
+      };
+    }
+
+    function hasAnyCriteria(c) {
+      return !!(c.artist || c.title || c.epNo !== null || c.airDate || c.feature || c.free || c.puySingle !== null || c.puyMulti.length > 0);
+    }
+
+    // ── 検索履歴（localStorage） ──
+    const HISTORY_KEY = 'mp8090_search_history';
+    const HISTORY_MAX = 8;
+
+    function loadHistory() {
+      try {
+        const raw = localStorage.getItem(HISTORY_KEY);
+        return raw ? JSON.parse(raw) : [];
+      } catch (e) { return []; }
+    }
+    function saveHistory(list) {
+      try { localStorage.setItem(HISTORY_KEY, JSON.stringify(list)); } catch (e) { /* 何もしない */ }
+    }
+    function describeCriteria(c) {
+      const parts = [];
+      if (c.free)      parts.push(c.free);
+      if (c.artist)    parts.push(`歌手:${c.artist}`);
+      if (c.title)     parts.push(`曲:${c.title}`);
+      if (c.feature)   parts.push(`特集:${c.feature}`);
+      if (c.epNo !== null) parts.push(`#${c.epNo}`);
+      if (c.airDate)   parts.push(c.airDate);
+      if (c.puySingle !== null) parts.push(`PUY${c.puySingle}`);
+      if (c.puyMulti.length > 0) parts.push(`PUY[${c.puyMulti.join(',')}]`);
+      return parts.join(' / ') || '（条件なし）';
+    }
+    function addHistory(c) {
+      const label = describeCriteria(c);
+      let list = loadHistory();
+      list = list.filter(item => item.label !== label);
+      list.unshift({ label, criteria: c });
+      if (list.length > HISTORY_MAX) list = list.slice(0, HISTORY_MAX);
+      saveHistory(list);
+      renderHistory();
+    }
+    function renderHistory() {
+      const list = loadHistory();
+      searchHistoryChips.innerHTML = '';
+      if (list.length === 0) {
+        searchHistoryWrap.hidden = true;
+        return;
+      }
+      searchHistoryWrap.hidden = false;
+      for (const item of list) {
+        const chip = document.createElement('button');
+        chip.type = 'button';
+        chip.className = 'search-history-chip';
+        chip.textContent = item.label;
+        chip.addEventListener('click', () => {
+          applyCriteria(item.criteria);
+          runSearch();
+        });
+        searchHistoryChips.appendChild(chip);
+      }
+    }
+    function applyCriteria(c) {
+      searchArtist.value = c.artist || '';
+      searchTitleInput.value = c.title || '';
+      searchEpNo.value = c.epNo !== null ? c.epNo : '';
+      searchAirDate.value = c.airDate || '';
+      searchFeature.value = c.feature || '';
+      searchFree.value = c.free || '';
+      searchPuySingle.value = c.puySingle !== null ? String(c.puySingle) : '';
+      const multiSet = new Set(c.puyMulti || []);
+      for (const cb of puyCheckboxes) {
+        const on = multiSet.has(Number(cb.value));
+        cb.checked = on;
+        cb.closest('.search-puy-check').classList.toggle('checked', on);
+      }
+      searchPanelBody.hidden = false;
+      searchToggleBtn.setAttribute('aria-expanded', 'true');
+    }
+
+    // ── 検索実行・結果表示 ──
+    function runSearch() {
+      const c = readCriteria();
+      if (!hasAnyCriteria(c)) return;
+
+      const results = episodes.filter(ep => episodeMatches(ep, c)).sort((a, b) => b.episode_no - a.episode_no);
+      addHistory(c);
+      renderSearchResults(results);
+
+      listArea.hidden = true;
+      calArea.hidden = true;
+      listNav.hidden = true;
+      searchResultsArea.hidden = false;
+      tabBtns.forEach(b => b.classList.remove('active'));
+
+      const navHeight = document.querySelector('.sul-nav')?.offsetHeight ?? 0;
+      const top = searchResultsArea.getBoundingClientRect().top + window.scrollY - navHeight;
+      window.scrollTo({ top, behavior: 'smooth' });
+    }
+
+    function renderSearchResults(results) {
+      searchResultsArea.innerHTML = '';
+
+      const header = document.createElement('div');
+      header.className = 'search-results-header';
+      const count = document.createElement('span');
+      count.className = 'search-results-count';
+      count.textContent = `検索結果：${results.length}件`;
+      const backBtn = document.createElement('button');
+      backBtn.type = 'button';
+      backBtn.className = 'search-clear-btn';
+      backBtn.textContent = '✕ 検索結果を閉じる';
+      backBtn.addEventListener('click', clearSearch);
+      header.appendChild(count);
+      header.appendChild(backBtn);
+      searchResultsArea.appendChild(header);
+
+      if (results.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'search-no-results';
+        empty.textContent = '該当する放送回が見つかりませんでした。';
+        searchResultsArea.appendChild(empty);
+        return;
+      }
+
+      const ul = document.createElement('ul');
+      ul.className = 'sul-list search-results-list';
+      for (const ep of results) {
+        ul.appendChild(createEpisodeItem(ep));
+      }
+      searchResultsArea.appendChild(ul);
+    }
+
+    function clearSearch() {
+      searchResultsArea.hidden = true;
+      searchResultsArea.innerHTML = '';
+      switchTab('list');
+    }
+
+    searchRunBtn.addEventListener('click', runSearch);
+    searchClearBtn.addEventListener('click', () => {
+      searchArtist.value = '';
+      searchTitleInput.value = '';
+      searchEpNo.value = '';
+      searchAirDate.value = '';
+      searchFeature.value = '';
+      searchFree.value = '';
+      searchPuySingle.value = '';
+      setDecadeChecked(0, -1);
+      clearSearch();
+    });
+    [searchArtist, searchTitleInput, searchEpNo, searchAirDate, searchFeature, searchFree].forEach(el => {
+      el.addEventListener('keydown', e => { if (e.key === 'Enter') runSearch(); });
+    });
+
+    renderHistory();
 
   })();
 </script>
