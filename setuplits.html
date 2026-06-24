@@ -1829,6 +1829,10 @@
       addHistory(c);
       renderSearchResults(results);
 
+      // 検索結果がすぐ見えるよう、検索条件パネルは自動的に折りたたむ
+      searchPanelBody.hidden = true;
+      searchToggleBtn.setAttribute('aria-expanded', 'false');
+
       listArea.hidden = true;
       calArea.hidden = true;
       listNav.hidden = true;
