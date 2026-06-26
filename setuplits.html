@@ -495,6 +495,13 @@
       font-size: 1rem;
       flex-shrink: 0;
     }
+    .sul-img-icon-btn {
+      background: none;
+      border: none;
+      padding: 0.15rem;
+      cursor: pointer;
+      line-height: 1;
+    }
 
     /* ── Loading / Error ── */
     .sul-loading {
@@ -1199,7 +1206,15 @@
       const hasImage  = !!ep.image_file;
 
       const li = document.createElement('li');
-      if (hasImage) {
+      if (hasImage && hasTracks) {
+        li.className = 'sul-item has-tracks';
+        li.setAttribute('role', 'button');
+        li.setAttribute('tabindex', '0');
+        li.title = '曲目一覧を表示';
+        const openTracks = () => openModal(ep, mode);
+        li.addEventListener('click', openTracks);
+        li.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openTracks(); } });
+      } else if (hasImage) {
         li.className = 'sul-item has-image';
         li.setAttribute('role', 'button');
         li.setAttribute('tabindex', '0');
@@ -1243,12 +1258,18 @@
       }
 
       if (hasImage) {
-        const icon = document.createElement('span');
-        icon.className = 'sul-img-icon';
-        icon.setAttribute('aria-hidden', 'true');
-        icon.textContent = '🖼';
-        li.appendChild(icon);
         if (hasTracks) {
+          const icon = document.createElement('button');
+          icon.className = 'sul-img-icon sul-img-icon-btn';
+          icon.textContent = '🖼';
+          icon.title = '画像を新しいタブで開く';
+          icon.setAttribute('aria-label', '画像を新しいタブで開く');
+          icon.addEventListener('click', e => {
+            e.stopPropagation();
+            window.open(`images/setuplits/${ep.image_file}`, '_blank');
+          });
+          li.appendChild(icon);
+
           const trackBtn = document.createElement('button');
           trackBtn.className = 'sul-track-btn';
           trackBtn.textContent = '📋';
@@ -1256,6 +1277,12 @@
           trackBtn.setAttribute('aria-label', '曲目一覧を表示');
           trackBtn.addEventListener('click', e => { e.stopPropagation(); openModal(ep, mode); });
           li.appendChild(trackBtn);
+        } else {
+          const icon = document.createElement('span');
+          icon.className = 'sul-img-icon';
+          icon.setAttribute('aria-hidden', 'true');
+          icon.textContent = '🖼';
+          li.appendChild(icon);
         }
       } else if (hasTracks) {
         const badge = document.createElement('span');
