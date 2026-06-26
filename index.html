@@ -539,6 +539,8 @@
   // ===== お知らせバー =====
   // 最新放送回番号（setuplits.html の NEW_EPISODE_NO と手動で揃える）
   const NEW_EPISODE_NO = 289;
+  // 最新放送回の放送日（表示用。新しい回を追加するたびに手動で更新する）
+  const NEW_EPISODE_DATE = '2026.4.7';
 
   // 手動の自由文お知らせ（必要に応じて編集）。
   //   text  : 表示する文言
@@ -555,7 +557,7 @@
     const notices = [];
     // 自動生成：最新回1件
     notices.push({
-      text: '📋 Set Up List #' + NEW_EPISODE_NO + ' を更新！',
+      text: '📋 Set Up List #' + NEW_EPISODE_NO + ' を更新！（' + NEW_EPISODE_DATE + '）',
       ep: NEW_EPISODE_NO
     });
     // 手動分を追加
