@@ -260,6 +260,28 @@
       cursor: pointer;
     }
     .search-history-chip:hover { background: var(--bg-nav-btn-h); color: var(--gold-l); }
+    .key-hint-top-wrap {
+      text-align: center;
+      margin-bottom: 1rem;
+    }
+    .key-hint-top {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      background: var(--accent-cyan, #006D77);
+      color: #fff;
+      font-family: var(--font-sans);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      padding: 0.4rem 1rem;
+      border-radius: 999px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    }
+    @media (max-width: 600px) {
+      .key-hint-top-wrap { display: none; }
+    }
+
     .search-results-header {
       display: flex;
       align-items: center;
@@ -1286,6 +1308,12 @@
       frag.appendChild(section);
     }
 
+    const keyHintTop = document.createElement('p');
+    keyHintTop.className = 'key-hint-top-wrap';
+    keyHintTop.setAttribute('aria-hidden', 'true');
+    keyHintTop.innerHTML = '<span class="key-hint-top">⌨️ ← → キーで年を切り替えられます</span>';
+    listArea.appendChild(keyHintTop);
+
     listArea.appendChild(frag);
     loadingMsg.hidden = true;
     listArea.hidden   = false;
@@ -1955,6 +1983,37 @@
     });
 
     renderHistory();
+
+    // ── ← → キーでリスト表示のPUY年セクションを切り替え（PCのみ） ──
+    function getCurrentYearIndex() {
+      const navHeight = document.querySelector('.sul-nav')?.offsetHeight ?? 0;
+      let bestIdx = 0;
+      let bestTop = -Infinity;
+      years.forEach((y, idx) => {
+        const section = document.getElementById(`year-${y}`);
+        if (!section) return;
+        const top = section.getBoundingClientRect().top - navHeight;
+        if (top <= 1 && top > bestTop) { bestTop = top; bestIdx = idx; }
+      });
+      return bestIdx;
+    }
+    function scrollToYearIndex(idx) {
+      if (idx < 0 || idx >= years.length) return;
+      const section = document.getElementById(`year-${years[idx]}`);
+      if (!section) return;
+      const navHeight = document.querySelector('.sul-nav')?.offsetHeight ?? 0;
+      const top = section.getBoundingClientRect().top + window.scrollY - navHeight;
+      window.scrollTo({ top, behavior: 'smooth' });
+    }
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') return;
+      const tag = document.activeElement?.tagName;
+      if (tag === 'INPUT' || tag === 'SELECT' || tag === 'TEXTAREA') return;
+      if (listArea.hidden) return; // リスト表示の時だけ対象
+      const idx = getCurrentYearIndex();
+      if (e.key === 'ArrowLeft') scrollToYearIndex(idx - 1);
+      else scrollToYearIndex(idx + 1);
+    });
 
   })();
 </script>
