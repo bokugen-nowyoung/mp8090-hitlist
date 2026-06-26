@@ -58,17 +58,30 @@
     padding: 2.2rem 1.2rem 1.6rem;
     background: linear-gradient(180deg, #2a1a0c 0%, #1c1108 100%);
   }
-  header.rules-header .back-link {
-    display: inline-block;
+  header.rules-header .cross-links {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    max-width: 640px;
+    margin: 0 auto 0.9rem;
+    gap: 1rem;
+  }
+  header.rules-header .cross-links a {
     color: var(--gold);
-    font-size: 0.85rem;
+    font-size: 0.8rem;
     text-decoration: none;
-    margin-bottom: 0.9rem;
     opacity: 0.85;
+  }
+  header.rules-header .cross-links a:hover { opacity: 1; }
+  @media (max-width: 480px) {
+    header.rules-header .cross-links {
+      flex-direction: column;
+      gap: 0.4rem;
+    }
   }
   header.rules-header h1 {
     font-family: 'Yusei Magic', sans-serif;
-    color: var(--gold);
+    color: #ffffff;
     font-size: clamp(1.4rem, 4.5vw, 2rem);
     margin-bottom: 0.5rem;
   }
@@ -246,7 +259,10 @@
   <a href="index.html" class="top-banner-strip">📻 トップ「ナウヤン同盟の部屋」はこちら<span class="strip-arrow">→</span></a>
 
   <header class="rules-header">
-    <a href="index.html" class="back-link">← ナウヤン同盟の部屋へ</a>
+    <div class="cross-links">
+      <a href="setuplits.html">🎵 mp8090 Set Up List アーカイブ</a>
+      <a href="year-end-chart.html">🎵 年間シングルヒット曲ランキング</a>
+    </div>
     <h1>📌 番組・リクエストのルール</h1>
     <p>LuckyFM「Music Pick Up 80's &amp; 90's」<br>石井哲也アナウンサー公認・ファンサイト</p>
   </header>
