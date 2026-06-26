@@ -1536,16 +1536,23 @@
             }
 
             if (hasImage) {
-              badge.className = 'cal-badge';
-              badge.title = '画像を新しいタブで開く';
-              badge.addEventListener('click', () => window.open(`images/setuplits/${ep.image_file}`, '_blank'));
-              body.appendChild(badge);
               if (hasTracks) {
-                const trackBtn = document.createElement('button');
-                trackBtn.className = 'cal-track-btn';
-                trackBtn.textContent = '📋 曲目一覧を見る';
-                trackBtn.addEventListener('click', () => openModal(ep, 'global'));
-                body.appendChild(trackBtn);
+                badge.className = 'cal-badge';
+                badge.title = '曲目一覧を表示';
+                badge.addEventListener('click', () => openModal(ep, 'global'));
+                body.appendChild(badge);
+
+                const imgBtn = document.createElement('button');
+                imgBtn.className = 'cal-track-btn';
+                imgBtn.textContent = '🦊 画像を見る';
+                imgBtn.title = '画像を新しいタブで開く';
+                imgBtn.addEventListener('click', () => window.open(`images/setuplits/${ep.image_file}`, '_blank'));
+                body.appendChild(imgBtn);
+              } else {
+                badge.className = 'cal-badge';
+                badge.title = '画像を新しいタブで開く';
+                badge.addEventListener('click', () => window.open(`images/setuplits/${ep.image_file}`, '_blank'));
+                body.appendChild(badge);
               }
             } else if (hasTracks) {
               badge.className = 'cal-badge';
