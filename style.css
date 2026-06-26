@@ -440,6 +440,25 @@ a {
   border-top: 1px solid var(--border-table);
 }
 
+.key-hint-top {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: var(--accent-cyan, #006D77);
+  color: #fff;
+  font-family: var(--font-sans);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  padding: 0.4rem 1rem;
+  border-radius: 999px;
+  margin: 0 auto 0.9rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+}
+.key-hint-top-wrap {
+  text-align: center;
+}
+
 /* ============================================================
    Ranking Table
    ============================================================ */
@@ -792,6 +811,10 @@ a {
   }
 
   .key-hint {
+    display: none;
+  }
+
+  .key-hint-top-wrap {
     display: none;
   }
 }
