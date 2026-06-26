@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>番組・リクエストのルール | #mp8090 × ナウヤン同盟</title>
+<meta name="description" content="LuckyFM「Music Pick Up 80's & 90's」(#mp8090) の番組のルール・リクエストのルールをまとめたページ。初めて聴く方・初めてリクエストする方向けの案内です。">
+<meta property="og:title" content="番組・リクエストのルール | #mp8090 × ナウヤン同盟">
+<meta property="og:description" content="LuckyFM「Music Pick Up 80's & 90's」(#mp8090) の番組のルール・リクエストのルールをまとめたページ。">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://bokugen-nowyoung.github.io/mp8090-hitlist/rules.html">
+<meta property="og:site_name" content="ナウヤン同盟の部屋">
+<meta property="og:locale" content="ja_JP">
+<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png">
+<link rel="icon" type="image/png" sizes="500x500" href="images/favicon.png">
+<link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Yusei+Magic&family=Zen+Maru+Gothic:wght@400;500;700&family=Klee+One:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --board: #b3895b;
+    --board-deep: #8f6b42;
+    --paper: #fffaf0;
+    --ink: #38383a;
+    --ink-soft: #6b6862;
+    --pin-red: #c0392b;
+    --tape: #e8c57a;
+    --note-yellow-a: #fff3b0;
+    --note-yellow-b: #ffe69a;
+    --note-blue-a: #bfe3ea;
+    --note-blue-b: #cdeef0;
+    --gold: #e8c97a;
+    --magenta: #c01878;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    font-family: 'Zen Maru Gothic', sans-serif;
+    color: var(--ink);
+    background: #fffaf0;
+  }
+
+  .top-banner-strip {
+    display: block;
+    background: linear-gradient(90deg, var(--gold) 0%, #d4a83a 100%);
+    color: #3a2400;
+    text-align: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 0.55rem 1rem;
+    text-decoration: none;
+  }
+  .top-banner-strip .strip-arrow { margin-left: 0.3em; }
+
+  header.rules-header {
+    text-align: center;
+    padding: 2.2rem 1.2rem 1.6rem;
+    background: linear-gradient(180deg, #2a1a0c 0%, #1c1108 100%);
+  }
+  header.rules-header .back-link {
+    display: inline-block;
+    color: var(--gold);
+    font-size: 0.85rem;
+    text-decoration: none;
+    margin-bottom: 0.9rem;
+    opacity: 0.85;
+  }
+  header.rules-header h1 {
+    font-family: 'Yusei Magic', sans-serif;
+    color: var(--gold);
+    font-size: clamp(1.4rem, 4.5vw, 2rem);
+    margin-bottom: 0.5rem;
+  }
+  header.rules-header p {
+    color: #d8c8a8;
+    font-size: 0.85rem;
+    line-height: 1.6;
+  }
+
+  .board {
+    background:
+      radial-gradient(circle at 15% 20%, rgba(0,0,0,0.08) 0, transparent 35%),
+      radial-gradient(circle at 75% 65%, rgba(0,0,0,0.07) 0, transparent 40%),
+      radial-gradient(circle at 40% 85%, rgba(0,0,0,0.06) 0, transparent 30%),
+      var(--board);
+    padding: 2.5rem 1.2rem 4rem;
+  }
+
+  .intro-card {
+    position: relative;
+    max-width: 760px;
+    margin: 0 auto 2.8rem;
+    background: var(--paper);
+    border-radius: 6px;
+    padding: 1.8rem 1.8rem 1.6rem;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.28);
+    transform: rotate(-0.5deg);
+  }
+  .pin {
+    position: absolute;
+    top: -10px; left: 50%;
+    transform: translateX(-50%);
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 30%, #ff8a8a, var(--pin-red) 70%);
+    box-shadow: 0 3px 4px rgba(0,0,0,0.4);
+  }
+  .intro-card h2 {
+    font-family: 'Yusei Magic', sans-serif;
+    font-size: 1.25rem;
+    color: var(--ink);
+    margin: 0.4rem 0 0.7rem;
+  }
+  .intro-card p {
+    font-family: 'Klee One', sans-serif;
+    font-size: 0.92rem;
+    color: var(--ink-soft);
+    line-height: 1.8;
+  }
+  .intro-lead-toggle {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.6rem;
+    width: 100%;
+    background: none;
+    border: none;
+    padding: 0;
+    margin-bottom: 0.9rem;
+    cursor: pointer;
+    text-align: left;
+    font-family: 'Klee One', sans-serif;
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+    line-height: 1.8;
+  }
+  .intro-lead-arrow {
+    flex-shrink: 0;
+    color: var(--magenta);
+    transition: transform 0.2s;
+    margin-top: 0.1rem;
+  }
+  .intro-lead-toggle[aria-expanded="true"] .intro-lead-arrow {
+    transform: rotate(180deg);
+  }
+  .ishii-quote[hidden] { display: none; }
+  .ishii-quote {
+    font-family: 'Klee One', sans-serif;
+    font-size: 0.88rem;
+    color: var(--ink);
+    line-height: 1.85;
+    background: #f5ecd6;
+    border-left: 3px solid var(--magenta);
+    border-radius: 4px;
+    padding: 0.9rem 1rem;
+    margin: 0 0 0.9rem;
+  }
+  .intro-card .station-info {
+    margin-top: 0.9rem;
+    font-size: 0.82rem;
+    color: var(--ink-soft);
+    border-top: 1px dashed #d8cdb0;
+    padding-top: 0.7rem;
+  }
+
+  .columns {
+    max-width: 860px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+  @media (max-width: 680px) {
+    .columns { grid-template-columns: 1fr; gap: 1rem; }
+  }
+
+  .col-title {
+    text-align: center;
+    color: var(--paper);
+    font-family: 'Yusei Magic', sans-serif;
+    font-size: 1.05rem;
+    margin-bottom: 1rem;
+    text-shadow: 0 1px 3px rgba(0,0,0,0.35);
+  }
+
+  .note {
+    position: relative;
+    border-radius: 3px;
+    padding: 1.1rem 1.1rem 1rem;
+    margin-bottom: 1.6rem;
+    box-shadow: 2px 5px 12px rgba(0,0,0,0.28);
+    font-family: 'Klee One', sans-serif;
+    font-size: 0.86rem;
+    line-height: 1.7;
+    color: var(--ink);
+  }
+  .note.yellow  { background: var(--note-yellow-a); transform: rotate(-1.1deg); }
+  .note.yellow2 { background: var(--note-yellow-b); transform: rotate(0.9deg); }
+  .note.blue    { background: var(--note-blue-a);   transform: rotate(1.1deg); }
+  .note.blue2   { background: var(--note-blue-b);   transform: rotate(-0.8deg); }
+  .note.placeholder { opacity: 0.7; }
+
+  .note .pin { width: 14px; height: 14px; top: -8px; }
+  .note .tape {
+    position: absolute; top: -8px; left: 50%;
+    transform: translateX(-50%) rotate(-3deg);
+    width: 64px; height: 18px;
+    background: rgba(232, 197, 122, 0.8);
+  }
+  .note strong {
+    display: block;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    font-weight: 700;
+    font-size: 0.95rem;
+    margin-bottom: 0.35rem;
+  }
+  .note .note-tag {
+    display: inline-block;
+    font-size: 0.66rem;
+    background: rgba(0,0,0,0.08);
+    color: var(--ink-soft);
+    border-radius: 999px;
+    padding: 0.1rem 0.55rem;
+    margin-bottom: 0.45rem;
+  }
+  .note a {
+    color: #1d5a55;
+    font-weight: 600;
+    word-break: break-all;
+  }
+
+  footer.rules-footer {
+    background: linear-gradient(180deg, #1c1108 0%, #150d06 100%);
+    color: #b8a888;
+    text-align: center;
+    font-size: 0.78rem;
+    padding: 1.6rem 1rem 2rem;
+    line-height: 1.8;
+  }
+  footer.rules-footer a { color: var(--gold); text-decoration: none; }
+</style>
+</head>
+<body>
+
+  <a href="index.html" class="top-banner-strip">📻 トップ「ナウヤン同盟の部屋」はこちら<span class="strip-arrow">→</span></a>
+
+  <header class="rules-header">
+    <a href="index.html" class="back-link">← ナウヤン同盟の部屋へ</a>
+    <h1>📌 番組・リクエストのルール</h1>
+    <p>LuckyFM「Music Pick Up 80's &amp; 90's」<br>石井哲也アナウンサー公認・ファンサイト</p>
+  </header>
+
+  <main class="board">
+
+    <div class="intro-card">
+      <div class="pin"></div>
+      <h2>📻 はじめての方へ</h2>
+      <button type="button" class="intro-lead-toggle" id="ishiiToggle" aria-expanded="false" aria-controls="ishiiQuote">
+        <span>番組のオープニングで、パーソナリティの石井哲也さんはこんな風に番組を紹介しています。</span>
+        <span class="intro-lead-arrow" aria-hidden="true">▼</span>
+      </button>
+      <blockquote class="ishii-quote" id="ishiiQuote" hidden>
+        Music Pick Up 80's &amp; 90's　こんばんは。パーソナリティの石井哲也です。<br>
+        この番組では、80年代から90年代のある年を毎回ピックアップして、その年を振り返りながら懐かしい曲を聴いていただきます。<br>
+        今日ピックアップするのは19XX年、（昭和・平成）XX年です。<br>
+        夜11時代前半は◯◯特集です。〇〇の名曲・懐かしい曲を特集します。<br><br>
+        毎週火曜日、夜10時から深夜0時まで、東京Luckyスタジオから生放送でお送りしています。<br>
+        お送りする曲はできるだけフルで流したいと思います。<br>
+        この時間、『ナウでヤングな青春時代にプレイバック』します。
+      </blockquote>
+      <p class="station-info">📡 毎週火曜 22:00〜24:00 生放送（LuckyFM／茨城放送）</p>
+    </div>
+
+    <div class="columns">
+
+      <div>
+        <p class="col-title">📻 番組のルール</p>
+
+        <div class="note yellow">
+          <div class="pin"></div>
+          <span class="note-tag">基本ルール</span>
+          <strong>PUYの曲について</strong>
+          ピックアップイヤー（PUY）で流れた曲は次回のPUYでは流れません。<br>
+          ※訃報や特別な事情がある場合は例外<br><br>
+          なので、<a href="setuplits.html">『mp8090 Set Up List アーカイブ』</a>のページで、該当の前回放送分を確認してからリクエストして下さい。
+        </div>
+
+        <div class="note yellow2">
+          <div class="tape"></div>
+          <span class="note-tag">基本ルール</span>
+          <strong>PUYはランダムに選ばれる</strong>
+          ピックアップイヤー（PUY）は毎週、石井さんが1980〜1999年の20年間の中から1年をランダムに選びます。<br>
+          20回の放送ごとに1周となりますので、「1周目、2周目」と数えます。<br>
+          次回がどの年になるかは、放送中の夜11時前までのお楽しみ。
+        </div>
+
+        <div class="note yellow">
+          <div class="pin"></div>
+          <span class="note-tag">基本ルール</span>
+          <strong>洋楽は8曲目</strong>
+          PUYの8曲目は洋楽がセレクトされます。<br>
+          毎週一曲しか流れないので、リクエストが採用されたら嬉しさ倍増!?<br>
+          あっという間に番組が進行している意味で『もう洋楽の時間？』のポストやハッシュタグ #もう洋楽の時間 も生まれました（笑）
+        </div>
+
+        <div class="note yellow2">
+          <div class="tape"></div>
+          <span class="note-tag">SNS</span>
+          <strong>#mp8090 でつながろう！</strong>
+          生放送中は、石井さんがX（旧Twitter）のハッシュタグ #mp8090 が付いたリスナーの投稿をピックアップして読み上げる双方向性と、ナウヤン同盟（リスナー）同士でも盛り上がっています。
+        </div>
+
+        <div class="note yellow placeholder">
+          <div class="pin"></div>
+          <strong>（ここに追記していきます）</strong>
+          気づいたルールは随時このボードに貼り足していきます。
+        </div>
+      </div>
+
+      <div>
+        <p class="col-title">🎧 リクエストのルール</p>
+
+        <div class="note blue">
+          <div class="pin"></div>
+          <span class="note-tag">基本ルール</span>
+          <strong>リクエストの方法</strong>
+          夜11時前のエンディングで、来週ピックアップする年（PUY）と特集についてお伝えします。<br>
+          リクエストは一人につき1通で、毎回「ピックアップする年から1曲」と「特集から1曲」の2曲を、一つにまとめてリクエストしてください。<br><br>
+          メールアドレス：<a href="mailto:mp8090@lucky-ibaraki.com">mp8090@lucky-ibaraki.com</a><br>
+          LuckyFMホームページのメッセージフォームからも送れます。<br>
+          <a href="https://lucky-ibaraki.com/request/" target="_blank" rel="noopener noreferrer">https://lucky-ibaraki.com/request/</a>
+        </div>
+
+        <div class="note blue">
+          <div class="tape"></div>
+          <span class="note-tag">基本ルール</span>
+          <strong>リクエストの締め切り</strong>
+          放送前日の月曜日です。
+        </div>
+
+        <div class="note blue2">
+          <div class="tape"></div>
+          <span class="note-tag">心構え</span>
+          <strong>リクエストが通らなくても…</strong>
+          リクエストが通らなくても大丈夫！<br>
+          『愛の点呼』といって、石井さんがリクエストにお応えできなかったナウヤンネーム（ラジオネーム）を読み上げてもらえます。<br>
+          何より、火曜夜10時からの2時間を楽しんで素敵な時間にしましょう♪
+        </div>
+
+        <div class="note blue placeholder">
+          <div class="pin"></div>
+          <strong>（ここに追記していきます）</strong>
+          初めての人が迷いやすいポイントを、見つけたら追加していきます。
+        </div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <footer class="rules-footer">
+    <p>※本サイトはLuckyFM「Music Pick Up 80's &amp; 90's」のファンサイトです</p>
+    <p>© 2026 ぼくげん｜本サイトのコンテンツ（テキスト・デザイン）の無断転載・転用を禁じます</p>
+  </footer>
+  <script>
+    const ishiiToggle = document.getElementById('ishiiToggle');
+    const ishiiQuote = document.getElementById('ishiiQuote');
+    ishiiToggle.addEventListener('click', () => {
+      const open = ishiiQuote.hidden;
+      ishiiQuote.hidden = !open;
+      ishiiToggle.setAttribute('aria-expanded', String(open));
+    });
+  </script>
+</body>
+</html>
