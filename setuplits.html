@@ -1305,14 +1305,6 @@
             window.open(`images/setuplits/${ep.image_file}`, '_blank');
           });
           li.appendChild(icon);
-
-          const trackBtn = document.createElement('button');
-          trackBtn.className = 'sul-track-btn';
-          trackBtn.textContent = '📋';
-          trackBtn.title = '曲目一覧を表示';
-          trackBtn.setAttribute('aria-label', '曲目一覧を表示');
-          trackBtn.addEventListener('click', e => { e.stopPropagation(); openModal(ep, mode); });
-          li.appendChild(trackBtn);
         } else {
           const icon = document.createElement('span');
           icon.className = 'sul-img-icon';
