@@ -314,6 +314,29 @@
       border: 1px solid var(--border-table);
       list-style: none;
     }
+    .search-match-row {
+      display: flex !important;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.45rem 1.25rem 0.45rem 2.5rem !important;
+      background: #fdf6e3 !important;
+      font-size: 0.82rem;
+      cursor: default !important;
+      border-top: none !important;
+    }
+    .search-match-row .match-no {
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      flex-shrink: 0;
+    }
+    .search-match-row .match-title {
+      color: var(--ink, #38383a);
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+    .search-match-row .match-artist {
+      color: var(--text-muted);
+    }
     .search-no-results {
       text-align: center;
       color: var(--text-muted);
@@ -2028,8 +2051,32 @@
       ul.className = 'sul-list search-results-list';
       for (const ep of results) {
         ul.appendChild(createEpisodeItem(ep, 'search'));
+
+        const matches = getMatchingTracks(ep, criteria);
+        for (const t of matches) {
+          const subLi = document.createElement('li');
+          subLi.className = 'sul-item search-match-row';
+          const titleHtml = highlightText(t.title, [criteria.title, criteria.free].filter(Boolean));
+          const artistHtml = highlightText(t.artist, [criteria.artist, criteria.free].filter(Boolean));
+          subLi.innerHTML =
+            `<span class="match-no">${t.no}</span>` +
+            `<span class="match-title">${titleHtml}</span>` +
+            `<span class="match-artist">${artistHtml}</span>`;
+          ul.appendChild(subLi);
+        }
       }
       searchResultsArea.appendChild(ul);
+    }
+
+    function getMatchingTracks(ep, c) {
+      if (!c) return [];
+      const tracks = ep.tracks || [];
+      return tracks.filter(t => {
+        if (c.artist && (t.artist || '').toLowerCase().includes(c.artist)) return true;
+        if (c.title && (t.title || '').toLowerCase().includes(c.title)) return true;
+        if (c.free && ((t.title || '').toLowerCase().includes(c.free) || (t.artist || '').toLowerCase().includes(c.free))) return true;
+        return false;
+      });
     }
 
     function clearSearch() {
