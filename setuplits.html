@@ -689,6 +689,13 @@
 
     /* Track table */
     .ep-track-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .search-hit {
+      background: #ffe69a;
+      color: #5a3d00;
+      padding: 0 0.15em;
+      border-radius: 2px;
+      font-weight: 700;
+    }
     .ep-track-table {
       width: 100%;
       border-collapse: collapse;
@@ -1608,12 +1615,37 @@
     let currentEpIndex = -1;
     let navMode = 'year';
     let lastSearchResults = [];
+    let lastSearchCriteria = null;
 
     function escHtml(s) {
       return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
-    function renderTrackTable(tracks) {
+    function highlightText(str, terms) {
+      const safe = escHtml(str);
+      const activeTerms = terms.filter(Boolean);
+      if (activeTerms.length === 0) return safe;
+      // 大文字小文字を無視して一致箇所を <mark> で囲む（escHtml後の文字列に対して安全に処理）
+      let result = '';
+      let i = 0;
+      const lower = safe.toLowerCase();
+      while (i < safe.length) {
+        let matched = null;
+        for (const term of activeTerms) {
+          if (term && lower.startsWith(term, i)) { matched = term; break; }
+        }
+        if (matched) {
+          result += '<mark class="search-hit">' + safe.slice(i, i + matched.length) + '</mark>';
+          i += matched.length;
+        } else {
+          result += safe[i];
+          i += 1;
+        }
+      }
+      return result;
+    }
+
+    function renderTrackTable(tracks, highlight) {
       const wrap = document.createElement('div');
       wrap.className = 'ep-track-scroll';
       const tbl = document.createElement('table');
@@ -1626,6 +1658,8 @@
         '<th class="col-note">備考</th>' +
         '</tr></thead>';
       const tbody = document.createElement('tbody');
+      const titleTerms = highlight ? [highlight.title, highlight.free].filter(Boolean) : [];
+      const artistTerms = highlight ? [highlight.artist, highlight.free].filter(Boolean) : [];
       for (const t of tracks) {
         const tr = document.createElement('tr');
         let noteCls = '';
@@ -1635,10 +1669,12 @@
         const noteBadge = t.note
           ? `<span class="note-badge ${noteCls}">${escHtml(t.note)}</span>`
           : '';
+        const titleHtml = titleTerms.length ? highlightText(t.title, titleTerms) : escHtml(t.title);
+        const artistHtml = artistTerms.length ? highlightText(t.artist, artistTerms) : escHtml(t.artist);
         tr.innerHTML =
           `<td class="col-no">${t.no}</td>` +
-          `<td>${escHtml(t.title)}</td>` +
-          `<td>${escHtml(t.artist)}</td>` +
+          `<td>${titleHtml}</td>` +
+          `<td>${artistHtml}</td>` +
           `<td class="col-note">${noteBadge}</td>`;
         tbody.appendChild(tr);
       }
@@ -1657,7 +1693,8 @@
       modalBody.innerHTML = '';
 
       if (ep.tracks && ep.tracks.length > 0) {
-        modalBody.appendChild(renderTrackTable(ep.tracks));
+        const highlight = (navMode === 'search' && lastSearchCriteria) ? lastSearchCriteria : null;
+        modalBody.appendChild(renderTrackTable(ep.tracks, highlight));
       } else {
         const p = document.createElement('p');
         p.className = 'ep-modal-nodata';
@@ -1931,6 +1968,7 @@
 
       const results = episodes.filter(ep => episodeMatches(ep, c)).sort((a, b) => b.episode_no - a.episode_no);
       lastSearchResults = results;
+      lastSearchCriteria = c;
       addHistory(c);
       renderSearchResults(results, c);
 
