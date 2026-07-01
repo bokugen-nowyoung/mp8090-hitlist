@@ -771,6 +771,23 @@
     .note-badge.yougaku { background: var(--accent-cyan);  color: #fff; }
     .note-badge.other   { background: #E0D0B8; color: #7A5830; }
 
+    /* 初登場（デビュー）バッジ ── 既存のNew/洋楽/特集バッジと視覚的に区別できる緑系 */
+    .debut-badge {
+      display: inline-block;
+      font-size: 0.62rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      padding: 0.12rem 0.48rem;
+      border-radius: 999px;
+      white-space: nowrap;
+      background: linear-gradient(135deg, #1f9d55, #14c38e);
+      color: #fff;
+      vertical-align: middle;
+      margin-left: 0.4em;
+      line-height: 1.4;
+      box-shadow: 0 1px 4px rgba(20, 150, 100, 0.35);
+    }
+
     /* Modal image */
     .ep-modal-img {
       width: 100%;
@@ -1184,6 +1201,30 @@
 
   (() => {
     const episodes    = SETUPLIST_DATA;
+
+    // ── 初登場（デビュー）判定 ──
+    // 全エピソードの全曲を「放送日（air_date）」の古い順に走査し、
+    // (曲名, アーティスト名) の完全一致する組み合わせが最初に登場した回のみを初登場とする。
+    // 表記ゆれは生データ保持方針により正規化せず、文字列の完全一致で判定する。
+    // ページ読み込み時に一度だけ算出してキャッシュし、モーダル・検索結果の両方で使い回す。
+    const debutEpNoByKey = (() => {
+      const map = new Map();
+      const trackKey = (t) => JSON.stringify([t.title, t.artist]);
+      const sorted = episodes
+        .filter(ep => ep.air_date && ep.tracks && ep.tracks.length)
+        .slice()
+        .sort((a, b) => a.air_date.localeCompare(b.air_date) || (a.episode_no - b.episode_no));
+      for (const ep of sorted) {
+        for (const t of ep.tracks) {
+          const key = trackKey(t);
+          if (!map.has(key)) map.set(key, ep.episode_no);
+        }
+      }
+      return map;
+    })();
+    const isDebutTrack = (ep, t) =>
+      ep && ep.episode_no != null &&
+      debutEpNoByKey.get(JSON.stringify([t.title, t.artist])) === ep.episode_no;
 
 
     const yearButtons = document.getElementById('yearButtons');
@@ -1675,7 +1716,7 @@
       return result;
     }
 
-    function renderTrackTable(tracks, highlight) {
+    function renderTrackTable(tracks, highlight, ep) {
       const wrap = document.createElement('div');
       wrap.className = 'ep-track-scroll';
       const tbl = document.createElement('table');
@@ -1701,9 +1742,12 @@
           : '';
         const titleHtml = titleTerms.length ? highlightText(t.title, titleTerms) : escHtml(t.title);
         const artistHtml = artistTerms.length ? highlightText(t.artist, artistTerms) : escHtml(t.artist);
+        const debutBadge = isDebutTrack(ep, t)
+          ? '<span class="debut-badge">初登場</span>'
+          : '';
         tr.innerHTML =
           `<td class="col-no">${t.no}</td>` +
-          `<td>${titleHtml}</td>` +
+          `<td>${titleHtml}${debutBadge}</td>` +
           `<td>${artistHtml}</td>` +
           `<td class="col-note">${noteBadge}</td>`;
         tbody.appendChild(tr);
@@ -1724,7 +1768,7 @@
 
       if (ep.tracks && ep.tracks.length > 0) {
         const highlight = (navMode === 'search' && lastSearchCriteria) ? lastSearchCriteria : null;
-        modalBody.appendChild(renderTrackTable(ep.tracks, highlight));
+        modalBody.appendChild(renderTrackTable(ep.tracks, highlight, ep));
       } else {
         const p = document.createElement('p');
         p.className = 'ep-modal-nodata';
@@ -2065,9 +2109,12 @@
           subLi.className = 'sul-item search-match-row';
           const titleHtml = highlightText(t.title, [criteria.title, criteria.free].filter(Boolean));
           const artistHtml = highlightText(t.artist, [criteria.artist, criteria.free].filter(Boolean));
+          const debutBadge = isDebutTrack(ep, t)
+            ? '<span class="debut-badge">初登場</span>'
+            : '';
           subLi.innerHTML =
             `<span class="match-no">${t.no}</span>` +
-            `<span class="match-title">${titleHtml}</span>` +
+            `<span class="match-title">${titleHtml}${debutBadge}</span>` +
             `<span class="match-artist">${artistHtml}</span>`;
           ul.appendChild(subLi);
         }
