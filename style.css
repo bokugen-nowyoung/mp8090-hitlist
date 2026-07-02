@@ -876,3 +876,65 @@ a {
     padding: 0.2rem 0.3rem;
   }
 }
+
+/* ===== 番組を聴く（radiko導線）===== */
+.listen-cta {
+  margin: 1.2rem auto 0;
+  max-width: 960px;
+  padding: 0 1rem;
+}
+.listen-cta-inner {
+  --radiko-blue: #00A7E9; /* radikoロゴ実測値に差し替え可。ここ1カ所でOK */
+  --radiko-navy: #003A52;
+  background: #FFF8E7;
+  border: 1px solid #D4AF37;
+  border-radius: 14px;
+  padding: 1.1rem 1.4rem;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem 1.8rem;
+}
+.listen-cta-schedule {
+  margin: 0 0 2px;
+  font-size: 0.8rem;
+  color: #6B4423;
+  letter-spacing: 0.06em;
+}
+.listen-cta-lead {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #3E2723;
+}
+.listen-cta-btn {
+  display: inline-flex;
+  align-items: center;
+  background: var(--radiko-blue);
+  color: var(--radiko-navy);
+  text-decoration: none;
+  padding: 0.8rem 1.6rem;
+  min-height: 44px;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 1rem;
+  transition: filter 0.2s, transform 0.1s;
+}
+.listen-cta-btn:hover { filter: brightness(1.07); }
+.listen-cta-btn:active { transform: scale(0.98); }
+.listen-cta-btn:focus-visible {
+  outline: 3px solid var(--radiko-navy);
+  outline-offset: 2px;
+}
+.listen-cta-btn-note { font-size: 0.8rem; font-weight: 600; }
+.listen-cta-freq {
+  font-family: 'Share Tech Mono', monospace;
+  color: #6B4423;
+  font-size: 0.85rem;
+  line-height: 1.7;
+}
+.listen-cta-freq .freq-num { color: #006D77; font-weight: 700; }
+@media (max-width: 600px) {
+  .listen-cta-inner { flex-direction: column; text-align: center; gap: 0.7rem; }
+}
