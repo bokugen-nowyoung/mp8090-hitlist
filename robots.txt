@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://bokugen-nowyoung.github.io/mp8090-hitlist/sitemap.xml
