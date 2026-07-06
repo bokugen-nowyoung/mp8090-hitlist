@@ -1693,27 +1693,63 @@
       return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
     }
 
+    // ── 検索用正規化 ──
+    // NFKC（全角英数→半角等）＋小文字化＋ひらがな→カタカナ＋アポストロフィ類統一＋空白除去。
+    // 表示データは変更せず、照合の瞬間だけ両辺に適用する（生データ保持主義）。
+    // normalizeWithMap は「正規化後の位置 → 元文字列の位置」対応表を返し、ハイライトに使う。
+    function normalizeWithMap(str) {
+      const s = String(str ?? '');
+      const map = [];
+      let out = '';
+      for (let i = 0; i < s.length; i++) {
+        let ch = s[i].replace(/[\u2018\u2019\u02BC\u00B4\u0060\uFF07]/g, "'");
+        ch = ch.normalize('NFKC').toLowerCase();
+        ch = ch.replace(/[\u3041-\u3096]/g, c => String.fromCharCode(c.charCodeAt(0) + 0x60));
+        if (/^\s+$/.test(ch)) continue;
+        for (const c2 of ch) { out += c2; map.push(i); }
+      }
+      return { out, map };
+    }
+    function searchNormalize(str) {
+      return normalizeWithMap(str).out;
+    }
+
     function highlightText(str, terms) {
-      const safe = escHtml(str);
-      const activeTerms = terms.filter(Boolean);
-      if (activeTerms.length === 0) return safe;
-      // 大文字小文字を無視して一致箇所を <mark> で囲む（escHtml後の文字列に対して安全に処理）
-      let result = '';
-      let i = 0;
-      const lower = safe.toLowerCase();
-      while (i < safe.length) {
-        let matched = null;
-        for (const term of activeTerms) {
-          if (term && lower.startsWith(term, i)) { matched = term; break; }
-        }
-        if (matched) {
-          result += '<mark class="search-hit">' + safe.slice(i, i + matched.length) + '</mark>';
-          i += matched.length;
-        } else {
-          result += safe[i];
-          i += 1;
+      const raw = String(str ?? '');
+      const activeTerms = (terms || []).map(t => searchNormalize(t)).filter(Boolean);
+      if (activeTerms.length === 0) return escHtml(raw);
+      const { out, map } = normalizeWithMap(raw);
+      // 一致範囲（元文字列上の [開始, 終了)）を収集
+      const ranges = [];
+      for (const term of activeTerms) {
+        let from = 0;
+        while (true) {
+          const idx = out.indexOf(term, from);
+          if (idx === -1) break;
+          const startO = map[idx];
+          const lastMapped = map[idx + term.length - 1];
+          ranges.push([startO, lastMapped + 1]);
+          from = idx + 1;
         }
       }
+      if (ranges.length === 0) return escHtml(raw);
+      // 重なる範囲をマージ
+      ranges.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+      const merged = [ranges[0].slice()];
+      for (let k = 1; k < ranges.length; k++) {
+        const last = merged[merged.length - 1];
+        if (ranges[k][0] <= last[1]) last[1] = Math.max(last[1], ranges[k][1]);
+        else merged.push(ranges[k].slice());
+      }
+      // 元文字列を分割し、一致部分だけ <mark> で囲む（escHtmlは区間ごとに適用）
+      let result = '';
+      let pos = 0;
+      for (const [s0, e0] of merged) {
+        result += escHtml(raw.slice(pos, s0));
+        result += '<mark class="search-hit">' + escHtml(raw.slice(s0, e0)) + '</mark>';
+        pos = e0;
+      }
+      result += escHtml(raw.slice(pos));
       return result;
     }
 
@@ -1911,13 +1947,17 @@
     // ── 検索条件を1件のエピソードに対して判定 ──
     function episodeMatches(ep, c) {
       const tracks = ep.tracks || [];
+      const nArtist  = searchNormalize(c.artist);
+      const nTitle   = searchNormalize(c.title);
+      const nFeature = searchNormalize(c.feature);
+      const nFree    = searchNormalize(c.free);
 
-      if (c.artist) {
-        const ok = tracks.some(t => (t.artist || '').toLowerCase().includes(c.artist));
+      if (nArtist) {
+        const ok = tracks.some(t => searchNormalize(t.artist).includes(nArtist));
         if (!ok) return false;
       }
-      if (c.title) {
-        const ok = tracks.some(t => (t.title || '').toLowerCase().includes(c.title));
+      if (nTitle) {
+        const ok = tracks.some(t => searchNormalize(t.title).includes(nTitle));
         if (!ok) return false;
       }
       if (c.epNo !== null) {
@@ -1926,8 +1966,8 @@
       if (c.airDate) {
         if (ep.air_date !== c.airDate) return false;
       }
-      if (c.feature) {
-        if (!(ep.special_feature || '').toLowerCase().includes(c.feature)) return false;
+      if (nFeature) {
+        if (!searchNormalize(ep.special_feature).includes(nFeature)) return false;
       }
       if (c.puySingle !== null) {
         if (ep.puy_year !== c.puySingle) return false;
@@ -1935,12 +1975,12 @@
       if (c.puyMulti.length > 0) {
         if (!c.puyMulti.includes(ep.puy_year)) return false;
       }
-      if (c.free) {
+      if (nFree) {
         const inTracks = tracks.some(t =>
-          (t.title || '').toLowerCase().includes(c.free) ||
-          (t.artist || '').toLowerCase().includes(c.free)
+          searchNormalize(t.title).includes(nFree) ||
+          searchNormalize(t.artist).includes(nFree)
         );
-        const inFeature = (ep.special_feature || '').toLowerCase().includes(c.free);
+        const inFeature = searchNormalize(ep.special_feature).includes(nFree);
         if (!inTracks && !inFeature) return false;
       }
       return true;
@@ -1948,12 +1988,12 @@
 
     function readCriteria() {
       return {
-        artist:    searchArtist.value.trim().toLowerCase(),
-        title:     searchTitleInput.value.trim().toLowerCase(),
+        artist:    searchArtist.value.trim(),
+        title:     searchTitleInput.value.trim(),
         epNo:      searchEpNo.value ? Number(searchEpNo.value) : null,
         airDate:   searchAirDate.value || '',
-        feature:   searchFeature.value.trim().toLowerCase(),
-        free:      searchFree.value.trim().toLowerCase(),
+        feature:   searchFeature.value.trim(),
+        free:      searchFree.value.trim(),
         puySingle: searchPuySingle.value ? Number(searchPuySingle.value) : null,
         puyMulti:  puyCheckboxes.filter(cb => cb.checked).map(cb => Number(cb.value))
       };
@@ -2126,10 +2166,15 @@
     function getMatchingTracks(ep, c) {
       if (!c) return [];
       const tracks = ep.tracks || [];
+      const nArtist = searchNormalize(c.artist);
+      const nTitle  = searchNormalize(c.title);
+      const nFree   = searchNormalize(c.free);
       return tracks.filter(t => {
-        if (c.artist && (t.artist || '').toLowerCase().includes(c.artist)) return true;
-        if (c.title && (t.title || '').toLowerCase().includes(c.title)) return true;
-        if (c.free && ((t.title || '').toLowerCase().includes(c.free) || (t.artist || '').toLowerCase().includes(c.free))) return true;
+        const ta = searchNormalize(t.artist);
+        const tt = searchNormalize(t.title);
+        if (nArtist && ta.includes(nArtist)) return true;
+        if (nTitle && tt.includes(nTitle)) return true;
+        if (nFree && (tt.includes(nFree) || ta.includes(nFree))) return true;
         return false;
       });
     }
