@@ -928,6 +928,7 @@ a {
   outline-offset: 2px;
 }
 .listen-cta-btn-note { font-size: 0.8rem; font-weight: 600; }
+.listen-cta-btn-note-ext { display: none; margin: 0; }
 .listen-cta-freq {
   font-family: 'Share Tech Mono', monospace;
   color: #6B4423;
@@ -937,4 +938,19 @@ a {
 .listen-cta-freq .freq-num { color: #006D77; font-weight: 700; }
 @media (max-width: 600px) {
   .listen-cta-inner { flex-direction: column; text-align: center; gap: 0.7rem; }
+  /* スマホ: ラベルを一行維持し、縦幅をスリムに */
+  .listen-cta-btn {
+    white-space: nowrap;
+    padding: 0.5rem 1.5rem;
+  }
+  /* ボタン内の補足はスマホでは非表示にし、ボタン下に外出し */
+  .listen-cta-btn-note { display: none; }
+  .listen-cta-btn-note-ext {
+    display: block;
+    margin: -0.2rem 0 0;
+    font-size: 0.78rem;
+    font-weight: 600;
+    color: #6B4423;
+    text-align: center;
+  }
 }
