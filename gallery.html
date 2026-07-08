@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="500x500" href="images/favicon.png">
+  <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
+  <title>ナウヤン資料室 | Music Pick Up 80's & 90's（#mp8090）ナウヤン同盟の部屋</title>
+  <meta name="description" content="LuckyFM「Music Pick Up 80's & 90's」(#mp8090)にまつわる創作物を展示する公開ギャラリー「ナウヤン資料室」。番組バナー・ロゴ、マスコット、ぼくげんくん、イベント制作物などを展示中。">
+  <meta property="og:title" content="ナウヤン資料室 | Music Pick Up 80's & 90's（#mp8090）ナウヤン同盟の部屋">
+  <meta property="og:description" content="mp8090にまつわる創作物を展示する公開ギャラリー。番組バナー・ロゴ、マスコット、ぼくげんくん、イベント制作物などを展示中。">
+  <meta property="og:type" content="website">
+  <link rel="canonical" href="https://bokugen-nowyoung.github.io/mp8090-hitlist/gallery.html">
+  <meta property="og:url" content="https://bokugen-nowyoung.github.io/mp8090-hitlist/gallery.html">
+  <meta property="og:site_name" content="ナウヤン同盟の部屋">
+  <meta property="og:locale" content="ja_JP">
+  <meta property="og:image" content="https://bokugen-nowyoung.github.io/mp8090-hitlist/images/ogp.jpg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <!-- 共通スタイル（CSS変数・配色・フォント・ヘッダー/フッター）を流用 -->
+  <link rel="stylesheet" href="style.css">
+  <style>
+    /* ============================================================
+       ナウヤン資料室 専用スタイル
+       ── 既存サイトの世界観（ノート罫線・マステ・カセットのレトロ感）を踏襲。
+          配色・角丸・影・フォントは style.css の CSS変数を流用する。
+       ============================================================ */
+
+    /* イントロ文 */
+    .gallery-intro {
+      max-width: 720px;
+      margin: 0 auto 0.4rem;
+      text-align: center;
+      color: var(--text-mid);
+      font-size: 0.95rem;
+      line-height: 1.9;
+    }
+
+    /* トップへ戻るナビ（本文上部の補助リンク） */
+    .gallery-backnav {
+      max-width: 860px;
+      margin: 0 auto 1.6rem;
+      padding: 0 1rem;
+      text-align: center;
+    }
+    .gallery-backnav a {
+      display: inline-block;
+      background: var(--accent-mg);
+      color: #fff;
+      text-decoration: none;
+      font-family: var(--font-sans);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      padding: 0.4rem 1.1rem;
+      border-radius: 999px;
+      box-shadow: 0 2px 8px rgba(232,67,147,0.35);
+      transition: background 0.12s, transform 0.1s, box-shadow 0.12s;
+    }
+    .gallery-backnav a:hover {
+      background: var(--accent-mg-l);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(232,67,147,0.45);
+    }
+
+    /* ── セクション見出し（setuplistの「▼年」トーンに合わせた棚見出し）── */
+    .gallery-section {
+      margin-bottom: 2.6rem;
+    }
+    .gallery-section-title {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: linear-gradient(135deg, #004A52 0%, var(--accent-cyan) 60%, #009aaa 100%);
+      color: #fff;
+      font-size: clamp(1rem, 3vw, 1.25rem);
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      padding: 0.7rem 1.1rem;
+      border-radius: var(--r-md);
+      box-shadow: var(--shadow-sm);
+      text-shadow: 1px 1px 4px rgba(0,0,0,0.4);
+      margin-bottom: 1.2rem;
+    }
+    .gallery-section-title .sec-caret {
+      color: var(--gold-l);
+      font-size: 0.9em;
+      line-height: 1;
+    }
+    .gallery-section-title .sec-count {
+      margin-left: auto;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.3);
+      color: rgba(255,255,255,0.9);
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      letter-spacing: 0.1em;
+      padding: 0.16rem 0.6rem;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
+    /* ── カードグリッド ──
+       スマホ(狭幅)は1〜2列、PCは3〜4列に自動で切り替わる。
+       当サイトはアクセスの約8割がスマホのため min() で小さめ基準にする。 */
+    .gallery-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 160px), 1fr));
+      gap: 1.1rem;
+    }
+    @media (min-width: 480px) {
+      .gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      }
+    }
+    @media (min-width: 720px) {
+      .gallery-grid {
+        grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      }
+    }
+
+    /* ── 額装・カード風の展示物 ── */
+    .gallery-card {
+      position: relative;
+      background: #fff;
+      border: 1px solid var(--border-table);
+      border-radius: var(--r-md);
+      box-shadow: var(--shadow-sm);
+      padding: 0.55rem 0.55rem 0.7rem;
+      cursor: pointer;
+      transition: transform 0.12s, box-shadow 0.12s;
+      /* マステ風のちょい傾きは控えめに（詰め込みすぎない） */
+    }
+    .gallery-card:hover,
+    .gallery-card:focus-visible {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+      outline: none;
+    }
+    .gallery-card:focus-visible {
+      box-shadow: var(--shadow-md), 0 0 0 3px var(--accent-cyan-xl);
+    }
+
+    /* マスキングテープ風の装飾（カード上辺中央にちょこん） */
+    .gallery-card::before {
+      content: '';
+      position: absolute;
+      top: -8px;
+      left: 50%;
+      transform: translateX(-50%) rotate(-2deg);
+      width: 54px;
+      height: 16px;
+      background: repeating-linear-gradient(
+        45deg,
+        rgba(232,67,147,0.55) 0 6px,
+        rgba(255,91,170,0.55) 6px 12px
+      );
+      border: 1px solid rgba(255,255,255,0.4);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.18);
+      opacity: 0.9;
+      pointer-events: none;
+    }
+
+    /* 画像 or プレースホルダー枠（額のマット部分） */
+    .gallery-card-frame {
+      position: relative;
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      border-radius: var(--r-sm);
+      overflow: hidden;
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-head);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .gallery-card-frame img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* ダミーのプレースホルダー（画像差し替え前の表示） */
+    .gallery-placeholder {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.35rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      text-align: center;
+      padding: 0.5rem;
+      background-image: repeating-linear-gradient(
+        45deg,
+        rgba(212,175,55,0.08) 0 10px,
+        rgba(212,175,55,0.02) 10px 20px
+      );
+      width: 100%;
+      height: 100%;
+    }
+    .gallery-placeholder .ph-icon {
+      font-size: 1.9rem;
+      opacity: 0.7;
+    }
+    .gallery-placeholder .ph-label {
+      font-size: 0.66rem;
+      letter-spacing: 0.08em;
+      opacity: 0.8;
+    }
+
+    /* キャプション（画像タイトルの仮テキスト欄） */
+    .gallery-caption {
+      margin-top: 0.55rem;
+      font-family: var(--font-sans);
+      font-size: 0.78rem;
+      line-height: 1.5;
+      color: var(--text-mid);
+      text-align: center;
+    }
+    .gallery-caption .cap-provisional {
+      display: inline-block;
+      font-size: 0.6rem;
+      color: var(--text-muted);
+      letter-spacing: 0.06em;
+      margin-top: 0.15rem;
+    }
+
+    /* ── 画像拡大モーダル（setuplits.html の ep-modal 機構・デザインを流用）── */
+    .ep-modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.62);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem 1rem;
+      overflow-y: auto;
+    }
+    .ep-modal-overlay[hidden] { display: none; }
+    .ep-modal {
+      background: var(--bg-primary);
+      border-radius: var(--r-lg);
+      box-shadow: 0 8px 40px rgba(0,0,0,0.55);
+      width: 100%;
+      max-width: 720px;
+      margin: auto 0;
+      display: flex;
+      flex-direction: column;
+      max-height: calc(100vh - 3rem);
+    }
+    .ep-modal-hdr {
+      background: linear-gradient(135deg, #5A0040 0%, #9B1060 60%, #C01878 100%);
+      padding: 0.9rem 3.2rem 0.9rem 1.25rem;
+      border-radius: var(--r-lg) var(--r-lg) 0 0;
+      flex-shrink: 0;
+      position: relative;
+    }
+    .ep-modal-title {
+      color: #fff;
+      font-family: var(--font-mono);
+      font-size: clamp(0.72rem, 2.5vw, 0.92rem);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      line-height: 1.4;
+      text-shadow: 1px 1px 4px rgba(0,0,0,0.4);
+      display: block;
+    }
+    .ep-modal-close {
+      position: absolute;
+      top: 0.55rem;
+      right: 0.6rem;
+      background: rgba(255,255,255,0.15);
+      border: 1px solid rgba(255,255,255,0.35);
+      color: #fff;
+      border-radius: 50%;
+      width: 2.4rem;
+      height: 2.4rem;
+      font-size: 1.1rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.12s;
+      flex-shrink: 0;
+    }
+    .ep-modal-close:hover { background: rgba(255,255,255,0.32); }
+    .ep-modal-body {
+      padding: 1.1rem 1.25rem 1.25rem;
+      overflow-y: auto;
+      flex: 1;
+    }
+    .ep-modal-img {
+      width: 100%;
+      border-radius: var(--r-md);
+      display: block;
+    }
+    /* モーダル内プレースホルダー（差し替え前の拡大表示用） */
+    .ep-modal-placeholder {
+      aspect-ratio: 4 / 3;
+      border-radius: var(--r-md);
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-head);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+    }
+    .ep-modal-placeholder .ph-icon { font-size: 3rem; opacity: 0.7; }
+    .ep-modal-caption {
+      margin-top: 0.9rem;
+      text-align: center;
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+      color: var(--text-mid);
+    }
+    @media (max-width: 600px) {
+      .ep-modal-overlay { padding: 0.5rem; }
+      .ep-modal { max-height: calc(100vh - 1rem); border-radius: var(--r-md); }
+      .ep-modal-hdr { padding: 0.8rem 3rem 0.8rem 1rem; }
+      .ep-modal-body { padding: 0.9rem 1rem 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- トップページ誘導帯（既存共通デザイン .top-banner-strip を流用） -->
+  <a href="index.html" class="top-banner-strip">📻 トップ「ナウヤン同盟の部屋」はこちら<span class="strip-arrow">→</span></a>
+
+  <header class="site-header">
+    <div class="header-deco" aria-hidden="true"></div>
+    <div class="header-inner">
+      <p class="header-badge">みんなの創作物 展示室</p>
+      <h1 class="site-title"><span class="title-note" aria-hidden="true">🖼️</span> ナウヤン資料室</h1>
+      <p class="site-subtitle">Music Pick Up 80's &amp; 90's（#mp8090）</p>
+    </div>
+  </header>
+
+  <main class="main-content" id="main">
+
+    <!-- 1. イントロ（文言は仮置き。後で調整する） -->
+    <p class="gallery-intro">
+      番組にまつわる創作物を展示するコーナーです。<br>
+      バナーやマスコット、ぼくげんくん、イベント制作物などを少しずつ並べていきます。
+    </p>
+
+    <!-- 2. トップへ戻るナビゲーション -->
+    <div class="gallery-backnav">
+      <a href="index.html">← トップページへ戻る</a>
+    </div>
+
+    <!-- ============================================================
+         各カードは images/gallery/ 配下の画像に差し替える想定。
+         ・実画像を入れる場合：
+             <div class="gallery-card-frame">
+               <img src="images/gallery/ファイル名.jpg" alt="説明">
+             </div>
+           に置き換え、gallery-card に data-full="images/gallery/ファイル名.jpg"
+           と data-caption="キャプション" を付けるとモーダル拡大に反映される。
+         ・下記は差し替え前のダミー枠（プレースホルダー）。
+         ============================================================ -->
+
+    <!-- ▼ 番組バナー・ロゴ類 -->
+    <section class="gallery-section" aria-labelledby="sec-banner">
+      <h2 class="gallery-section-title" id="sec-banner">
+        <span class="sec-caret" aria-hidden="true">▼</span> 番組バナー・ロゴ類
+        <span class="sec-count" aria-hidden="true">準備中</span>
+      </h2>
+      <div class="gallery-grid">
+        <!-- カード1（ダミー）: images/gallery/ に画像を置いたらここに差し替え -->
+        <div class="gallery-card" tabindex="0" role="button"
+             data-full="" data-caption="番組バナー（仮）">
+          <div class="gallery-card-frame">
+            <!-- ここに画像ファイル名を入れる: <img src="images/gallery/banner-01.png" alt="番組バナー"> -->
+            <div class="gallery-placeholder">
+              <span class="ph-icon" aria-hidden="true">🎼</span>
+              <span class="ph-label">IMAGE 01</span>
+            </div>
+          </div>
+          <p class="gallery-caption">画像キャプション（仮）<span class="cap-provisional">※後で差し替え</span></p>
+        </div>
+        <div class="gallery-card" tabindex="0" role="button"
+             data-full="" data-caption="番組ロゴ（仮）">
+          <div class="gallery-card-frame">
+            <!-- ここに画像ファイル名を入れる: <img src="images/gallery/banner-02.png" alt="番組ロゴ"> -->
+            <div class="gallery-placeholder">
+              <span class="ph-icon" aria-hidden="true">🎼</span>
+              <span class="ph-label">IMAGE 02</span>
+            </div>
+          </div>
+          <p class="gallery-caption">画像キャプション（仮）<span class="cap-provisional">※後で差し替え</span></p>
+        </div>
+        <div class="gallery-card" tabindex="0" role="button"
+             data-full="" data-caption="番組バナー（仮）">
+          <div class="gallery-card-frame">
+            <!-- ここに画像ファイル名を入れる: <img src="images/gallery/banner-03.png" alt="番組バナー"> -->
+            <div class="gallery-placeholder">
+              <span class="ph-icon" aria-hidden="true">🎼</span>
+              <span class="ph-label">IMAGE 03</span>
+            </div>
+          </div>
+          <p class="gallery-caption">画像キャプション（仮）<span class="cap-provisional">※後で差し替え</span></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ▼ マスコット（mpハチゼロ・mpキュウゼロ） -->
+    <section class="gallery-section" aria-labelledby="sec-mascot">
+      <h2 class="gallery-section-title" id="sec-mascot">
+        <span class="sec-caret" aria-hidden="true">▼</span> マスコット（mpハチゼロ・mpキュウゼロ）
+        <span class="sec-count" aria-hidden="true">準備中</span>
+      </h2>
+      <div class="gallery-grid">
+        <div class="gallery-card" tabindex="0" role="button"
+             data-full="" data-caption="mpハチゼロ（仮）">
+          <div class="gallery-card-frame">
+            <!-- ここに画像ファイル名を入れる: <img src="images/gallery/mascot-80-01.png" alt="mpハチゼロ"> -->
+            <div class="gallery-placeholder">
+              <span class="ph-icon" aria-hidden="true">🧸</span>
+              <span class="ph-label">IMAGE 01</span>
+            </div>
+          </div>
+          <p class="gallery-caption">画像キャプション（仮）<span class="cap-provisional">※後で差し替え</span></p>
+        </div>
+        <div class="gallery-card" tabindex="0" role="button"
+             data-full="" data-caption="mpキュウゼロ（仮）">
+          <div class="gallery-card-frame">
+            <!-- ここに画像ファイル名を入れる: <img src="images/gallery/mascot-90-01.png" alt="mpキュウゼロ"> -->
+            <div class="gallery-placeholder">
+              <span class="ph-icon" aria-hidden="true">🧸</span>
+              <span class="ph-label">IMAGE 02</span>
+            </div>
+          </div>
+          <p class="gallery-caption">画像キャプション（仮）<span class="cap-provisional">※後で差し替え</span></p>
+        </div>
+        <div class="gallery-card" tabindex="0" role="button"
+             data-full="" data-caption="マスコット（仮）">
+          <div class="gallery-card-frame">
+            <!-- ここに画像ファイル名を入れる: <img src="images/gallery/mascot-03.png" alt="マスコット"> -->
+            <div class="gallery-placeholder">
+              <span class="ph-icon" aria-hidden="true">🧸</span>
+              <span class="ph-label">IMAGE 03</span>
+            </div>
+          </div>
+          <p class="gallery-caption">画像キャプション（仮）<span class="cap-provisional">※後で差し替え</span></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ▼ ぼくげんくん -->
+    <section class="gallery-section" aria-labelledby="sec-bokugen">
+      <h2 class="gallery-section-title" id="sec-bokugen">
+        <span class="sec-caret" aria-hidden="true">▼</span> ぼくげんくん
+        <span class="sec-count" aria-hidden="true">準備中</span>
+      </h2>
+      <div class="gallery-grid">
+        <div class="gallery-card" tabindex="0" role="button"
+             data-full="" data-caption="ぼくげんくん（仮）">
+          <div class="gallery-card-frame">
+            <!-- ここに画像ファイル名を入れる: <img src="images/gallery/bokugen-01.png" alt="ぼくげんくん"> -->
+            <div class="gallery-placeholder">
+              <span class="ph-icon" aria-hidden="true">🎩</span>
+              <span class="ph-label">IMAGE 01</span>
+            </div>
+          </div>
+          <p class="gallery-caption">画像キャプション（仮）<span class="cap-provisional">※後で差し替え</span></p>
+        </div>
+        <div class="gallery-card" tabindex="0" role="button"
+             data-full="" data-caption="ぼくげんくん（仮）">
+          <div class="gallery-card-frame">
+            <!-- ここに画像ファイル名を入れる: <img src="images/gallery/bokugen-02.png" alt="ぼくげんくん"> -->
+            <div class="gallery-placeholder">
+              <span class="ph-icon" aria-hidden="true">🎩</span>
+              <span class="ph-label">IMAGE 02</span>
+            </div>
+          </div>
+          <p class="gallery-caption">画像キャプション（仮）<span class="cap-provisional">※後で差し替え</span></p>
+        </div>
+        <div class="gallery-card" tabindex="0" role="button"
+             data-full="" data-caption="ぼくげんくん（仮）">
+          <div class="gallery-card-frame">
+            <!-- ここに画像ファイル名を入れる: <img src="images/gallery/bokugen-03.png" alt="ぼくげんくん"> -->
+            <div class="gallery-placeholder">
+              <span class="ph-icon" aria-hidden="true">🎩</span>
+              <span class="ph-label">IMAGE 03</span>
+            </div>
+          </div>
+          <p class="gallery-caption">画像キャプション（仮）<span class="cap-provisional">※後で差し替え</span></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ▼ イベント制作物（ラジオまつり等） -->
+    <section class="gallery-section" aria-labelledby="sec-event">
+      <h2 class="gallery-section-title" id="sec-event">
+        <span class="sec-caret" aria-hidden="true">▼</span> イベント制作物（ラジオまつり等）
+        <span class="sec-count" aria-hidden="true">準備中</span>
+      </h2>
+      <div class="gallery-grid">
+        <div class="gallery-card" tabindex="0" role="button"
+             data-full="" data-caption="ラジオまつり制作物（仮）">
+          <div class="gallery-card-frame">
+            <!-- ここに画像ファイル名を入れる: <img src="images/gallery/event-01.jpg" alt="イベント制作物"> -->
+            <div class="gallery-placeholder">
+              <span class="ph-icon" aria-hidden="true">🎪</span>
+              <span class="ph-label">IMAGE 01</span>
+            </div>
+          </div>
+          <p class="gallery-caption">画像キャプション（仮）<span class="cap-provisional">※後で差し替え</span></p>
+        </div>
+        <div class="gallery-card" tabindex="0" role="button"
+             data-full="" data-caption="イベント制作物（仮）">
+          <div class="gallery-card-frame">
+            <!-- ここに画像ファイル名を入れる: <img src="images/gallery/event-02.jpg" alt="イベント制作物"> -->
+            <div class="gallery-placeholder">
+              <span class="ph-icon" aria-hidden="true">🎪</span>
+              <span class="ph-label">IMAGE 02</span>
+            </div>
+          </div>
+          <p class="gallery-caption">画像キャプション（仮）<span class="cap-provisional">※後で差し替え</span></p>
+        </div>
+        <div class="gallery-card" tabindex="0" role="button"
+             data-full="" data-caption="イベント制作物（仮）">
+          <div class="gallery-card-frame">
+            <!-- ここに画像ファイル名を入れる: <img src="images/gallery/event-03.jpg" alt="イベント制作物"> -->
+            <div class="gallery-placeholder">
+              <span class="ph-icon" aria-hidden="true">🎪</span>
+              <span class="ph-label">IMAGE 03</span>
+            </div>
+          </div>
+          <p class="gallery-caption">画像キャプション（仮）<span class="cap-provisional">※後で差し替え</span></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ============================================================
+         【参加者限定エリアは後日追加】
+         2段階目で、ここに参加者限定ギャラリー（または限定エリアへの入り口）を
+         追加する想定。今回のスコープには含めない。
+         ============================================================ -->
+
+  </main>
+
+  <footer class="site-footer">
+    <div class="footer-inner">
+      <p class="footer-credit">
+        <a href="index.html">← ナウヤン同盟の部屋（トップ）へ戻る</a>
+      </p>
+      <p class="footer-disclaimer">※本サイトはLuckyFM「Music Pick Up 80's &amp; 90's」のファンサイトです</p>
+    </div>
+  </footer>
+
+  <!-- ── 画像拡大モーダル（setuplits.html の ep-modal と同一機構）── -->
+  <div id="galModalOverlay" class="ep-modal-overlay" hidden
+       role="dialog" aria-modal="true" aria-labelledby="galModalTitle">
+    <div class="ep-modal">
+      <div class="ep-modal-hdr">
+        <span class="ep-modal-title" id="galModalTitle"></span>
+        <button class="ep-modal-close" id="galModalClose" aria-label="閉じる">✕</button>
+      </div>
+      <div class="ep-modal-body" id="galModalBody"></div>
+    </div>
+  </div>
+
+  <script>
+    // ── 画像拡大モーダル（setuplits.html の openModal/closeModal と同じ挙動）──
+    const modalOverlay = document.getElementById('galModalOverlay');
+    const modalTitle   = document.getElementById('galModalTitle');
+    const modalBody    = document.getElementById('galModalBody');
+    const modalClose   = document.getElementById('galModalClose');
+    let lastFocused = null;
+
+    function openCard(card) {
+      const full    = card.getAttribute('data-full');    // 実画像パス（差し替え後）
+      const caption = card.getAttribute('data-caption') || '';
+      lastFocused = card;
+      modalTitle.textContent = caption || '資料';
+      modalBody.innerHTML = '';
+
+      if (full) {
+        // 画像あり: 拡大表示
+        const img = document.createElement('img');
+        img.className = 'ep-modal-img';
+        img.src = full;
+        img.alt = caption;
+        modalBody.appendChild(img);
+      } else {
+        // 画像未設定（ダミー）: プレースホルダーを拡大表示
+        const ph = document.createElement('div');
+        ph.className = 'ep-modal-placeholder';
+        ph.innerHTML = '<span class="ph-icon" aria-hidden="true">🖼️</span>'
+                     + '<span>画像は準備中です</span>';
+        modalBody.appendChild(ph);
+      }
+      if (caption) {
+        const cap = document.createElement('p');
+        cap.className = 'ep-modal-caption';
+        cap.textContent = caption;
+        modalBody.appendChild(cap);
+      }
+      modalOverlay.removeAttribute('hidden');
+      document.body.style.overflow = 'hidden';
+      modalClose.focus();
+    }
+
+    function closeModal() {
+      modalOverlay.setAttribute('hidden', '');
+      document.body.style.overflow = '';
+      modalBody.innerHTML = '';
+      if (lastFocused) { lastFocused.focus(); lastFocused = null; }
+    }
+
+    document.querySelectorAll('.gallery-card').forEach(card => {
+      card.addEventListener('click', () => openCard(card));
+      // キーボード操作（Enter / Space）でも開けるように
+      card.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          openCard(card);
+        }
+      });
+    });
+
+    modalClose.addEventListener('click', closeModal);
+    modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modalOverlay.hidden) closeModal(); });
+  </script>
+
+</body>
+</html>
