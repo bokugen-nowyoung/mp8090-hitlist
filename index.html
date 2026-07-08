@@ -353,9 +353,24 @@
     .notice-item.is-static:hover {
       text-decoration: none;
     }
+    /* 最新回の自動生成文言だけにふわっとした明滅効果（マーキーのスクロールとは独立） */
+    .notice-item.is-latest {
+      animation: noticePulse 3s ease-in-out infinite;
+    }
     @keyframes noticeScroll {
       0%   { transform: translateX(0); }
       100% { transform: translateX(-100%); }
+    }
+    @keyframes noticePulse {
+      0%, 100% { opacity: 1; }
+      50%      { opacity: 0.6; }
+    }
+    /* 「動きを減らす」設定時は明滅を無効化（opacity 1.0 固定） */
+    @media (prefers-reduced-motion: reduce) {
+      .notice-item.is-latest {
+        animation: none;
+        opacity: 1;
+      }
     }
     @media (max-width: 600px) {
       .notice-bar { margin-top: 0.75rem; }
@@ -576,10 +591,11 @@
     if (!track) return;
 
     const notices = [];
-    // 自動生成：最新回1件
+    // 自動生成：最新回1件（isLatest で明滅効果の対象を識別）
     notices.push({
       text: '📋 Set Up List #' + NEW_EPISODE_NO + ' を更新！（' + NEW_EPISODE_DATE + '）',
-      ep: NEW_EPISODE_NO
+      ep: NEW_EPISODE_NO,
+      isLatest: true
     });
     // 手動分を追加
     MANUAL_NOTICES.forEach(n => notices.push(n));
@@ -593,6 +609,10 @@
       } else {
         el = document.createElement('span');
         el.className = 'notice-item is-static';
+      }
+      // 最新回の自動生成文言だけにふわっと明滅効果を付与
+      if (n.isLatest) {
+        el.classList.add('is-latest');
       }
       el.textContent = n.text;
       track.appendChild(el);
