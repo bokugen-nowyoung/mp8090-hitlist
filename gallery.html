@@ -105,6 +105,38 @@
       white-space: nowrap;
     }
 
+    /* ── サブセクション見出し（大見出し「ナウヤン同窓会」より一段小さい階層見出し）──
+       塗り帯の大見出しに対し、左罫線＋ティール文字で従属関係を表す。 */
+    .gallery-subsection-title {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-family: var(--font-sans);
+      font-size: clamp(0.9rem, 2.4vw, 1.05rem);
+      font-weight: 700;
+      color: #0a6d76;
+      border-left: 5px solid var(--accent-cyan);
+      padding: 0.2rem 0 0.2rem 0.6rem;
+      margin: 1.7rem 0 0.9rem;
+      letter-spacing: 0.04em;
+    }
+    .gallery-subsection-title .subsec-mark {
+      color: var(--accent-cyan);
+      font-size: 0.72em;
+      line-height: 1;
+    }
+    .gallery-subsection-title .subsec-count {
+      margin-left: auto;
+      background: var(--accent-cyan-xl);
+      color: #063f45;
+      font-family: var(--font-mono);
+      font-size: 0.6rem;
+      letter-spacing: 0.08em;
+      padding: 0.16rem 0.6rem;
+      border-radius: 999px;
+      white-space: nowrap;
+    }
+
     /* ── カードグリッド ──
        スマホ(狭幅)は1〜2列、PCは3〜4列に自動で切り替わる。
        当サイトはアクセスの約8割がスマホのため min() で小さめ基準にする。 */
@@ -184,6 +216,11 @@
       height: 100%;
       object-fit: cover;
       display: block;
+    }
+    /* 写真（チラシ・制作物）は全体が見えるよう contain 表示。縦横比が様々なため
+       余白は展示マット風の背景で埋める。モーダル拡大では原寸比率で表示される。 */
+    .gallery-card-frame.is-photo img {
+      object-fit: contain;
     }
 
     /* ダミーのプレースホルダー（画像差し替え前の表示） */
@@ -298,7 +335,12 @@
       flex: 1;
     }
     .ep-modal-img {
-      width: 100%;
+      max-width: 100%;
+      /* 縦長のチラシでもビューポート内に収め、横はみ出しを防ぐ */
+      max-height: 78vh;
+      width: auto;
+      height: auto;
+      margin: 0 auto;
       border-radius: var(--r-md);
       display: block;
     }
@@ -528,12 +570,17 @@
       <a href="index.html">← トップページへ戻る</a>
     </div>
 
-    <!-- ▼ ナウヤン同窓会 選曲リスト（公開中・資料室の先頭セクション） -->
+    <!-- ▼ ナウヤン同窓会（公開中・資料室の先頭セクション／選曲リスト・チラシ・制作物の3サブ構成） -->
     <section class="gallery-section" aria-labelledby="sec-dousoukai">
       <h2 class="gallery-section-title" id="sec-dousoukai">
-        <span class="sec-caret" aria-hidden="true">▼</span> ナウヤン同窓会 選曲リスト
-        <span class="sec-count" aria-hidden="true">全114曲 / 3回</span>
+        <span class="sec-caret" aria-hidden="true">▼</span> ナウヤン同窓会
       </h2>
+
+      <!-- サブ: 選曲リスト -->
+      <h3 class="gallery-subsection-title">
+        <span class="subsec-mark" aria-hidden="true">◆</span> 選曲リスト
+        <span class="subsec-count" aria-hidden="true">全114曲 / 3回</span>
+      </h3>
       <div class="dousoukai-grid">
         <div class="dousoukai-card" tabindex="0" role="button" data-kai="1">
           <span class="dsk-kai">第1回</span>
@@ -558,6 +605,48 @@
           <p class="dsk-date">2026.7.11</p>
           <span class="dsk-count">全38曲</span>
           <span class="dsk-open" aria-hidden="true">▶ 選曲リストを見る</span>
+        </div>
+      </div>
+
+      <!-- サブ: チラシ（画像カード・クリックでモーダル拡大。既存の画像カード機構を流用）-->
+      <h3 class="gallery-subsection-title">
+        <span class="subsec-mark" aria-hidden="true">◆</span> チラシ
+      </h3>
+      <div class="gallery-grid">
+        <div class="gallery-card" tabindex="0" role="button"
+             data-full="images/dousoukai2-flyer.jpg" data-caption="第2回チラシ">
+          <div class="gallery-card-frame is-photo">
+            <img src="images/dousoukai2-flyer.jpg" alt="第2回ナウヤン同窓会チラシ" loading="lazy">
+          </div>
+          <p class="gallery-caption">第2回チラシ</p>
+        </div>
+        <div class="gallery-card" tabindex="0" role="button"
+             data-full="images/dousoukai3-flyer.jpg" data-caption="第3回チラシ">
+          <div class="gallery-card-frame is-photo">
+            <img src="images/dousoukai3-flyer.jpg" alt="第3回ナウヤン同窓会チラシ" loading="lazy">
+          </div>
+          <p class="gallery-caption">第3回チラシ</p>
+        </div>
+        <div class="gallery-card" tabindex="0" role="button"
+             data-full="images/dousoukai3-post.jpg" data-caption="第3回 前日告知（アクセスMAP）">
+          <div class="gallery-card-frame is-photo">
+            <img src="images/dousoukai3-post.jpg" alt="第3回ナウヤン同窓会 前日告知ポスト（アクセスMAP付き）" loading="lazy">
+          </div>
+          <p class="gallery-caption">第3回 前日告知（アクセスMAP）</p>
+        </div>
+      </div>
+
+      <!-- サブ: 制作物（画像カード・クリックでモーダル拡大）-->
+      <h3 class="gallery-subsection-title">
+        <span class="subsec-mark" aria-hidden="true">◆</span> 制作物
+      </h3>
+      <div class="gallery-grid">
+        <div class="gallery-card" tabindex="0" role="button"
+             data-full="images/dousoukai3-nametag.jpg" data-caption="第3回 参加者名札（見本）">
+          <div class="gallery-card-frame is-photo">
+            <img src="images/dousoukai3-nametag.jpg" alt="第3回ナウヤン同窓会 参加者名札（見本・SAMPLE入り）" loading="lazy">
+          </div>
+          <p class="gallery-caption">第3回 参加者名札（見本）</p>
         </div>
       </div>
     </section>
