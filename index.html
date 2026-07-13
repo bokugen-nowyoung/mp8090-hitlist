@@ -544,20 +544,17 @@
         </div>
       </article>
 
-      <!-- ⑥ ナウヤン資料室（工事中） -->
-      <article class="top-card top-card--wip" aria-disabled="true">
-        <div class="top-card-inner">
+      <!-- ⑥ ナウヤン資料室 -->
+      <article class="top-card top-card--live">
+        <a href="gallery.html" class="top-card-link">
           <div class="top-card-icon" aria-hidden="true">🗂️</div>
           <h2 class="top-card-title">ナウヤン資料室</h2>
-          <p class="top-card-desc">Coming Soon...</p>
+          <p class="top-card-desc">ナウヤン同窓会の選曲リストを公開中！番組にまつわる資料を展示する部屋です。</p>
           <div class="top-card-footer">
-            <span class="top-status-wip">
-              <span class="wip-blink" aria-hidden="true">🚧</span>
-              工事中
-              <span class="wip-blink" aria-hidden="true" style="animation-delay:0.55s">🚧</span>
-            </span>
+            <span class="top-status-live">● 公開中</span>
+            <span class="top-card-arrow" aria-hidden="true">→</span>
           </div>
-        </div>
+        </a>
       </article>
 
     </div>
@@ -590,7 +587,9 @@
   // 手動の自由文お知らせ（必要に応じて編集）。
   //   text  : 表示する文言
   //   ep    : クリックで開く回番号（数値）。リンク不要なら null
+  //   url   : クリックで開くページURL（例 'gallery.html'）。指定時は ep より優先。使わないなら省略
   const MANUAL_NOTICES = [
+    { text: '🎉 ナウヤン資料室を公開しました！', url: 'gallery.html' },
     { text: '300回記念！ナウヤン同盟の部屋へようこそ！', ep: null },
     // 例: { text: '工藤静香特集の回はこちら', ep: 109 },
   ];
@@ -611,7 +610,12 @@
 
     notices.forEach(n => {
       let el;
-      if (n.ep != null) {
+      if (n.url) {
+        // 任意ページへのリンク（例: 資料室 gallery.html）。最新回のような明滅・▶は付けない。
+        el = document.createElement('a');
+        el.href = n.url;
+        el.className = 'notice-item';
+      } else if (n.ep != null) {
         el = document.createElement('a');
         el.href = 'setuplits.html?ep=' + n.ep;
         el.className = 'notice-item';
