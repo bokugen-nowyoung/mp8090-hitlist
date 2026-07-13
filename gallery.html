@@ -330,6 +330,152 @@
       .ep-modal-hdr { padding: 0.8rem 3rem 0.8rem 1rem; }
       .ep-modal-body { padding: 0.9rem 1rem 1rem; }
     }
+
+    /* ============================================================
+       ナウヤン同窓会 選曲リスト
+       ── 3回分をカードで横並び（スマホは縦積み）。カードクリックで
+          その回の選曲リストをモーダル表示（setuplits.html のテーブル体裁を流用）。
+       ============================================================ */
+    .dousoukai-grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.1rem;
+    }
+    @media (min-width: 680px) {
+      .dousoukai-grid { grid-template-columns: repeat(3, 1fr); }
+    }
+    .dousoukai-card {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      gap: 0.4rem;
+      background: linear-gradient(160deg, #fff 0%, #fff7fb 100%);
+      border: 1px solid var(--border-table);
+      border-radius: var(--r-md);
+      box-shadow: var(--shadow-sm);
+      padding: 1.4rem 1rem 1.2rem;
+      cursor: pointer;
+      transition: transform 0.12s, box-shadow 0.12s;
+    }
+    .dousoukai-card:hover,
+    .dousoukai-card:focus-visible {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-md);
+      outline: none;
+    }
+    .dousoukai-card:focus-visible {
+      box-shadow: var(--shadow-md), 0 0 0 3px var(--accent-cyan-xl);
+    }
+    .dousoukai-card .dsk-kai {
+      display: inline-block;
+      font-family: var(--font-mono);
+      font-weight: 700;
+      font-size: 0.72rem;
+      letter-spacing: 0.08em;
+      color: #fff;
+      background: linear-gradient(135deg, #9B1060 0%, #C01878 100%);
+      padding: 0.2rem 0.9rem;
+      border-radius: 999px;
+      box-shadow: 0 2px 6px rgba(155,16,96,0.35);
+    }
+    .dousoukai-card .dsk-title {
+      font-family: var(--font-sans);
+      font-weight: 700;
+      font-size: 0.92rem;
+      line-height: 1.45;
+      color: var(--text-dark);
+    }
+    .dousoukai-card .dsk-date {
+      font-family: var(--font-mono);
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+    }
+    .dousoukai-card .dsk-count {
+      margin-top: 0.15rem;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      letter-spacing: 0.06em;
+      color: #0a7d88;
+      background: var(--accent-cyan-xl);
+      padding: 0.16rem 0.75rem;
+      border-radius: 999px;
+    }
+    .dousoukai-card .dsk-open {
+      margin-top: 0.1rem;
+      font-size: 0.66rem;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+    }
+
+    /* 同窓会モーダル内：見出しブロック */
+    .dsk-modal-head { margin-bottom: 0.9rem; text-align: center; }
+    .dsk-modal-heading {
+      font-family: var(--font-sans);
+      font-weight: 700;
+      font-size: 0.98rem;
+      line-height: 1.5;
+      color: var(--text-dark);
+    }
+    .dsk-modal-sub {
+      margin-top: 0.3rem;
+      font-family: var(--font-sans);
+      font-size: 0.8rem;
+      color: var(--text-mid);
+    }
+
+    /* 同窓会モーダル内：曲テーブル（setuplits.html の ep-track-table を流用）*/
+    .ep-track-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .ep-track-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.82rem;
+      min-width: 300px;
+    }
+    .ep-track-table th {
+      background: var(--bg-secondary);
+      color: var(--text-mid);
+      font-weight: 700;
+      padding: 0.42rem 0.55rem;
+      text-align: left;
+      border-bottom: 2px solid var(--border-head);
+      white-space: nowrap;
+    }
+    .ep-track-table td {
+      padding: 0.38rem 0.55rem;
+      border-bottom: 1px solid var(--border-table);
+      vertical-align: middle;
+    }
+    .ep-track-table tbody tr:nth-child(odd)  td { background: var(--stripe-odd); }
+    .ep-track-table tbody tr:nth-child(even) td { background: var(--stripe-even); }
+    .ep-track-table .col-no {
+      width: 2.2rem;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      text-align: center;
+      white-space: nowrap;
+    }
+    .ep-track-table .col-puy {
+      white-space: nowrap;
+      font-family: var(--font-mono);
+      font-size: 0.75rem;
+      color: var(--text-mid);
+    }
+    /* グループ小見出し行（変化球特集・エンディング・各groupのname 等）
+       ── 縞模様(nth-child)の背景に負けないよう !important で上書きする。*/
+    .ep-track-table tr.dsk-group-row td {
+      background: linear-gradient(135deg, #004A52 0%, var(--accent-cyan) 100%) !important;
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.82rem;
+      letter-spacing: 0.03em;
+      padding: 0.5rem 0.6rem;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.35);
+    }
   </style>
 </head>
 <body>
@@ -543,6 +689,35 @@
       </div>
     </section>
 
+    <!-- ▼ ナウヤン同窓会 選曲リスト -->
+    <section class="gallery-section" aria-labelledby="sec-dousoukai">
+      <h2 class="gallery-section-title" id="sec-dousoukai">
+        <span class="sec-caret" aria-hidden="true">▼</span> ナウヤン同窓会 選曲リスト
+        <span class="sec-count" aria-hidden="true">全114曲 / 3回</span>
+      </h2>
+      <div class="dousoukai-grid">
+        <div class="dousoukai-card" tabindex="0" role="button" data-kai="1">
+          <span class="dsk-kai">第1回</span>
+          <p class="dsk-title">第1回ナウヤン同窓会 in 水戸</p>
+          <p class="dsk-date">2025.2.23</p>
+          <span class="dsk-count">全41曲</span>
+          <span class="dsk-open" aria-hidden="true">▶ 選曲リストを見る</span>
+        </div>
+        <div class="dousoukai-card" tabindex="0" role="button" data-kai="2">
+          <span class="dsk-kai">第2回</span>
+          <p class="dsk-title">第2回ナウヤン同窓会</p>
+          <span class="dsk-count">全35曲</span>
+          <span class="dsk-open" aria-hidden="true">▶ 選曲リストを見る</span>
+        </div>
+        <div class="dousoukai-card" tabindex="0" role="button" data-kai="3">
+          <span class="dsk-kai">第3回</span>
+          <p class="dsk-title">第3回ナウヤン同窓会</p>
+          <span class="dsk-count">全38曲</span>
+          <span class="dsk-open" aria-hidden="true">▶ 選曲リストを見る</span>
+        </div>
+      </div>
+    </section>
+
     <!-- ============================================================
          【参加者限定エリアは後日追加】
          2段階目で、ここに参加者限定ギャラリー（または限定エリアへの入り口）を
@@ -634,6 +809,149 @@
     modalClose.addEventListener('click', closeModal);
     modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modalOverlay.hidden) closeModal(); });
+
+    // ── ナウヤン同窓会 選曲リスト ──
+    //   data/dousoukai-data.json を単一のデータソースとして読み込み、
+    //   setuplits.html と同じテーブル体裁（ep-track-table）でモーダル表示する。
+    //   曲名・アーティスト等はJSONの値を textContent でそのまま出す（生データ保持）。
+    let dousoukaiData = null;
+    let dousoukaiLoading = null;
+
+    function loadDousoukaiData() {
+      if (dousoukaiData) return Promise.resolve(dousoukaiData);
+      if (dousoukaiLoading) return dousoukaiLoading;
+      dousoukaiLoading = fetch('data/dousoukai-data.json')
+        .then(r => { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+        .then(json => { dousoukaiData = json; return json; });
+      return dousoukaiLoading;
+    }
+
+    function buildDousoukaiTable(kai) {
+      const table = document.createElement('table');
+      table.className = 'ep-track-table';
+      const hasNo = kai.columns.indexOf('no') !== -1;   // 第1回は no 列あり（5列）、他は2列
+
+      // ── ヘッダー ──
+      const thead = document.createElement('thead');
+      const htr = document.createElement('tr');
+      const heads = hasNo
+        ? [['No.', 'col-no'], ['曲名', ''], ['アーティスト', ''], ['PUY', 'col-puy'], ['備考', '']]
+        : [['曲名', ''], ['アーティスト', '']];
+      heads.forEach(pair => {
+        const th = document.createElement('th');
+        if (pair[1]) th.className = pair[1];
+        th.textContent = pair[0];
+        htr.appendChild(th);
+      });
+      thead.appendChild(htr);
+      table.appendChild(thead);
+
+      const tbody = document.createElement('tbody');
+      const colCount = hasNo ? 5 : 2;
+
+      function addGroupRow(name) {
+        const tr = document.createElement('tr');
+        tr.className = 'dsk-group-row';
+        const td = document.createElement('td');
+        td.colSpan = colCount;
+        td.textContent = name;
+        tr.appendChild(td);
+        tbody.appendChild(tr);
+      }
+
+      if (hasNo) {
+        // 第1回：フラットな songs 配列。group フィールドを持つ曲の前に小見出しを挟む。
+        kai.songs.forEach(song => {
+          if (song.group) addGroupRow(song.group);
+          const tr = document.createElement('tr');
+          const cells = [
+            [String(song.no), 'col-no'],
+            [song.title, ''],
+            [song.artist, ''],
+            [song.puy, 'col-puy'],
+            [song.note != null ? song.note : '', '']   // note が空文字なら備考欄は空
+          ];
+          cells.forEach(pair => {
+            const td = document.createElement('td');
+            if (pair[1]) td.className = pair[1];
+            td.textContent = pair[0];
+            tr.appendChild(td);
+          });
+          tbody.appendChild(tr);
+        });
+      } else {
+        // 第2回・第3回：groups 構造。各 group.name を小見出しにして曲を並べる。
+        kai.groups.forEach(group => {
+          addGroupRow(group.name);
+          group.songs.forEach(song => {
+            const tr = document.createElement('tr');
+            [song.title, song.artist].forEach(val => {
+              const td = document.createElement('td');
+              td.textContent = val;
+              tr.appendChild(td);
+            });
+            tbody.appendChild(tr);
+          });
+        });
+      }
+      table.appendChild(tbody);
+      return table;
+    }
+
+    function renderDousoukai(kai) {
+      modalBody.innerHTML = '';
+
+      // 見出しブロック（タイトル＋日付＋selected by／note_header）
+      const head = document.createElement('div');
+      head.className = 'dsk-modal-head';
+      const heading = document.createElement('p');
+      heading.className = 'dsk-modal-heading';
+      heading.textContent = kai.title + (kai.date ? '　' + kai.date : '');
+      head.appendChild(heading);
+      const subParts = [];
+      if (kai.selected_by) subParts.push('selected by ' + kai.selected_by);
+      if (kai.note_header)  subParts.push(kai.note_header);
+      if (subParts.length) {
+        const sub = document.createElement('p');
+        sub.className = 'dsk-modal-sub';
+        sub.textContent = subParts.join('　／　');
+        head.appendChild(sub);
+      }
+      modalBody.appendChild(head);
+
+      // テーブル（横スクロール対応）
+      const scroll = document.createElement('div');
+      scroll.className = 'ep-track-scroll';
+      scroll.appendChild(buildDousoukaiTable(kai));
+      modalBody.appendChild(scroll);
+    }
+
+    function openDousoukai(card) {
+      const kaiNo = Number(card.getAttribute('data-kai'));
+      lastFocused = card;
+      modalOverlay.removeAttribute('hidden');
+      document.body.style.overflow = 'hidden';
+      modalTitle.textContent = '第' + kaiNo + '回ナウヤン同窓会 選曲リスト';
+      modalBody.innerHTML = '<p class="ep-modal-caption">読み込み中…</p>';
+      modalClose.focus();
+
+      loadDousoukaiData().then(data => {
+        const kai = data.dousoukai.find(d => d.kai === kaiNo);
+        if (!kai) { modalBody.innerHTML = '<p class="ep-modal-caption">データが見つかりませんでした。</p>'; return; }
+        modalTitle.textContent = kai.title + (kai.date ? '　' + kai.date : '');
+        renderDousoukai(kai);
+      }).catch(err => {
+        modalBody.innerHTML = '<p class="ep-modal-caption">選曲リストの読み込みに失敗しました。</p>';
+        console.error('dousoukai load error', err);
+      });
+    }
+
+    document.querySelectorAll('.dousoukai-card').forEach(card => {
+      card.addEventListener('click', () => openDousoukai(card));
+      card.addEventListener('keydown', e => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openDousoukai(card); }
+      });
+    });
   </script>
 
 </body>

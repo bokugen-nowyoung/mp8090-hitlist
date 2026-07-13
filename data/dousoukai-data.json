@@ -1,0 +1,651 @@
+{
+  "dousoukai": [
+    {
+      "kai": 1,
+      "title": "第1回ナウヤン同窓会 in 水戸",
+      "date": "2025.2.23",
+      "selected_by": "ぼく・ぼくげん（ナウヤン同盟）",
+      "note_header": "BGMセットリスト",
+      "columns": [
+        "no",
+        "title",
+        "artist",
+        "puy",
+        "note"
+      ],
+      "songs": [
+        {
+          "no": 1,
+          "title": "Radio Ga Ga",
+          "artist": "QUEEN",
+          "puy": "1984年",
+          "note": "番組OP曲"
+        },
+        {
+          "no": 2,
+          "title": "今すぐKiss Me",
+          "artist": "LINDBERG",
+          "puy": "1990年",
+          "note": "第一回目の\"一曲目\""
+        },
+        {
+          "no": 3,
+          "title": "長い夜",
+          "artist": "松山千春",
+          "puy": "1981年",
+          "note": "生歌王子の\"代表曲\""
+        },
+        {
+          "no": 4,
+          "title": "チェリーブラッサム",
+          "artist": "松田聖子",
+          "puy": "1981年",
+          "note": "Gospel Loveさんが\"カラオケ大会\"で披露"
+        },
+        {
+          "no": 5,
+          "title": "約束",
+          "artist": "渡辺徹",
+          "puy": "1982年",
+          "note": "ご当地ソング\"茨城県\""
+        },
+        {
+          "no": 6,
+          "title": "「男」",
+          "artist": "久宝留理子",
+          "puy": "1993年",
+          "note": "石井さん、久宝留理子\"大好き説？\""
+        },
+        {
+          "no": 7,
+          "title": "Get Wild",
+          "artist": "TM NETWORK",
+          "puy": "1987年",
+          "note": "特集リクエスト2位（142人）2025.2.23当時"
+        },
+        {
+          "no": 8,
+          "title": "フレンズ",
+          "artist": "レベッカ",
+          "puy": "1986年",
+          "note": "特集リクエスト1位（153人）2025.2.23当時"
+        },
+        {
+          "no": 9,
+          "title": "格好悪いふられ方",
+          "artist": "大江千里",
+          "puy": "1991年",
+          "note": "特集リクエスト4位（135人）2025.2.23当時"
+        },
+        {
+          "no": 10,
+          "title": "My Revolution",
+          "artist": "渡辺美里",
+          "puy": "1986年",
+          "note": ""
+        },
+        {
+          "no": 11,
+          "title": "浪漫飛行",
+          "artist": "米米CLUB",
+          "puy": "1990年",
+          "note": "PUYリクエスト2位（72人）2025.2.23当時"
+        },
+        {
+          "no": 12,
+          "title": "北酒場",
+          "artist": "細川たかし",
+          "puy": "1982年",
+          "note": "特集リクエスト3位（136人）2025.2.23当時"
+        },
+        {
+          "no": 13,
+          "title": "もしもピアノが弾けたなら",
+          "artist": "西田敏行",
+          "puy": "1981年",
+          "note": "PUYリクエスト1位（83人）2025.2.23当時"
+        },
+        {
+          "no": 14,
+          "title": "世界中の誰よりきっと",
+          "artist": "中山美穂＆WANDS",
+          "puy": "1993年",
+          "note": "ナウヤン紅白2024\"90年代編\""
+        },
+        {
+          "no": 15,
+          "title": "クリスマス・イブ",
+          "artist": "山下達郎",
+          "puy": "1983年",
+          "note": "特集リクエスト5位（132人）2025.2.23当時"
+        },
+        {
+          "no": 16,
+          "title": "サイレント・イヴ",
+          "artist": "辛島美登里",
+          "puy": "1991年",
+          "note": "PUYリクエスト3位（53人）2025.2.23当時"
+        },
+        {
+          "no": 17,
+          "title": "Winter, again",
+          "artist": "GLAY",
+          "puy": "1999年",
+          "note": "PUYリクエスト5位（37人）2025.2.23当時"
+        },
+        {
+          "no": 18,
+          "title": "We Built This City",
+          "artist": "Starship",
+          "puy": "1985年",
+          "note": ""
+        },
+        {
+          "no": 19,
+          "title": "The Final Countdown",
+          "artist": "Europe",
+          "puy": "1986年",
+          "note": ""
+        },
+        {
+          "no": 20,
+          "title": "Back for Good",
+          "artist": "Take That",
+          "puy": "1995年",
+          "note": ""
+        },
+        {
+          "no": 21,
+          "title": "It Ain't Over 'Til It's Over",
+          "artist": "Lenny Kravitz",
+          "puy": "1991年",
+          "note": ""
+        },
+        {
+          "no": 22,
+          "title": "Kiss Me",
+          "artist": "Sixpence None the Richer",
+          "puy": "1997年",
+          "note": ""
+        },
+        {
+          "no": 23,
+          "title": "Ellie My Love",
+          "artist": "Ray Charles",
+          "puy": "1990年",
+          "note": ""
+        },
+        {
+          "no": 24,
+          "title": "サファイアの瞳",
+          "artist": "THE ALFEE",
+          "puy": "1987年",
+          "note": ""
+        },
+        {
+          "no": 25,
+          "title": "ROSIER",
+          "artist": "LUNA SEA",
+          "puy": "1994年",
+          "note": ""
+        },
+        {
+          "no": 26,
+          "title": "コンピューターおばあちゃん",
+          "artist": "東京児童合唱団（酒井司優子）",
+          "puy": "1981年",
+          "note": ""
+        },
+        {
+          "no": 27,
+          "title": "ハイスクールララバイ",
+          "artist": "イモ欽トリオ",
+          "puy": "1981年",
+          "note": ""
+        },
+        {
+          "no": 28,
+          "title": "夢見る少女じゃいられない（POLYSICS remix）",
+          "artist": "相川七瀬",
+          "puy": "1995年",
+          "note": "ハイスクールララバイを\"サンプリング\"したリミックス"
+        },
+        {
+          "no": 29,
+          "title": "MOTOR MAN（秋葉原〜南浦和）",
+          "artist": "SUPER BELL\"Z",
+          "puy": "1999年",
+          "note": ""
+        },
+        {
+          "no": 30,
+          "title": "ガラスのメモリーズ",
+          "artist": "TUBE",
+          "puy": "1992年",
+          "note": ""
+        },
+        {
+          "no": 31,
+          "title": "Your Eyes",
+          "artist": "山下達郎",
+          "puy": "1982年",
+          "note": ""
+        },
+        {
+          "no": 32,
+          "title": "朝のシルエット",
+          "artist": "浜田省吾",
+          "puy": "1983年",
+          "note": ""
+        },
+        {
+          "no": 33,
+          "title": "Say Yes!",
+          "artist": "菊池桃子",
+          "puy": "1986年",
+          "note": ""
+        },
+        {
+          "no": 34,
+          "title": "夢で逢えたら",
+          "artist": "ラッツ＆スター",
+          "puy": "1996年",
+          "note": ""
+        },
+        {
+          "no": 35,
+          "title": "明日があるさ（ジョージアで行きましょう編）",
+          "artist": "ウルフルズ",
+          "puy": "2001年",
+          "note": ""
+        },
+        {
+          "no": 36,
+          "title": "TRUTH",
+          "artist": "T-SQUARE",
+          "puy": "1987年",
+          "note": "反響が大きかった\"インスト曲\"",
+          "group": "変化球特集"
+        },
+        {
+          "no": 37,
+          "title": "マッチョ・ドラゴン",
+          "artist": "藤波辰爾",
+          "puy": "1985年",
+          "note": "大人気の\"変化球\""
+        },
+        {
+          "no": 38,
+          "title": "邦子のかわい子ぶりっ子（バスガイド編）",
+          "artist": "山田邦子",
+          "puy": "1981年",
+          "note": ""
+        },
+        {
+          "no": 39,
+          "title": "きたかチョーさんまってたドン",
+          "artist": "川上さんと長島さん",
+          "puy": "1983年",
+          "note": "\"野球ソング\"特集"
+        },
+        {
+          "no": 40,
+          "title": "Dynamite",
+          "artist": "BTS",
+          "puy": "2020年",
+          "note": "番組ED曲",
+          "group": "エンディング ※流すのを忘れてました"
+        },
+        {
+          "no": 41,
+          "title": "ガラス越しに消えた夏",
+          "artist": "鈴木雅之",
+          "puy": "1986年",
+          "note": "ボーナストラック"
+        }
+      ]
+    },
+    {
+      "kai": 2,
+      "title": "第2回ナウヤン同窓会",
+      "columns": [
+        "title",
+        "artist"
+      ],
+      "groups": [
+        {
+          "name": "【80's夏ソング・実行委員セレクション】",
+          "songs": [
+            {
+              "title": "Sparkle",
+              "artist": "山下達郎"
+            },
+            {
+              "title": "Remember Summer Days",
+              "artist": "杏里"
+            },
+            {
+              "title": "DIVE INTO YOUR BODY",
+              "artist": "TM NETWORK"
+            },
+            {
+              "title": "チェック・ポイント",
+              "artist": "藤井一子"
+            },
+            {
+              "title": "長く熱い夜",
+              "artist": "小比類巻かほる"
+            },
+            {
+              "title": "サザン・ウインド",
+              "artist": "中森明菜"
+            },
+            {
+              "title": "Return to Myself",
+              "artist": "浜田麻里"
+            },
+            {
+              "title": "C-Girl",
+              "artist": "浅香唯"
+            },
+            {
+              "title": "世界でいちばん熱い夏",
+              "artist": "PRINCESS PRINCESS"
+            },
+            {
+              "title": "ベストセラー・サマー",
+              "artist": "TUBE"
+            },
+            {
+              "title": "フォトジェニック・エンジェル",
+              "artist": "夢工場"
+            },
+            {
+              "title": "サマータイム ブルース",
+              "artist": "渡辺美里"
+            }
+          ]
+        },
+        {
+          "name": "【参加者リクエスト】",
+          "songs": [
+            {
+              "title": "チェリーブラッサム",
+              "artist": "松田聖子"
+            },
+            {
+              "title": "恋したっていいじゃない",
+              "artist": "渡辺美里"
+            },
+            {
+              "title": "お嫁サンバ",
+              "artist": "郷ひろみ"
+            },
+            {
+              "title": "ときめきのアクシデント",
+              "artist": "原田知世"
+            },
+            {
+              "title": "SUMMER SUSPICION",
+              "artist": "杉山清貴&オメガトライブ"
+            },
+            {
+              "title": "夏色のナンシー",
+              "artist": "早見優"
+            },
+            {
+              "title": "翼の折れたエンジェル",
+              "artist": "中村あゆみ"
+            },
+            {
+              "title": "背中ごしにセンチメンタル",
+              "artist": "宮里久美"
+            },
+            {
+              "title": "JOY",
+              "artist": "石井明美"
+            },
+            {
+              "title": "ドラマティック・レイン",
+              "artist": "稲垣潤一"
+            },
+            {
+              "title": "リトルプリンセス",
+              "artist": "岡田有希子"
+            },
+            {
+              "title": "ブルドック",
+              "artist": "フォーリーブス"
+            },
+            {
+              "title": "はみだしチャンピオン",
+              "artist": "沖田 浩之"
+            },
+            {
+              "title": "エスピオナージ",
+              "artist": "アリス"
+            },
+            {
+              "title": "眠れぬ夜",
+              "artist": "オフコース"
+            },
+            {
+              "title": "鰐",
+              "artist": "KUWATA BAND"
+            },
+            {
+              "title": "遠い愛",
+              "artist": "松山千春"
+            },
+            {
+              "title": "金曜日のライオン (Take it to the lucky)",
+              "artist": "TM NETWORK"
+            },
+            {
+              "title": "悲しみは雪のように",
+              "artist": "浜田 省吾"
+            },
+            {
+              "title": "長崎小夜曲",
+              "artist": "さだまさし"
+            },
+            {
+              "title": "青い風のビーチサイド",
+              "artist": "松本典子"
+            },
+            {
+              "title": "長い夜",
+              "artist": "松山千春"
+            }
+          ]
+        },
+        {
+          "name": "【石井哲也セレクション】",
+          "songs": [
+            {
+              "title": "セクシャルバイオレット No.1",
+              "artist": "桑名正博"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "kai": 3,
+      "title": "第3回ナウヤン同窓会",
+      "columns": [
+        "title",
+        "artist"
+      ],
+      "groups": [
+        {
+          "name": "【80's夏ソング・実行委員セレクション】",
+          "songs": [
+            {
+              "title": "COME ON EVERYBODY",
+              "artist": "TM NETWORK"
+            },
+            {
+              "title": "Be My Venus",
+              "artist": "渚のオールスターズ"
+            },
+            {
+              "title": "赤道小町ドキッ",
+              "artist": "山下久美子"
+            },
+            {
+              "title": "君は1000%",
+              "artist": "1986 OMEGA TRIBE"
+            },
+            {
+              "title": "NIGHT OF SUMMER SIDE",
+              "artist": "池田政典"
+            },
+            {
+              "title": "夏色片想い",
+              "artist": "菊池桃子"
+            },
+            {
+              "title": "南風",
+              "artist": "太田 裕美"
+            },
+            {
+              "title": "夏の扉",
+              "artist": "松田聖子"
+            },
+            {
+              "title": "デビュー~Fly Me To Love~",
+              "artist": "河合奈保子"
+            },
+            {
+              "title": "DAY IN VACATION",
+              "artist": "渚のオールスターズ"
+            },
+            {
+              "title": "MERRY X'MAS IN SUMMER",
+              "artist": "KUWATA BAND"
+            },
+            {
+              "title": "SUMMER CANDLES",
+              "artist": "杏里"
+            },
+            {
+              "title": "夏のクラクション",
+              "artist": "稲垣潤一"
+            },
+            {
+              "title": "青い瞳のステラ、1962年夏・・・",
+              "artist": "柳ジョージ&レイニーウッド"
+            },
+            {
+              "title": "思い出のビーチクラブ",
+              "artist": "稲垣潤一"
+            },
+            {
+              "title": "SUMMER EYES",
+              "artist": "菊池桃子"
+            },
+            {
+              "title": "マイアミ午前5時",
+              "artist": "松田聖子"
+            },
+            {
+              "title": "YOU惑-MAY惑",
+              "artist": "THE GOOD-BYE"
+            },
+            {
+              "title": "バチェラー・ガール",
+              "artist": "稲垣潤一"
+            }
+          ]
+        },
+        {
+          "name": "【参加者リクエスト】",
+          "songs": [
+            {
+              "title": "そして僕は途方に暮れる",
+              "artist": "大沢誉志幸"
+            },
+            {
+              "title": "恋してカリビアン",
+              "artist": "荻野目洋子"
+            },
+            {
+              "title": "モンロー・ウォーク",
+              "artist": "南佳孝"
+            },
+            {
+              "title": "十戒",
+              "artist": "中森明菜"
+            },
+            {
+              "title": "トマト・イッパツ",
+              "artist": "スペクトラム"
+            },
+            {
+              "title": "約束",
+              "artist": "渡辺徹"
+            },
+            {
+              "title": "アクシデント",
+              "artist": "TM NETWORK"
+            },
+            {
+              "title": "トライアングル・ラブレター",
+              "artist": "トライアングル"
+            },
+            {
+              "title": "寝た子も起きる子守唄",
+              "artist": "とんねるず"
+            },
+            {
+              "title": "秘密のオルゴール",
+              "artist": "川田あつ子"
+            },
+            {
+              "title": "悲しみよこんにちは",
+              "artist": "斉藤由貴"
+            },
+            {
+              "title": "鏡の中のアクトレス",
+              "artist": "中原めいこ"
+            },
+            {
+              "title": "プロフィール",
+              "artist": "倉沢淳美"
+            },
+            {
+              "title": "輝きながら",
+              "artist": "德永英明"
+            },
+            {
+              "title": "うしろゆびさされ組",
+              "artist": "うしろゆびさされ組"
+            },
+            {
+              "title": "真夏の夜の夢",
+              "artist": "野口五郎"
+            },
+            {
+              "title": "Let's go!青春",
+              "artist": "JUNKO & CHEER LEADERS"
+            },
+            {
+              "title": "センチメンタル カンガルー",
+              "artist": "渡辺美里"
+            }
+          ]
+        },
+        {
+          "name": "【石井哲也セレクション】",
+          "songs": [
+            {
+              "title": "さらば・・夏",
+              "artist": "田原俊彦"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
