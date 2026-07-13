@@ -388,6 +388,14 @@
       line-height: 1.45;
       color: var(--text-dark);
     }
+    /* 会場名（控えめに、日付の少し上）*/
+    .dousoukai-card .dsk-venue {
+      margin-top: -0.1rem;
+      font-family: var(--font-sans);
+      font-size: 0.74rem;
+      color: var(--text-mid);
+      letter-spacing: 0.02em;
+    }
     .dousoukai-card .dsk-date {
       font-family: var(--font-mono);
       font-size: 0.72rem;
@@ -419,6 +427,21 @@
       font-size: 0.98rem;
       line-height: 1.5;
       color: var(--text-dark);
+    }
+    /* 会場名（控えめに、日付の少し上）*/
+    .dsk-modal-venue {
+      margin-top: 0.15rem;
+      font-family: var(--font-sans);
+      font-size: 0.82rem;
+      color: var(--text-mid);
+      letter-spacing: 0.02em;
+    }
+    .dsk-modal-date {
+      margin-top: 0.05rem;
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
     }
     .dsk-modal-sub {
       margin-top: 0.3rem;
@@ -515,19 +538,24 @@
         <div class="dousoukai-card" tabindex="0" role="button" data-kai="1">
           <span class="dsk-kai">第1回</span>
           <p class="dsk-title">第1回ナウヤン同窓会 in 水戸</p>
+          <p class="dsk-venue">カラオケまねきねこ</p>
           <p class="dsk-date">2025.2.23</p>
           <span class="dsk-count">全41曲</span>
           <span class="dsk-open" aria-hidden="true">▶ 選曲リストを見る</span>
         </div>
         <div class="dousoukai-card" tabindex="0" role="button" data-kai="2">
           <span class="dsk-kai">第2回</span>
-          <p class="dsk-title">第2回ナウヤン同窓会</p>
+          <p class="dsk-title">第2回ナウヤン同窓会 in 新橋</p>
+          <p class="dsk-venue">スポットライト新橋</p>
+          <p class="dsk-date">2025.6.14</p>
           <span class="dsk-count">全35曲</span>
           <span class="dsk-open" aria-hidden="true">▶ 選曲リストを見る</span>
         </div>
         <div class="dousoukai-card" tabindex="0" role="button" data-kai="3">
           <span class="dsk-kai">第3回</span>
-          <p class="dsk-title">第3回ナウヤン同窓会</p>
+          <p class="dsk-title">第3回ナウヤン同窓会 in 新橋</p>
+          <p class="dsk-venue">スポットライト新橋</p>
+          <p class="dsk-date">2026.7.11</p>
           <span class="dsk-count">全38曲</span>
           <span class="dsk-open" aria-hidden="true">▶ 選曲リストを見る</span>
         </div>
@@ -913,13 +941,25 @@
     function renderDousoukai(kai) {
       modalBody.innerHTML = '';
 
-      // 見出しブロック（タイトル＋日付＋selected by／note_header）
+      // 見出しブロック（カードと同じ体裁：タイトル(in 地名)／会場名／日付／selected by・note_header）
       const head = document.createElement('div');
       head.className = 'dsk-modal-head';
       const heading = document.createElement('p');
       heading.className = 'dsk-modal-heading';
-      heading.textContent = kai.title + (kai.date ? '　' + kai.date : '');
+      heading.textContent = kai.title;
       head.appendChild(heading);
+      if (kai.venue) {
+        const venue = document.createElement('p');
+        venue.className = 'dsk-modal-venue';
+        venue.textContent = kai.venue;
+        head.appendChild(venue);
+      }
+      if (kai.date) {
+        const date = document.createElement('p');
+        date.className = 'dsk-modal-date';
+        date.textContent = kai.date;
+        head.appendChild(date);
+      }
       const subParts = [];
       if (kai.selected_by) subParts.push('selected by ' + kai.selected_by);
       if (kai.note_header)  subParts.push(kai.note_header);
