@@ -336,7 +336,12 @@
     .search-match-row .match-title {
       color: var(--ink, #38383a);
       font-weight: 600;
-      flex-shrink: 0;
+      /* 長い曲名は利用可能幅を超えたら折り返す（スマホでの左端見切れ防止）。
+         余白があるときは折り返さず1行のまま＝短い曲名の見た目は不変。
+         min-width:0 で flex アイテムが内容幅より縮めるようにし、
+         overflow-wrap:anywhere で切れ目のない長い語も折り返せるようにする。 */
+      min-width: 0;
+      overflow-wrap: anywhere;
     }
     .search-match-row .match-artist {
       color: var(--text-muted);
