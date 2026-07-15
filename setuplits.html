@@ -320,16 +320,13 @@
       align-items: center;
       justify-content: flex-end;
       gap: 0.7rem;
-      padding: 0.45rem 3.6rem 0.45rem 1.25rem !important;
+      /* 右端をエピソード行の🦊マーク位置（＝.sul-item の padding-right 1.1rem）に揃える。
+         PC・スマホとも🦊は右端 1.1rem の位置なので、共通の 1.1rem で右基準を合わせる。 */
+      padding: 0.45rem 1.1rem 0.45rem 1.25rem !important;
       background: #fdf6e3 !important;
       font-size: 0.82rem;
       cursor: default !important;
       border-top: none !important;
-    }
-    @media (min-width: 601px) {
-      .search-match-row {
-        padding-right: 7.15rem !important;
-      }
     }
     .search-match-row .match-no {
       color: var(--text-muted);
