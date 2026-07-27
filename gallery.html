@@ -268,6 +268,14 @@
       letter-spacing: 0.06em;
       margin-top: 0.15rem;
     }
+    /* サブキャプション（本キャプションの下に一段小さく添える説明。学園だより等で使用） */
+    .gallery-caption .cap-sub {
+      display: block;
+      font-size: 0.66rem;
+      color: var(--text-muted);
+      letter-spacing: 0.04em;
+      margin-top: 0.15rem;
+    }
 
     /* ── 画像拡大モーダル（setuplits.html の ep-modal 機構・デザインを流用）── */
     .ep-modal-overlay {
@@ -649,6 +657,25 @@
             <img src="images/dousoukai3-nametag.jpg" alt="第3回ナウヤン同窓会 参加者名札（見本・SAMPLE入り）" loading="lazy">
           </div>
           <p class="gallery-caption">第3回 参加者名札（見本）</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ▼ ナウヤン学園だより（公開中・同窓会セクションの直後に配置。サブセクションは設けず大見出し直下に画像カードを並べる） -->
+    <section class="gallery-section" aria-labelledby="sec-gakuen">
+      <h2 class="gallery-section-title" id="sec-gakuen">
+        <span class="sec-caret" aria-hidden="true">▼</span> ナウヤン学園だより
+        <span class="sec-count" aria-hidden="true">全1号</span>
+      </h2>
+      <!-- 並び順は新しい号が上（降順）: 号が増えたら新しい号をこのグリッドの先頭（左・上）に追加していく。
+           現在は2026年3月号の1号のみ。 -->
+      <div class="gallery-grid">
+        <div class="gallery-card" tabindex="0" role="button"
+             data-full="images/gakuen-dayori-2026-03.jpg" data-caption="2026年3月号（ラジオまつり2026 特別号）">
+          <div class="gallery-card-frame is-photo">
+            <img src="images/gakuen-dayori-2026-03.jpg" alt="ナウヤン学園だより 2026年3月号" loading="lazy">
+          </div>
+          <p class="gallery-caption">2026年3月号<span class="cap-sub">ラジオまつり2026 特別号</span></p>
         </div>
       </div>
     </section>
