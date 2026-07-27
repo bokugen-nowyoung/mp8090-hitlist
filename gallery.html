@@ -374,6 +374,41 @@
       font-size: 0.9rem;
       color: var(--text-mid);
     }
+    /* モーダル内のPDFダウンロードボタン（data-pdf を持つカードのみJSで生成。
+       資料室のトップ戻るボタンと同じ丸ピル調で世界観を統一）。
+       将来チラシ等にもPDFを付けられる汎用の見た目。 */
+    .ep-modal-pdf {
+      display: flex;
+      justify-content: center;
+      margin-top: 1rem;
+    }
+    .ep-modal-pdf a {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      min-height: 44px;
+      background: var(--accent-mg);
+      color: #fff;
+      text-decoration: none;
+      font-family: var(--font-sans);
+      font-size: 0.85rem;
+      font-weight: 700;
+      letter-spacing: 0.04em;
+      padding: 0.55rem 1.3rem;
+      border-radius: 999px;
+      box-shadow: 0 2px 8px rgba(232,67,147,0.35);
+      transition: background 0.12s, transform 0.1s, box-shadow 0.12s;
+    }
+    .ep-modal-pdf a:hover,
+    .ep-modal-pdf a:focus-visible {
+      background: var(--accent-mg-l);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(232,67,147,0.45);
+      outline: none;
+    }
+    .ep-modal-pdf a:focus-visible {
+      box-shadow: 0 4px 12px rgba(232,67,147,0.45), 0 0 0 3px var(--accent-cyan-xl);
+    }
     @media (max-width: 600px) {
       .ep-modal-overlay { padding: 0.5rem; }
       .ep-modal { max-height: calc(100vh - 1rem); border-radius: var(--r-md); }
@@ -671,7 +706,8 @@
            現在は2026年3月号の1号のみ。 -->
       <div class="gallery-grid">
         <div class="gallery-card" tabindex="0" role="button"
-             data-full="images/gakuen-dayori-2026-03.jpg" data-caption="2026年3月号（ラジオまつり2026 特別号）">
+             data-full="images/gakuen-dayori-2026-03.jpg" data-caption="2026年3月号（ラジオまつり2026 特別号）"
+             data-pdf="pdf/gakuen-dayori-2026-03.pdf">
           <div class="gallery-card-frame is-photo">
             <img src="images/gakuen-dayori-2026-03.jpg" alt="ナウヤン学園だより 2026年3月号" loading="lazy">
           </div>
@@ -916,6 +952,7 @@
     function openCard(card) {
       const full    = card.getAttribute('data-full');    // 実画像パス（差し替え後）
       const caption = card.getAttribute('data-caption') || '';
+      const pdf     = card.getAttribute('data-pdf');      // PDFがあるカードのみ（学園だより等）。無ければボタン非表示
       lastFocused = card;
       modalTitle.textContent = caption || '資料';
       modalBody.innerHTML = '';
@@ -940,6 +977,20 @@
         cap.className = 'ep-modal-caption';
         cap.textContent = caption;
         modalBody.appendChild(cap);
+      }
+      // data-pdf があるカードのみダウンロードボタンを表示。
+      // modalBody は毎回 innerHTML='' でリセットされるため、PDFの無いカードにボタンは残らない。
+      if (pdf) {
+        const pdfWrap = document.createElement('div');
+        pdfWrap.className = 'ep-modal-pdf';
+        const pdfLink = document.createElement('a');
+        pdfLink.href = pdf;
+        pdfLink.setAttribute('download', '');
+        pdfLink.target = '_blank';                 // 環境によりブラウザ内表示にフォールバック
+        pdfLink.rel = 'noopener';
+        pdfLink.textContent = '📄 PDFをダウンロード';
+        pdfWrap.appendChild(pdfLink);
+        modalBody.appendChild(pdfWrap);
       }
       modalOverlay.removeAttribute('hidden');
       document.body.style.overflow = 'hidden';
