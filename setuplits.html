@@ -1205,21 +1205,43 @@
   (() => {
     const episodes    = SETUPLIST_DATA;
 
+    // ── 照合用の正規化 ──
+    // 生データ保持方針は維持したまま、表記ゆれで同一曲が別曲と判定されるのを防ぐため、
+    // 「比較のときだけ」内部で正規化した文字列を使う。表示には絶対に使わないこと。
+    // （例：スニーカーぶるーす／ぶる〜す／ぶる～す は同一曲として扱う）
+    const normalizeForMatch = (s) => {
+      if (s == null) return '';
+      return String(s)
+        // (1) 全角英数→半角、Ⅱ→II、₂→2、＆→&、？→? 等を吸収
+        .normalize('NFKC')
+        // (2) 長音符ー・波ダッシュ〜・全角チルダ～・半角チルダ~・−・－・各種ダッシュ(U+2010〜U+2015)を '-' に統一
+        .replace(/[ー〜～~−－‐-―]/g, '-')
+        // (3) 中黒・／半角中黒･／U+00B7／U+2022 を '.' に統一
+        .replace(/[・･·•]/g, '.')
+        // (4) 空白（半角・全角・タブ等）をすべて除去
+        .replace(/\s+/g, '')
+        // (5) 小文字化
+        .toLowerCase()
+        // (6) アポストロフィ U+2019 / U+2018 を U+0027 に統一
+        .replace(/[’‘]/g, "'");
+    };
+
     // ── 初登場（デビュー）判定 ──
     // 全エピソードの全曲を「放送日（air_date）」の古い順に走査し、
-    // (曲名, アーティスト名) の完全一致する組み合わせが最初に登場した回のみを初登場とする。
-    // 表記ゆれは生データ保持方針により正規化せず、文字列の完全一致で判定する。
+    // (曲名, アーティスト名) を正規化したキーが最初に登場した回のみを初登場とする。
+    // キャッシュのキーも正規化後の値で持つ。
     // ページ読み込み時に一度だけ算出してキャッシュし、モーダル・検索結果の両方で使い回す。
+    const debutTrackKey = (t) =>
+      JSON.stringify([normalizeForMatch(t.title), normalizeForMatch(t.artist)]);
     const debutEpNoByKey = (() => {
       const map = new Map();
-      const trackKey = (t) => JSON.stringify([t.title, t.artist]);
       const sorted = episodes
         .filter(ep => ep.air_date && ep.tracks && ep.tracks.length)
         .slice()
         .sort((a, b) => a.air_date.localeCompare(b.air_date) || (a.episode_no - b.episode_no));
       for (const ep of sorted) {
         for (const t of ep.tracks) {
-          const key = trackKey(t);
+          const key = debutTrackKey(t);
           if (!map.has(key)) map.set(key, ep.episode_no);
         }
       }
@@ -1227,7 +1249,7 @@
     })();
     const isDebutTrack = (ep, t) =>
       ep && ep.episode_no != null &&
-      debutEpNoByKey.get(JSON.stringify([t.title, t.artist])) === ep.episode_no;
+      debutEpNoByKey.get(debutTrackKey(t)) === ep.episode_no;
 
 
     const yearButtons = document.getElementById('yearButtons');
