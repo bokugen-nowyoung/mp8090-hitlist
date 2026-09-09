@@ -1161,12 +1161,15 @@
       modalClose.focus();
 
       loadDousoukaiData().then(data => {
+        if (modalOverlay.hidden || lastFocused !== card) return;
         const kai = data.dousoukai.find(d => d.kai === kaiNo);
         if (!kai) { modalBody.innerHTML = '<p class="ep-modal-caption">データが見つかりませんでした。</p>'; return; }
         modalTitle.textContent = kai.title + (kai.date ? '　' + kai.date : '');
         renderDousoukai(kai);
       }).catch(err => {
-        modalBody.innerHTML = '<p class="ep-modal-caption">選曲リストの読み込みに失敗しました。</p>';
+        if (!modalOverlay.hidden && lastFocused === card) {
+          modalBody.innerHTML = '<p class="ep-modal-caption">選曲リストの読み込みに失敗しました。</p>';
+        }
         console.error('dousoukai load error', err);
       });
     }
