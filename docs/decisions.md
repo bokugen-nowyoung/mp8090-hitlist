@@ -155,3 +155,21 @@
 - 異常検出の自己テストは合成データをメモリ内で処理し、本番データをテスト用に変更・複製しない
 
 この段階ではGitHub Actionsや自動修復を導入せず、`npm run validate` による手動確認だけを提供する。
+
+---
+
+## 2026-09-09 — GitHub Actionsでデータ検証を自動実行する判断
+
+### 背景
+
+前項の読み取り専用データ検証をローカルだけでなく、`main` へのpushと`main`向けpull requestでも自動実行する第2段階へ進めた。
+
+### 決定
+
+- `.github/workflows/validate.yml` は検証専用とし、デプロイ、データ更新、自動修復、commit、pushを行わない
+- workflowの権限は `contents: read` だけとし、secretsやwrite権限を使用しない
+- Node.js 20.19.0で `npm ci` と既存の `npm run validate` を実行する
+- GitHub Pagesの公開設定や既存デプロイ方法には触れない
+- triggerは `main` へのpushと`main`向けpull requestだけに限定する
+
+GitHub Actionsではcheckout後の作業ツリーとHEADが同じ内容になるため、validatorのHEAD件数比較は主にローカル更新時の確認機能となる。CIでは構造破損、必須項目欠落、画像参照切れなど、現在のcheckout内容に対する検証を担う。base branchとの件数比較は、比較元の取得とvalidatorの入力設計が必要になるため、この最小構成には含めない。
