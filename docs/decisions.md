@@ -185,3 +185,15 @@ GitHub Actionsではcheckout後の作業ツリーとHEADが同じ内容になる
 - 新着表示は #298、サイト反映日は 2026.9.15 とする
 - 変更対象は `setuplits.html`、`index.html`、`docs/decisions.md`、`images/setuplits/1998.298.png` に限定し、既存の未追跡画像には触れない
 - 今回の作業では commit / push を行わない
+
+---
+
+## 2026-09-16 — Set Up List #299 の追加
+
+### 決定
+
+- #299（放送日 2026-06-16、PUY 1989年、工藤静香特集（2回目））を `SETUPLIST_DATA` に追加する
+- セットリスト画像は新形式 `1989.299.jfif` で追加し、`image_file` と一致させる
+- 新着表示は #299、サイト反映日は 2026.9.16 とする
+- 変更対象は `setuplits.html`、`index.html`、`docs/decisions.md`、`images/setuplits/1989.299.jfif` に限定し、既存の未追跡画像には触れない
+- 今回の作業では commit / push を行わない
