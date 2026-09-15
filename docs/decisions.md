@@ -173,3 +173,15 @@
 - triggerは `main` へのpushと`main`向けpull requestだけに限定する
 
 GitHub Actionsではcheckout後の作業ツリーとHEADが同じ内容になるため、validatorのHEAD件数比較は主にローカル更新時の確認機能となる。CIでは構造破損、必須項目欠落、画像参照切れなど、現在のcheckout内容に対する検証を担う。base branchとの件数比較は、比較元の取得とvalidatorの入力設計が必要になるため、この最小構成には含めない。
+
+---
+
+## 2026-09-15 — Set Up List #298 の追加と明示訂正
+
+### 決定
+
+- #298（放送日 2026-06-09、PUY 1998年、SMAP特集（3回目））を `SETUPLIST_DATA` に追加する
+- セットリスト画像 `1998.298.png` を元データとするが、no.1 のアーティスト名 `Kinki kids` はユーザーが画像の打ち間違いと明示したため、正式表記 `KinKi Kids` を採用する
+- 新着表示は #298、サイト反映日は 2026.9.15 とする
+- 変更対象は `setuplits.html`、`index.html`、`docs/decisions.md`、`images/setuplits/1998.298.png` に限定し、既存の未追跡画像には触れない
+- 今回の作業では commit / push を行わない
