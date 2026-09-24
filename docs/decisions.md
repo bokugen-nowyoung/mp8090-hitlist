@@ -197,3 +197,19 @@ GitHub Actionsではcheckout後の作業ツリーとHEADが同じ内容になる
 - 新着表示は #299、サイト反映日は 2026.9.16 とする
 - 変更対象は `setuplits.html`、`index.html`、`docs/decisions.md`、`images/setuplits/1989.299.jfif` に限定し、既存の未追跡画像には触れない
 - 今回の作業では commit / push を行わない
+
+---
+
+## 2026-09-24 — Set Up List #288 の追加と新着表示の運用
+
+### 決定
+
+- #288（放送日 2026-03-31、PUY 1997年、小室哲哉特集（2回目））を `SETUPLIST_DATA` に追加する
+- 曲名・歌手名は画像表記を優先し、no.2 A.S.A.P は末尾ピリオドなし、no.8 Everything’s は曲線アポストロフィ（U+2019）、no.9 井上陽水奥田民生 は区切りなし、no.13 の波形は ～（U+FF5E）で記録する
+- セットリスト画像は新形式 `1997.288.png` で追加し、`image_file` と一致させる
+- `NEW_EPISODE_NO` は最大の放送回番号ではなく、次回PUYに合わせて前回の同じPUYのSet Up Listを新着表示するための参照回として扱う
+- リスナー（ナウヤン同盟）は前回のSet Up List画像を見て曲被りを避け、コアなリスナーは過去PUYやアーティスト検索も利用してリクエスト曲を考える
+- 番組の基本ルールとして、あるPUYで流れた曲は次回の同PUYでは流れない。訃報や特別事情がある場合は例外とする
+- 今回は次回PUY向け参照回として `NEW_EPISODE_NO = 288`、サイト反映日は 2026.9.24 とする
+- 変更対象は `setuplits.html`、`index.html`、`docs/decisions.md`、`images/setuplits/1997.288.png` に限定し、既存の未追跡画像には触れない
+- 今回の作業では commit / push を行わない
