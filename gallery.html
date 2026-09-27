@@ -277,6 +277,51 @@
       margin-top: 0.15rem;
     }
 
+    /* ── 応援キャラクター紹介 ── */
+    .character-feature {
+      display: grid;
+      grid-template-columns: minmax(0, 1.15fr) minmax(240px, 0.85fr);
+      gap: 1.2rem;
+      align-items: center;
+      margin-bottom: 1.4rem;
+    }
+    .character-story {
+      background: linear-gradient(135deg, var(--gold-bg) 0%, #fff 62%, #fff0f7 100%);
+      border: 1px solid var(--border-table);
+      border-left: 5px solid var(--accent-mg);
+      border-radius: var(--r-md);
+      box-shadow: var(--shadow-sm);
+      padding: 1rem 1.1rem;
+      color: var(--text-mid);
+      font-family: var(--font-sans);
+      font-size: 0.88rem;
+      line-height: 1.8;
+    }
+    .character-story p + p { margin-top: 0.7rem; }
+    .character-lead {
+      color: var(--text-dark);
+      font-weight: 700;
+    }
+    .character-permission {
+      background: #fff;
+      border: 1px solid var(--gold);
+      border-radius: var(--r-sm);
+      padding: 0.55rem 0.7rem;
+      font-size: 0.8rem;
+      color: var(--text-mid);
+    }
+    .character-profile-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      max-width: 720px;
+      margin: 0 auto;
+    }
+    .character-profile-grid .gallery-card-frame { aspect-ratio: 1; }
+    @media (max-width: 600px) {
+      .character-feature { grid-template-columns: 1fr; gap: 1rem; }
+      .character-story { padding: 0.85rem 0.9rem; font-size: 0.84rem; }
+      .character-profile-grid { grid-template-columns: 1fr; }
+    }
+
     /* ── 画像拡大モーダル（setuplits.html の ep-modal 機構・デザインを流用）── */
     .ep-modal-overlay {
       position: fixed;
@@ -712,6 +757,56 @@
             <img src="images/gakuen-dayori-2026-03.jpg" alt="ナウヤン学園だより 2026年3月号" loading="lazy">
           </div>
           <p class="gallery-caption">2026年3月号<span class="cap-sub">ラジオまつり2026 特別号</span></p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ▼ 応援キャラクター？（公開中） -->
+    <section class="gallery-section" aria-labelledby="sec-characters">
+      <h2 class="gallery-section-title" id="sec-characters">
+        <span class="sec-caret" aria-hidden="true">▼</span> 応援キャラクター？
+        <span class="sec-count" aria-hidden="true">双子ロボット</span>
+      </h2>
+
+      <div class="character-feature">
+        <div class="gallery-card" tabindex="0" role="button"
+             data-full="images/gallery/mp8090-characters.jpg"
+             data-caption="mpハチゼロ＆mpキュウゼロ">
+          <div class="gallery-card-frame is-photo">
+            <img src="images/gallery/mp8090-characters.jpg"
+                 alt="80年代担当のmpハチゼロと90年代担当のmpキュウゼロ" loading="lazy">
+          </div>
+          <p class="gallery-caption">mpハチゼロ＆mpキュウゼロ<span class="cap-sub">音楽で時代をつなぐ双子のロボット</span></p>
+        </div>
+
+        <div class="character-story">
+          <p class="character-lead">
+            80年代担当の「mpハチゼロ」と、90年代担当の「mpキュウゼロ」。<br>
+            音楽で時代をつなぐ、双子のロボットです。
+          </p>
+          <p>ナウヤン同盟のみなさんと一緒に、これから育てていく応援キャラクターです。</p>
+          <p>ナウヤン同窓会のチラシにも登場し、ナウヤンのみなさんにも少しずつおなじみになっています。</p>
+          <p class="character-permission">※石井哲也アナウンサーの許可を得て掲載しています。</p>
+        </div>
+      </div>
+
+      <h3 class="gallery-subsection-title">
+        <span class="subsec-mark" aria-hidden="true">◆</span> キャラクター紹介
+      </h3>
+      <div class="gallery-grid character-profile-grid">
+        <div class="gallery-card" tabindex="0" role="button"
+             data-full="images/gallery/mp80.jpg" data-caption="mpハチゼロ（80年代担当）">
+          <div class="gallery-card-frame is-photo">
+            <img src="images/gallery/mp80.jpg" alt="80年代担当の双子ロボット mpハチゼロ" loading="lazy">
+          </div>
+          <p class="gallery-caption">mpハチゼロ<span class="cap-sub">80年代担当</span></p>
+        </div>
+        <div class="gallery-card" tabindex="0" role="button"
+             data-full="images/gallery/mp90.jpg" data-caption="mpキュウゼロ（90年代担当）">
+          <div class="gallery-card-frame is-photo">
+            <img src="images/gallery/mp90.jpg" alt="90年代担当の双子ロボット mpキュウゼロ" loading="lazy">
+          </div>
+          <p class="gallery-caption">mpキュウゼロ<span class="cap-sub">90年代担当</span></p>
         </div>
       </div>
     </section>
