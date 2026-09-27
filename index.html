@@ -241,10 +241,18 @@
       padding: 1rem 1.25rem;
     }
     .radiko-update-title {
-      margin: 0 0 0.45rem;
+      margin: 0 0 0.25rem;
       color: var(--accent-cyan);
       font-size: 1.05rem;
       line-height: 1.5;
+    }
+    .radiko-update-request {
+      margin: 0 0 0.55rem;
+      color: #B51F68;
+      font-family: var(--font-sans);
+      font-size: 0.88rem;
+      font-weight: 700;
+      line-height: 1.55;
     }
     .radiko-update-text {
       margin: 0;
@@ -272,6 +280,7 @@
     @media (max-width: 600px) {
       .radiko-update-inner { padding: 0.75rem 0.9rem; }
       .radiko-update-title { font-size: 1rem; }
+      .radiko-update-request { font-size: 0.84rem; }
       .radiko-update-text { font-size: 0.86rem; }
       .radiko-update-times {
         display: grid;
@@ -537,6 +546,7 @@
   <aside class="radiko-update" aria-labelledby="radiko-update-title">
     <div class="radiko-update-inner">
       <h2 class="radiko-update-title" id="radiko-update-title">📻 radikoで、もっと聴きやすくなりました！</h2>
+      <p class="radiko-update-request">ナウヤン同盟の皆さんからのご要望にお応え♪</p>
       <p class="radiko-update-text">
         2026年9月1日放送分から、radikoの番組表示が1時間ごとに分割されました。<br>
         前半・後半をそれぞれ選んで再生できるので、タイムフリーでもより聴きやすくなりました！
