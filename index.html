@@ -226,6 +226,66 @@
       padding-bottom: 2rem;
     }
 
+    /* radiko表示変更のお知らせ */
+    .radiko-update {
+      max-width: 960px;
+      margin: 0.8rem auto 0;
+      padding: 0 1rem;
+    }
+    .radiko-update-inner {
+      background: linear-gradient(135deg, var(--gold-bg) 0%, #fff 58%, #fff0f7 100%);
+      border: 1px solid var(--accent-cyan-xl);
+      border-left: 5px solid var(--accent-mg);
+      border-radius: var(--r-lg);
+      box-shadow: var(--shadow-sm);
+      padding: 1rem 1.25rem;
+    }
+    .radiko-update-title {
+      margin: 0 0 0.45rem;
+      color: var(--accent-cyan);
+      font-size: 1.05rem;
+      line-height: 1.5;
+    }
+    .radiko-update-text {
+      margin: 0;
+      color: var(--text-mid);
+      font-family: var(--font-sans);
+      font-size: 0.9rem;
+      line-height: 1.75;
+    }
+    .radiko-update-times {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin: 0.7rem 0 0;
+      font-family: var(--font-sans);
+      font-size: 0.84rem;
+      font-weight: 700;
+    }
+    .radiko-update-time {
+      background: #fff;
+      border: 1px solid var(--accent-mg-l);
+      border-radius: 999px;
+      color: var(--text-dark);
+      padding: 0.25rem 0.75rem;
+    }
+    @media (max-width: 600px) {
+      .radiko-update-inner { padding: 0.75rem 0.9rem; }
+      .radiko-update-title { font-size: 1rem; }
+      .radiko-update-text { font-size: 0.86rem; }
+      .radiko-update-times {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.35rem;
+        margin-top: 0.5rem;
+      }
+      .radiko-update-time {
+        padding: 0.25rem 0.35rem;
+        text-align: center;
+        white-space: nowrap;
+      }
+    }
+
     /* ===== フッター ===== */
     .site-footer {
       text-align: center;
@@ -472,6 +532,21 @@
       </div>
     </div>
   </section>
+
+  <!-- radiko表示変更のお知らせ -->
+  <aside class="radiko-update" aria-labelledby="radiko-update-title">
+    <div class="radiko-update-inner">
+      <h2 class="radiko-update-title" id="radiko-update-title">📻 radikoで、もっと聴きやすくなりました！</h2>
+      <p class="radiko-update-text">
+        2026年9月1日放送分から、radikoの番組表示が1時間ごとに分割されました。<br>
+        前半・後半をそれぞれ選んで再生できるので、タイムフリーでもより聴きやすくなりました！
+      </p>
+      <p class="radiko-update-times" aria-label="radikoの番組表示時間">
+        <span class="radiko-update-time">① 22:00〜23:00</span>
+        <span class="radiko-update-time">② 23:00〜24:00</span>
+      </p>
+    </div>
+  </aside>
 
   <main class="main-content">
     <div class="top-grid">
