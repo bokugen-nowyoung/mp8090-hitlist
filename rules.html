@@ -21,7 +21,7 @@
 <link rel="apple-touch-icon" href="images/apple-touch-icon.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Yusei+Magic&family=Zen+Maru+Gothic:wght@400;500;700&family=Klee+One:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Klee+One:wght@400;600&family=M+PLUS+1+Code:wght@500;700&family=Press+Start+2P&family=Yusei+Magic&family=Zen+Maru+Gothic:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
   :root {
     --board: #b3895b;
@@ -390,6 +390,264 @@
     line-height: 1.8;
   }
   footer.rules-footer a { color: var(--gold); text-decoration: none; }
+
+  /* ===== 80年代テクノ・ポップ／シンセ・シーケンサー ===== */
+  :root {
+    --techno-bg: #07141b;
+    --techno-panel: #13252d;
+    --techno-panel-deep: #091419;
+    --techno-line: #31545d;
+    --techno-cyan: #21d9e3;
+    --techno-pink: #f13b98;
+    --techno-cream: #fff5dc;
+    --techno-gold: #dfb94e;
+  }
+  body {
+    color: var(--techno-cream);
+    background: var(--techno-bg);
+  }
+  .top-banner-strip {
+    background: var(--techno-gold);
+    color: #241700;
+    letter-spacing: 0.03em;
+  }
+  header.rules-header {
+    position: relative;
+    overflow: hidden;
+    background:
+      linear-gradient(rgba(33,217,227,0.08) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(33,217,227,0.08) 1px, transparent 1px),
+      #091820;
+    background-size: 28px 28px;
+    border-bottom: 1px solid var(--techno-line);
+  }
+  header.rules-header::after {
+    content: "TECHNO POP PROGRAM GUIDE / 80—90";
+    display: block;
+    margin: 1.2rem auto 0;
+    color: #74aab3;
+    font: 0.68rem/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: 0.16em;
+  }
+  header.rules-header .cross-links a { color: var(--techno-gold); }
+  header.rules-header h1 {
+    font-family: 'M PLUS 1 Code', 'Zen Maru Gothic', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.025em;
+  }
+  header.rules-header p { color: #a7c1c4; }
+
+  .board {
+    position: relative;
+    overflow: hidden;
+    background:
+      radial-gradient(circle at 12% 12%, rgba(33,217,227,0.08), transparent 25%),
+      radial-gradient(circle at 88% 85%, rgba(241,59,152,0.07), transparent 28%),
+      var(--techno-bg);
+    padding-bottom: 2rem;
+  }
+  .board::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0.28;
+    background: repeating-linear-gradient(0deg, transparent 0 27px, rgba(81,127,137,0.12) 27px 28px);
+  }
+  .quick-card,
+  .intro-card,
+  .note {
+    transform: none;
+    border-radius: 3px;
+    color: #dbeaec;
+    background: var(--techno-panel);
+    border: 1px solid var(--techno-line);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.34);
+  }
+  .quick-card {
+    border: 2px solid #77898e;
+    box-shadow: inset 0 0 0 5px var(--techno-panel-deep), 0 10px 26px rgba(0,0,0,0.42);
+    padding: 1.7rem 1.5rem 1.4rem;
+  }
+  .quick-card h2 {
+    color: var(--techno-cyan);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: 0.08em;
+    text-shadow: 0 0 10px rgba(33,217,227,0.32);
+  }
+  .quick-row { border-color: rgba(102,151,161,0.32); }
+  .quick-label {
+    color: var(--techno-bg);
+    background: var(--techno-cyan);
+    border-radius: 2px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+  .quick-row-send .quick-label { color: #28101d; background: var(--techno-pink); }
+  .quick-row-deadline .quick-label { color: #241700; background: var(--techno-gold); }
+  .quick-row-mail .quick-label { color: var(--techno-bg); background: var(--techno-cyan); }
+  .quick-row-form .quick-label { color: #0e260d; background: #70cc6b; }
+  .quick-val a,
+  .quick-rules-link a,
+  .note a { color: var(--techno-cyan); }
+  .quick-sub { color: #9ab2b7; }
+  .request-single-ok {
+    color: #ff9bca;
+    background: rgba(241,59,152,0.1);
+    border-left-color: var(--techno-pink);
+  }
+  .copy-btn {
+    color: var(--techno-cream);
+    background: #15262d;
+    border-color: var(--techno-pink);
+    border-radius: 2px;
+  }
+  .copy-btn:hover { background: #283c44; }
+  .copy-msg { color: #75df84; }
+  .pin, .tape { display: none; }
+
+  .sequencer-strip {
+    max-width: 760px;
+    margin: 0 auto 1.2rem;
+    display: grid;
+    grid-template-columns: repeat(16, 1fr);
+    gap: 0.35rem;
+  }
+  .sequencer-strip span {
+    height: 0.9rem;
+    background: #0c171b;
+    border: 1px solid #3e555b;
+  }
+  .sequencer-strip span:nth-child(4n+1),
+  .sequencer-strip span:nth-child(7),
+  .sequencer-strip span:nth-child(14) {
+    background: var(--techno-pink);
+    border-color: #ff76ba;
+    box-shadow: 0 0 8px rgba(241,59,152,0.65);
+  }
+  .jump-nav { margin-bottom: 2.2rem; }
+  .jump-nav a {
+    color: var(--techno-cream);
+    background: #10242c !important;
+    border: 1px solid var(--techno-line);
+    border-radius: 2px;
+    box-shadow: none;
+    transform: none !important;
+  }
+  .jump-nav a:first-child { border-left: 4px solid var(--techno-gold); }
+  .jump-nav a:last-child { border-left: 4px solid var(--techno-pink); }
+  .jump-nav a:hover { background: #19333d !important; }
+
+  .intro-card { border-left: 4px solid var(--techno-cyan); }
+  .intro-card h2 { color: var(--techno-cream); font-family: 'Zen Maru Gothic', sans-serif; }
+  .intro-card p,
+  .intro-lead-toggle { color: #b8c9cb; }
+  .intro-lead-arrow { color: var(--techno-pink); }
+  .ishii-quote {
+    color: #dbeaec;
+    background: #09171c;
+    border-left-color: var(--techno-pink);
+  }
+  .intro-card .station-info { color: #9bb3b7; border-color: var(--techno-line); }
+
+  .columns { gap: 1.25rem; }
+  .col-title {
+    padding: 0.7rem;
+    color: var(--techno-cream);
+    background: #0b1d24;
+    border-bottom: 3px solid var(--techno-cyan);
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    text-shadow: none;
+    letter-spacing: 0.04em;
+  }
+  #request-rules .col-title { border-bottom-color: var(--techno-pink); }
+  .note {
+    margin-bottom: 1rem;
+    padding: 1.05rem 1.05rem 1rem;
+    font-family: 'Zen Maru Gothic', sans-serif;
+    border-left: 4px solid var(--techno-cyan);
+  }
+  .note.yellow,
+  .note.yellow2,
+  .note.blue,
+  .note.blue2 { background: var(--techno-panel); transform: none; }
+  .note.yellow2 { border-left-color: var(--techno-gold); }
+  .note.blue { border-left-color: var(--techno-pink); }
+  .note.blue2 { border-left-color: #70cc6b; }
+  .note strong { color: var(--techno-cream); }
+  .note .note-tag {
+    color: #8fb6bc;
+    background: #09171c;
+    border-radius: 2px;
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    letter-spacing: 0.06em;
+  }
+  .note.placeholder { opacity: 0.52; }
+
+  .character-guides {
+    position: relative;
+    z-index: 1;
+    max-width: 860px;
+    min-height: 92px;
+    margin: 0.8rem auto 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    pointer-events: none;
+  }
+  .character-guide {
+    position: relative;
+    width: 92px;
+    height: 82px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    filter: drop-shadow(0 0 7px color-mix(in srgb, var(--guide-color) 42%, transparent));
+  }
+  .character-guide img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  .character-guide.mp80 { --guide-color: var(--techno-pink); }
+  .character-guide.mp90 { --guide-color: var(--techno-cyan); }
+  .character-title {
+    flex: 1 1 auto;
+    align-self: center;
+    padding: 0 0.8rem;
+    color: var(--techno-cream);
+    text-align: center;
+    font-family: 'Press Start 2P', ui-monospace, monospace;
+    font-size: clamp(0.48rem, 1.25vw, 0.72rem);
+    line-height: 1.8;
+    letter-spacing: 0.04em;
+    text-shadow:
+      2px 0 0 rgba(241,59,152,0.68),
+      -2px 0 0 rgba(33,217,227,0.68);
+  }
+  .character-title span { display: block; }
+  footer.rules-footer {
+    color: #81999e;
+    background: #040c10;
+    border-top: 1px solid var(--techno-line);
+  }
+  footer.rules-footer a { color: var(--techno-gold); }
+
+  @media (max-width: 480px) {
+    header.rules-header::after { font-size: 0.56rem; letter-spacing: 0.09em; }
+    .board { padding: 1.5rem 0.75rem 1.5rem; }
+    .quick-card { padding: 1.4rem 0.85rem 1rem; }
+    .sequencer-strip { gap: 0.2rem; }
+    .sequencer-strip span { height: 0.65rem; }
+    .character-guides { min-height: 64px; padding: 0 0.4rem; }
+    .character-guide { width: 60px; height: 55px; }
+    .character-title {
+      padding: 0 0.35rem;
+      font-size: 0.52rem;
+      line-height: 1.75;
+      letter-spacing: 0;
+    }
+  }
 </style>
 </head>
 <body>
@@ -401,7 +659,7 @@
       <a href="setuplits.html">🎵 mp8090 Set Up List アーカイブ</a>
       <a href="year-end-chart.html">🎵 年間シングルヒット曲ランキング</a>
     </div>
-    <h1>📌 番組・リクエストのルール</h1>
+    <h1>🎛️ 番組・リクエストのルール</h1>
     <p>LuckyFM「Music Pick Up 80's &amp; 90's」<br>石井哲也アナウンサー公認・ファンサイト</p>
   </header>
 
@@ -411,23 +669,30 @@
       <div class="pin pin-left"></div>
       <div class="pin pin-right"></div>
       <h2>✉️ リクエストはこちら</h2>
-      <div class="quick-row">
+      <div class="quick-row quick-row-send">
         <span class="quick-label">送り方</span>
         <span class="quick-val">リクエストは一人1通でお願いします。<span class="quick-sub">ピックアップする年（PUY）から1曲＋特集から1曲をひとつにまとめて。</span><span class="quick-sub request-single-ok">もしくはPUY・特集どちらか1曲のみのリクエストでも構いません。</span></span>
       </div>
-      <div class="quick-row">
+      <div class="quick-row quick-row-deadline">
         <span class="quick-label">締切</span>
         <span class="quick-val">放送前日の<strong>月曜日</strong></span>
       </div>
-      <div class="quick-row">
+      <div class="quick-row quick-row-mail">
         <span class="quick-label">メール</span>
         <span class="quick-val"><a href="mailto:mp8090@lucky-ibaraki.com">mp8090@lucky-ibaraki.com</a><button type="button" class="copy-btn" id="copyMailBtn" data-copy="mp8090@lucky-ibaraki.com">コピー</button><span class="copy-msg" id="copyMailMsg" role="status" hidden>コピーしました</span></span>
       </div>
-      <div class="quick-row">
+      <div class="quick-row quick-row-form">
         <span class="quick-label">フォーム</span>
         <span class="quick-val"><a href="https://lucky-ibaraki.com/request/" target="_blank" rel="noopener noreferrer">LuckyFM メッセージフォーム</a></span>
       </div>
       <p class="quick-rules-link"><a href="#request-rules">「リクエストのルール」もご覧ください。</a></p>
+    </div>
+
+    <div class="sequencer-strip" aria-hidden="true">
+      <span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span>
+      <span></span><span></span><span></span><span></span>
     </div>
 
     <nav class="jump-nav" aria-label="ページ内ジャンプ">
@@ -601,6 +866,16 @@
         -->
       </div>
 
+    </div>
+
+    <div class="character-guides" aria-hidden="true">
+      <div class="character-guide mp80">
+        <img src="images/gallery/mp80-transparent.png" alt="" loading="lazy">
+      </div>
+      <p class="character-title"><span>Music Pick Up</span><span>80's &amp; 90's</span></p>
+      <div class="character-guide mp90">
+        <img src="images/gallery/mp90-transparent.png" alt="" loading="lazy">
+      </div>
     </div>
 
   </main>
