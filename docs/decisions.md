@@ -236,3 +236,15 @@ GitHub Actionsではcheckout後の作業ツリーとHEADが同じ内容になる
 - 新着表示は #295、サイト反映日は 2026.9.30 とする
 - 変更対象は `setuplits.html`、`index.html`、`docs/decisions.md`、`images/setuplits/1983.295.jfif` に限定し、既存の未追跡画像には触れない
 - 今回の作業では commit / push を行わない
+
+---
+
+## 2026-09-30 — Set Up List #170 の画像接続
+
+### 決定
+
+- #170（放送日 2023-12-26、PUY 1999年、ナウヤン紅白〜90年代編〜）には18曲が完全登録済みのため、曲データは変更せず画像だけを接続する
+- 未追跡画像 `1999_170.jfif` を新形式 `1999.170.jfif` へrenameし、`image_file` を同じファイル名に設定する
+- no.3は画像上では `Kinki Kids` だが、既存の正式表記 `KinKi Kids` を維持する
+- 特集名とno.18 `あなたに逢いたくて〜Missing You〜` の波ダッシュは画像からコードポイントを断定できないため、既存表記を維持する
+- `index.html`、`NEW_EPISODE_NO`、`NEW_EPISODE_DATE`は変更せず、今回の作業ではcommit / pushを行わない
