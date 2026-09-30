@@ -248,3 +248,14 @@ GitHub Actionsではcheckout後の作業ツリーとHEADが同じ内容になる
 - no.3は画像上では `Kinki Kids` だが、既存の正式表記 `KinKi Kids` を維持する
 - 特集名とno.18 `あなたに逢いたくて〜Missing You〜` の波ダッシュは画像からコードポイントを断定できないため、既存表記を維持する
 - `index.html`、`NEW_EPISODE_NO`、`NEW_EPISODE_DATE`は変更せず、今回の作業ではcommit / pushを行わない
+
+---
+
+## 2026-09-30 — Set Up List #276 の画像接続
+
+### 決定
+
+- #276（放送日 2026-01-06、PUY 1995年、松任谷由実特集（3回目））は全17曲の曲名・アーティスト名・注記が画像と一致しているため、曲データは変更せず画像だけを接続する
+- 未追跡画像 `1995_276.png` を新形式 `1995.276.png` へrenameし、`image_file` を同じファイル名に設定する
+- 曲データを変更しないため、検索結果と初登場判定への影響はない
+- `index.html`、`NEW_EPISODE_NO`、`NEW_EPISODE_DATE`は変更せず、今回の作業ではcommit / pushを行わない
