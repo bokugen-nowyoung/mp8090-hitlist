@@ -166,6 +166,10 @@ export function validateSetuplist(data, report, { imageNames = null } = {}) {
     if (episode.special_feature !== null && typeof episode.special_feature !== 'string') {
       report.error('SETUPLIST', `${episodeLocation} special_feature must be string or null`);
     }
+    const isPreparing = episode.status === 'preparing';
+    if (hasOwn(episode, 'status') && !isPreparing) {
+      report.error('SETUPLIST', `${episodeLocation} invalid status: ${JSON.stringify(episode.status)}`);
+    }
 
     if (episode.image_file !== null) {
       if (!nonEmptyString(episode.image_file)
@@ -186,8 +190,11 @@ export function validateSetuplist(data, report, { imageNames = null } = {}) {
       report.error('SETUPLIST', `${episodeLocation} tracks must be an array`);
       continue;
     }
-    if (episode.tracks.length === 0) {
+    if (episode.tracks.length === 0 && !isPreparing) {
       report.error('SETUPLIST', `${episodeLocation} tracks is empty`);
+    }
+    if (episode.tracks.length > 0 && isPreparing) {
+      report.error('SETUPLIST', `${episodeLocation} preparing status must be removed when tracks are added`);
     }
     for (let trackIndex = 0; trackIndex < episode.tracks.length; trackIndex += 1) {
       const track = episode.tracks[trackIndex];
@@ -604,6 +611,27 @@ export function runSelfTest() {
     const data = makeSetuplistFixture();
     delete data[0].tracks[0].artist;
     return hasDiagnostic(validateSet(data), 'ERROR', 'missing field: artist');
+  });
+  test('empty tracks require explicit preparing status', () => {
+    const data = makeSetuplistFixture();
+    data[0].tracks = [];
+    return hasDiagnostic(validateSet(data), 'ERROR', 'tracks is empty');
+  });
+  test('preparing episode may have empty tracks', () => {
+    const data = makeSetuplistFixture();
+    data[0].status = 'preparing';
+    data[0].tracks = [];
+    return validateSet(data).count('ERROR') === 0;
+  });
+  test('preparing status must be removed after tracks are added', () => {
+    const data = makeSetuplistFixture();
+    data[0].status = 'preparing';
+    return hasDiagnostic(validateSet(data), 'ERROR', 'preparing status must be removed');
+  });
+  test('unknown episode status is rejected', () => {
+    const data = makeSetuplistFixture();
+    data[0].status = 'unknown';
+    return hasDiagnostic(validateSet(data), 'ERROR', 'invalid status');
   });
   test('empty ranking year is WARNING only', () => {
     const data = makeRankingFixture();
