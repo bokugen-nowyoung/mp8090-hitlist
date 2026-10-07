@@ -870,7 +870,35 @@
       grid-template-columns: repeat(2, minmax(0, 1fr));
       gap: 0.9rem;
     }
+    .air-decade-column {
+      display: flex;
+      flex-direction: column;
+      gap: 0.9rem;
+      min-width: 0;
+    }
+    .air-decade-header {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.8rem;
+      min-width: 0;
+      padding: 0.5rem;
+      color: var(--accent-mg);
+    }
+    .air-decade-header img {
+      width: 112px;
+      max-width: 35%;
+      height: auto;
+      flex-shrink: 0;
+    }
+    .air-decade-title { font-size: 1.1rem; }
+    .air-decade-character {
+      margin-top: 0.25rem;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+    }
     .air-year-card {
+      min-width: 0;
       background: #fff;
       border: 1px solid var(--border-table);
       border-radius: var(--r-lg);
@@ -887,6 +915,11 @@
       color: #fff;
       cursor: default;
     }
+    .air-year-heading-mobile {
+      display: none;
+      margin: 0;
+    }
+    .air-year-name { margin: 0; }
     .air-year-toggle {
       display: none;
       width: 100%;
@@ -961,7 +994,9 @@
         padding-inline: 0.6rem;
       }
       .air-year-grid { grid-template-columns: 1fr; }
+      .air-decade-header img { width: 72px; }
       .air-year-header-desktop { display: none; }
+      .air-year-heading-mobile { display: block; }
       .air-year-toggle {
         display: flex;
         min-height: 48px;
@@ -973,7 +1008,7 @@
         font-size: 0.72rem;
         opacity: 0.9;
       }
-      .air-year-card.is-open > .air-year-toggle::after { content: "▲"; }
+      .air-year-card.is-open > .air-year-heading-mobile > .air-year-toggle::after { content: "▲"; }
       .air-year-count { margin-left: auto; }
       .air-episode-list[hidden] { display: none !important; }
       .air-episode-row {
@@ -1833,6 +1868,35 @@
 
       const grid = document.createElement('div');
       grid.className = 'air-year-grid';
+      const decadeColumns = new Map();
+      for (const [decade, character, imageFile] of [
+        [1980, 'mpハチゼロ', 'mp80-transparent.png'],
+        [1990, 'mpキュウゼロ', 'mp90-transparent.png']
+      ]) {
+        const column = document.createElement('section');
+        column.className = 'air-decade-column';
+        column.setAttribute('aria-labelledby', `air-decade-${decade}`);
+        const decadeHeader = document.createElement('header');
+        decadeHeader.className = 'air-decade-header';
+        const image = document.createElement('img');
+        image.src = `images/gallery/${imageFile}`;
+        image.alt = '';
+        image.width = 512;
+        image.height = 512;
+        const labels = document.createElement('div');
+        const decadeTitle = document.createElement('h3');
+        decadeTitle.className = 'air-decade-title';
+        decadeTitle.id = `air-decade-${decade}`;
+        decadeTitle.textContent = `${decade}年代`;
+        const characterName = document.createElement('p');
+        characterName.className = 'air-decade-character';
+        characterName.textContent = character;
+        labels.append(decadeTitle, characterName);
+        decadeHeader.append(image, labels);
+        column.appendChild(decadeHeader);
+        grid.appendChild(column);
+        decadeColumns.set(decade, column);
+      }
       const setAirCardOpen = (card, open) => {
         const toggle = card.querySelector('.air-year-toggle');
         const list = card.querySelector('.air-episode-list');
@@ -1849,7 +1913,7 @@
 
         const cardHeader = document.createElement('div');
         cardHeader.className = 'air-year-header air-year-header-desktop';
-        const name = document.createElement('h3');
+        const name = document.createElement('h4');
         name.className = 'air-year-name';
         name.id = `air-year-${y}`;
         name.textContent = `PUY ${y}年`;
@@ -1860,6 +1924,8 @@
         cardHeader.appendChild(count);
         card.appendChild(cardHeader);
 
+        const mobileHeading = document.createElement('h4');
+        mobileHeading.className = 'air-year-heading-mobile';
         const mobileToggle = document.createElement('button');
         mobileToggle.type = 'button';
         mobileToggle.className = 'air-year-header air-year-toggle';
@@ -1883,7 +1949,8 @@
           }
           setAirCardOpen(card, willOpen);
         });
-        card.appendChild(mobileToggle);
+        mobileHeading.appendChild(mobileToggle);
+        card.appendChild(mobileHeading);
 
         const list = document.createElement('ol');
         list.className = 'air-episode-list';
@@ -1918,7 +1985,7 @@
 
         card.appendChild(list);
         setAirCardOpen(card, !mqMobile.matches);
-        grid.appendChild(card);
+        decadeColumns.get(Math.floor(y / 10) * 10).appendChild(card);
       }
 
       onAirArea.appendChild(grid);
