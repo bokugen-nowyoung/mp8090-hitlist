@@ -885,6 +885,14 @@
       padding: 0.65rem 0.9rem;
       background: linear-gradient(135deg, #5A0040 0%, #9B1060 60%, #C01878 100%);
       color: #fff;
+      cursor: default;
+    }
+    .air-year-toggle {
+      display: none;
+      width: 100%;
+      border: none;
+      text-align: left;
+      font-family: inherit;
     }
     .air-year-name {
       font-size: 1rem;
@@ -953,6 +961,21 @@
         padding-inline: 0.6rem;
       }
       .air-year-grid { grid-template-columns: 1fr; }
+      .air-year-header-desktop { display: none; }
+      .air-year-toggle {
+        display: flex;
+        min-height: 48px;
+        cursor: pointer;
+      }
+      .air-year-toggle::after {
+        content: "▼";
+        flex-shrink: 0;
+        font-size: 0.72rem;
+        opacity: 0.9;
+      }
+      .air-year-card.is-open > .air-year-toggle::after { content: "▲"; }
+      .air-year-count { margin-left: auto; }
+      .air-episode-list[hidden] { display: none !important; }
       .air-episode-row {
         grid-template-columns: 4rem 4.4rem minmax(0, 1fr);
         padding: 0.5rem 0.65rem;
@@ -1810,15 +1833,22 @@
 
       const grid = document.createElement('div');
       grid.className = 'air-year-grid';
+      const setAirCardOpen = (card, open) => {
+        const toggle = card.querySelector('.air-year-toggle');
+        const list = card.querySelector('.air-episode-list');
+        card.classList.toggle('is-open', open);
+        toggle.setAttribute('aria-expanded', String(open));
+        list.hidden = !open;
+      };
 
       for (const y of years) {
         const yearEpisodes = (byYear.get(y) || []).slice().sort((a, b) => a.episode_no - b.episode_no);
         const card = document.createElement('section');
         card.className = 'air-year-card';
-        card.setAttribute('aria-labelledby', `air-year-${y}`);
+        card.setAttribute('aria-label', `PUY ${y}年`);
 
         const cardHeader = document.createElement('div');
-        cardHeader.className = 'air-year-header';
+        cardHeader.className = 'air-year-header air-year-header-desktop';
         const name = document.createElement('h3');
         name.className = 'air-year-name';
         name.id = `air-year-${y}`;
@@ -1830,8 +1860,34 @@
         cardHeader.appendChild(count);
         card.appendChild(cardHeader);
 
+        const mobileToggle = document.createElement('button');
+        mobileToggle.type = 'button';
+        mobileToggle.className = 'air-year-header air-year-toggle';
+        mobileToggle.setAttribute('aria-controls', `air-list-${y}`);
+        mobileToggle.setAttribute('aria-expanded', 'false');
+        const mobileName = document.createElement('span');
+        mobileName.className = 'air-year-name';
+        mobileName.textContent = `PUY ${y}年`;
+        const mobileCount = document.createElement('span');
+        mobileCount.className = 'air-year-count';
+        mobileCount.textContent = `${yearEpisodes.length}回`;
+        mobileToggle.appendChild(mobileName);
+        mobileToggle.appendChild(mobileCount);
+        mobileToggle.addEventListener('click', () => {
+          if (!mqMobile.matches) return;
+          const willOpen = mobileToggle.getAttribute('aria-expanded') !== 'true';
+          if (willOpen) {
+            grid.querySelectorAll('.air-year-card.is-open').forEach(other => {
+              if (other !== card) setAirCardOpen(other, false);
+            });
+          }
+          setAirCardOpen(card, willOpen);
+        });
+        card.appendChild(mobileToggle);
+
         const list = document.createElement('ol');
         list.className = 'air-episode-list';
+        list.id = `air-list-${y}`;
         yearEpisodes.forEach((ep, index) => {
           const row = document.createElement('li');
           row.className = 'air-episode-row';
@@ -1861,10 +1917,17 @@
         });
 
         card.appendChild(list);
+        setAirCardOpen(card, !mqMobile.matches);
         grid.appendChild(card);
       }
 
       onAirArea.appendChild(grid);
+      const syncAirAccordionMode = () => {
+        grid.querySelectorAll('.air-year-card').forEach(card => {
+          setAirCardOpen(card, !mqMobile.matches);
+        });
+      };
+      mqMobile.addEventListener('change', syncAirAccordionMode);
       onAirRendered = true;
     }
 
