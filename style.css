@@ -289,6 +289,181 @@ a {
 }
 
 /* ============================================================
+   Year-end chart search
+   ============================================================ */
+.year-end-chart-page [hidden] {
+  display: none !important;
+}
+
+.year-end-chart-page.search-panel-open .year-nav {
+  position: static;
+}
+
+.year-end-chart-page .year-chart-nav-inner {
+  display: block;
+  max-width: 980px;
+}
+
+.year-end-chart-page .year-chart-nav-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+}
+
+.year-end-chart-page .year-chart-nav-controls .nav-label,
+.year-end-chart-page .year-chart-nav-controls .chart-search-toggle {
+  flex-shrink: 0;
+  margin-bottom: 0;
+}
+
+.year-end-chart-page .year-chart-nav-controls .year-buttons {
+  flex: 1 1 auto;
+}
+
+.year-end-chart-page .chart-search-toggle,
+.year-end-chart-page .chart-search-submit,
+.year-end-chart-page .chart-search-clear,
+.year-end-chart-page .chart-search-results-close {
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-weight: 700;
+  transition: background 0.12s, color 0.12s, border-color 0.12s, box-shadow 0.12s;
+}
+
+.year-end-chart-page .chart-search-toggle {
+  background: var(--accent-mg);
+  border: 1px solid var(--accent-mg-l);
+  border-bottom: 3px solid #65133D;
+  color: #fff;
+  font-size: 0.76rem;
+  padding: 0.35rem 0.75rem;
+  white-space: nowrap;
+}
+
+.year-end-chart-page .chart-search-toggle:hover:not(:disabled),
+.year-end-chart-page .chart-search-toggle[aria-expanded="true"] {
+  background: var(--accent-mg-l);
+  box-shadow: 0 0 10px rgba(232,67,147,0.5);
+}
+
+.year-end-chart-page .chart-search-toggle:disabled {
+  cursor: wait;
+  opacity: 0.45;
+}
+
+.year-end-chart-page .chart-search-panel {
+  background: #2B1608;
+  border: 1px solid #5D3516;
+  border-radius: var(--r-md);
+  display: grid;
+  grid-template-columns: minmax(12rem, 1fr) auto auto;
+  gap: 0.75rem;
+  align-items: end;
+  margin-top: 0.75rem;
+  padding: 0.85rem;
+}
+
+.year-end-chart-page .chart-search-keyword {
+  min-width: 0;
+}
+
+.year-end-chart-page .chart-search-keyword label,
+.year-end-chart-page .chart-search-decades legend {
+  color: var(--gold-l);
+  font-family: var(--font-sans);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+}
+
+.year-end-chart-page .chart-search-keyword label {
+  display: block;
+  margin-bottom: 0.35rem;
+}
+
+.year-end-chart-page .chart-search-keyword input {
+  background: #fff;
+  border: 2px solid #8D6845;
+  border-radius: var(--r-sm);
+  box-sizing: border-box;
+  color: var(--text-main);
+  font: inherit;
+  min-width: 0;
+  padding: 0.48rem 0.6rem;
+  width: 100%;
+}
+
+.year-end-chart-page .chart-search-decades {
+  border: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.7rem;
+  margin: 0;
+  min-width: 0;
+  padding: 0;
+}
+
+.year-end-chart-page .chart-search-decades legend {
+  margin-bottom: 0.35rem;
+  padding: 0;
+}
+
+.year-end-chart-page .chart-search-decades label {
+  color: #F4E4D4;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  font-size: 0.76rem;
+  white-space: nowrap;
+}
+
+.year-end-chart-page .chart-search-actions {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.year-end-chart-page .chart-search-submit,
+.year-end-chart-page .chart-search-clear,
+.year-end-chart-page .chart-search-results-close {
+  font-size: 0.76rem;
+  padding: 0.48rem 0.8rem;
+}
+
+.year-end-chart-page .chart-search-submit {
+  background: var(--accent-cyan);
+  border: 1px solid var(--accent-cyan-l);
+  color: #fff;
+}
+
+.year-end-chart-page .chart-search-submit:hover {
+  background: var(--accent-cyan-l);
+}
+
+.year-end-chart-page .chart-search-clear,
+.year-end-chart-page .chart-search-results-close {
+  background: #fff;
+  border: 1px solid #BFA88F;
+  color: #603C20;
+}
+
+.year-end-chart-page .chart-search-clear:hover,
+.year-end-chart-page .chart-search-results-close:hover {
+  background: #FFF2DF;
+  border-color: #8D6845;
+}
+
+.year-end-chart-page .chart-search-toggle:focus-visible,
+.year-end-chart-page .chart-search-keyword input:focus-visible,
+.year-end-chart-page .chart-search-decades input:focus-visible,
+.year-end-chart-page .chart-search-submit:focus-visible,
+.year-end-chart-page .chart-search-clear:focus-visible,
+.year-end-chart-page .chart-search-results-close:focus-visible,
+.year-end-chart-page .chart-search-table-wrapper:focus-visible {
+  outline: 3px solid #FFE56B;
+  outline-offset: 3px;
+}
+
+/* ============================================================
    Main / Loading / Error
    ============================================================ */
 .main-content {
@@ -337,6 +512,124 @@ a {
   overflow: hidden;
   border: 1px solid var(--border-table);
   animation: fadeIn 0.3s ease;
+}
+
+.year-end-chart-page .chart-search-results {
+  background: #fff;
+  border: 1px solid var(--border-table);
+  border-radius: var(--r-lg);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  animation: fadeIn 0.3s ease;
+}
+
+.year-end-chart-page .chart-search-results-header {
+  align-items: center;
+  background: linear-gradient(135deg, #004A52 0%, var(--accent-cyan) 60%, #009aaa 100%);
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  justify-content: space-between;
+  padding: 1rem 1.5rem;
+}
+
+.year-end-chart-page .chart-search-results-title {
+  color: #fff;
+  font-size: clamp(1rem, 3vw, 1.4rem);
+  letter-spacing: 0.06em;
+  text-shadow: 1px 1px 4px rgba(0,0,0,0.4);
+}
+
+.year-end-chart-page .chart-search-results-tools {
+  align-items: center;
+  display: flex;
+  gap: 0.6rem;
+}
+
+.year-end-chart-page .chart-search-result-count {
+  background: rgba(255,255,255,0.15);
+  border: 1px solid rgba(255,255,255,0.3);
+  border-radius: 999px;
+  color: #fff;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  min-width: 3.5rem;
+  padding: 0.2rem 0.65rem;
+  text-align: center;
+}
+
+.year-end-chart-page .chart-search-scroll-hint {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-head);
+  color: var(--text-muted);
+  display: none;
+  font-family: var(--font-sans);
+  font-size: 0.68rem;
+  padding: 0.35rem;
+  text-align: center;
+}
+
+.year-end-chart-page .chart-search-table-wrapper {
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.year-end-chart-page .chart-search-table {
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  min-width: 600px;
+  width: 100%;
+}
+
+.year-end-chart-page .chart-search-table th {
+  background: var(--bg-secondary);
+  border-bottom: 2px solid var(--border-head);
+  color: var(--text-mid);
+  font-family: var(--font-sans);
+  font-size: 0.7rem;
+  letter-spacing: 0.08em;
+  padding: 0.65rem 0.8rem;
+  text-align: left;
+  white-space: nowrap;
+}
+
+.year-end-chart-page .chart-search-table td {
+  border-bottom: 1px solid var(--border-table);
+  padding: 0.68rem 0.8rem;
+  vertical-align: top;
+}
+
+.year-end-chart-page .chart-search-table tbody tr:nth-child(odd) {
+  background: var(--stripe-odd);
+}
+
+.year-end-chart-page .chart-search-table tbody tr:nth-child(even) {
+  background: var(--stripe-even);
+}
+
+.year-end-chart-page .chart-search-table tbody tr:hover {
+  background: #FFEEC0;
+}
+
+.year-end-chart-page .col-search-year,
+.year-end-chart-page .col-search-rank {
+  font-family: var(--font-mono);
+  text-align: center;
+  white-space: nowrap;
+  width: 5.5rem;
+}
+
+.year-end-chart-page .col-search-title,
+.year-end-chart-page .col-search-artist {
+  min-width: 12rem;
+}
+
+.year-end-chart-page .chart-search-empty {
+  color: var(--text-muted);
+  padding: 2rem !important;
+  text-align: center;
 }
 
 @keyframes fadeIn {
@@ -817,6 +1110,39 @@ a {
   .key-hint-top-wrap {
     display: none;
   }
+
+  .year-end-chart-page .chart-search-panel {
+    align-items: stretch;
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .year-end-chart-page .chart-search-actions {
+    justify-content: flex-end;
+  }
+
+  .year-end-chart-page .chart-search-scroll-hint {
+    display: block;
+  }
+
+  .year-end-chart-page .chart-search-results-header {
+    padding: 0.8rem 1rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .year-end-chart-page .year-chart-nav-controls {
+    flex-wrap: wrap;
+  }
+
+  .year-end-chart-page .year-chart-nav-controls .nav-label,
+  .year-end-chart-page .year-chart-nav-controls .year-buttons {
+    flex-basis: 100%;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .year-end-chart-page .year-chart-nav-controls .chart-search-toggle {
+    margin-left: auto;
+  }
 }
 
 /* ============================================================
@@ -866,6 +1192,36 @@ a {
   .main-content {
     margin: 1rem auto;
     padding: 0 0.5rem;
+  }
+
+  .year-end-chart-page .year-nav {
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .year-end-chart-page .chart-search-panel {
+    padding: 0.7rem;
+  }
+
+  .year-end-chart-page .chart-search-decades {
+    gap: 0.45rem 0.6rem;
+  }
+
+  .year-end-chart-page .chart-search-actions > button {
+    flex: 1 1 0;
+  }
+
+  .year-end-chart-page .chart-search-results-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .year-end-chart-page .chart-search-results-tools {
+    justify-content: space-between;
+  }
+
+  .year-end-chart-page .chart-search-table {
+    min-width: 560px;
   }
 }
 

@@ -24,7 +24,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="year-end-chart-page">
   <a href="index.html" class="top-banner-strip">📻 トップ「ナウヤン同盟の部屋」はこちら<span class="strip-arrow">→</span></a>
 
   <header class="site-header">
@@ -38,9 +38,31 @@
   </header>
 
   <nav class="year-nav" aria-label="年度選択">
-    <div class="year-nav-inner">
-      <span class="nav-label" aria-hidden="true">◀ YEAR SELECT ▶</span>
-      <div class="year-buttons" id="yearButtons" role="group" aria-label="年度ボタン"></div>
+    <div class="year-nav-inner year-chart-nav-inner">
+      <div class="year-chart-nav-controls">
+        <span class="nav-label" aria-hidden="true">◀ YEAR SELECT ▶</span>
+        <div class="year-buttons" id="yearButtons" role="group" aria-label="年度ボタン"></div>
+        <button type="button" id="chartSearchToggle" class="chart-search-toggle" aria-expanded="false" aria-controls="chartSearchPanel" disabled>🔍検索</button>
+      </div>
+
+      <form id="chartSearchPanel" class="chart-search-panel" aria-label="年間ランキング検索" hidden>
+        <div class="chart-search-keyword">
+          <label for="chartSearchKeyword">曲名・アーティスト名</label>
+          <input type="search" id="chartSearchKeyword" name="keyword" autocomplete="off" enterkeyhint="search" placeholder="キーワードを入力">
+        </div>
+
+        <fieldset class="chart-search-decades">
+          <legend>年代</legend>
+          <label><input type="radio" name="decade" value="all" checked> 全年</label>
+          <label><input type="radio" name="decade" value="1980"> 1980年代</label>
+          <label><input type="radio" name="decade" value="1990"> 1990年代</label>
+        </fieldset>
+
+        <div class="chart-search-actions">
+          <button type="submit" class="chart-search-submit">検索</button>
+          <button type="button" id="chartSearchClear" class="chart-search-clear">クリア</button>
+        </div>
+      </form>
     </div>
   </nav>
 
@@ -77,6 +99,32 @@
             </tr>
           </thead>
           <tbody id="rankingBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section id="chartSearchResults" class="chart-search-results" aria-labelledby="chartSearchResultsTitle" hidden>
+      <div class="chart-search-results-header">
+        <h2 id="chartSearchResultsTitle" class="chart-search-results-title">検索結果</h2>
+        <div class="chart-search-results-tools">
+          <span id="chartSearchResultCount" class="chart-search-result-count" role="status" aria-live="polite" aria-atomic="true"></span>
+          <button type="button" id="chartSearchResultsClose" class="chart-search-results-close">閉じる</button>
+        </div>
+      </div>
+
+      <div class="chart-search-scroll-hint" aria-hidden="true">← 表は横にスクロールできます →</div>
+
+      <div class="chart-search-table-wrapper" role="region" aria-label="年間ランキング検索結果" tabindex="0">
+        <table class="chart-search-table">
+          <thead>
+            <tr>
+              <th class="col-search-year" scope="col">年</th>
+              <th class="col-search-rank" scope="col">年間順位</th>
+              <th class="col-search-title" scope="col">曲名</th>
+              <th class="col-search-artist" scope="col">アーティスト名</th>
+            </tr>
+          </thead>
+          <tbody id="chartSearchResultsBody"></tbody>
         </table>
       </div>
     </section>

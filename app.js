@@ -4,6 +4,9 @@ const YEARS = Array.from({ length: 20 }, (_, i) => 1980 + i);
 
 let rankingData = {};
 let currentYear = 1980;
+let rankingSearchIndex = [];
+let searchIsComposing = false;
+let ignoreNextSearchSubmit = false;
 
 /* --------------------------------------------------------
    Init
@@ -13,6 +16,7 @@ async function init() {
     const res = await fetch('data.json');
     if (!res.ok) throw new Error(`HTTP ${res.status} — data.json の読み込みに失敗しました`);
     rankingData = await res.json();
+    rankingSearchIndex = buildRankingSearchIndex(rankingData);
   } catch (err) {
     const errEl = document.getElementById('errorMsg');
     errEl.textContent = `⚠️ ${err.message}`;
@@ -22,6 +26,7 @@ async function init() {
   }
 
   renderYearButtons();
+  setupSearch();
   showYear(1980);
 
   document.getElementById('loadingMsg').hidden = true;
@@ -45,11 +50,153 @@ function renderYearButtons() {
     btn.dataset.year = String(y);
     btn.setAttribute('aria-label', `${y}年のランキングを表示`);
     btn.setAttribute('aria-pressed', 'false');
-    btn.addEventListener('click', () => showYear(y));
+    btn.addEventListener('click', () => {
+      closeSearch();
+      showYear(y);
+    });
     frag.appendChild(btn);
   });
 
   container.appendChild(frag);
+}
+
+/* --------------------------------------------------------
+   Search
+   -------------------------------------------------------- */
+function buildRankingSearchIndex(data) {
+  return YEARS.flatMap(year => (data[String(year)] || []).map(entry => ({
+    year,
+    rank: entry.rank,
+    title: entry.title,
+    artist: entry.artist,
+    normalizedTitle: normalizeSearchText(entry.title),
+    normalizedArtist: normalizeSearchText(entry.artist)
+  }))).sort((a, b) => a.year - b.year || a.rank - b.rank);
+}
+
+function setupSearch() {
+  const toggle = document.getElementById('chartSearchToggle');
+  const panel = document.getElementById('chartSearchPanel');
+  const keyword = document.getElementById('chartSearchKeyword');
+  const clearButton = document.getElementById('chartSearchClear');
+  const closeButton = document.getElementById('chartSearchResultsClose');
+
+  toggle.disabled = false;
+  toggle.addEventListener('click', () => {
+    if (toggle.getAttribute('aria-expanded') === 'true') {
+      closeSearch();
+      return;
+    }
+    openSearch();
+  });
+
+  panel.addEventListener('submit', event => {
+    event.preventDefault();
+    if (searchIsComposing || ignoreNextSearchSubmit) return;
+    runSearch();
+  });
+
+  keyword.addEventListener('keydown', event => {
+    if (event.key !== 'Enter') return;
+    if (!event.isComposing && !searchIsComposing && event.keyCode !== 229) return;
+
+    ignoreNextSearchSubmit = true;
+    setTimeout(() => {
+      ignoreNextSearchSubmit = false;
+    }, 0);
+  });
+
+  keyword.addEventListener('compositionstart', () => {
+    searchIsComposing = true;
+  });
+  keyword.addEventListener('compositionend', () => {
+    searchIsComposing = false;
+  });
+
+  clearButton.addEventListener('click', () => {
+    clearSearchConditionsAndResults();
+    keyword.focus();
+  });
+
+  closeButton.addEventListener('click', () => closeSearch({ focusToggle: true }));
+}
+
+function openSearch() {
+  const toggle = document.getElementById('chartSearchToggle');
+  const panel = document.getElementById('chartSearchPanel');
+
+  panel.hidden = false;
+  toggle.setAttribute('aria-expanded', 'true');
+  document.body.classList.add('search-panel-open');
+  document.getElementById('chartSearchKeyword').focus();
+}
+
+function closeSearch({ focusToggle = false } = {}) {
+  const toggle = document.getElementById('chartSearchToggle');
+  const panel = document.getElementById('chartSearchPanel');
+
+  clearSearchConditionsAndResults();
+  panel.hidden = true;
+  toggle.setAttribute('aria-expanded', 'false');
+  document.body.classList.remove('search-panel-open');
+  if (focusToggle) toggle.focus();
+}
+
+function clearSearchConditionsAndResults() {
+  document.getElementById('chartSearchPanel').reset();
+  document.getElementById('chartSearchResultsBody').innerHTML = '';
+  document.getElementById('chartSearchResultCount').textContent = '';
+  document.getElementById('chartSearchResults').hidden = true;
+  document.getElementById('chartSection').hidden = false;
+}
+
+function runSearch() {
+  const form = document.getElementById('chartSearchPanel');
+  const query = normalizeSearchText(document.getElementById('chartSearchKeyword').value);
+
+  if (!query) {
+    document.getElementById('chartSearchResultsBody').innerHTML = '';
+    document.getElementById('chartSearchResultCount').textContent = '';
+    document.getElementById('chartSearchResults').hidden = true;
+    document.getElementById('chartSection').hidden = false;
+    return;
+  }
+
+  const decade = new FormData(form).get('decade');
+  const results = rankingSearchIndex.filter(entry => {
+    const decadeMatches = decade === 'all' || Math.floor(entry.year / 10) * 10 === Number(decade);
+    const keywordMatches = entry.normalizedTitle.includes(query) || entry.normalizedArtist.includes(query);
+    return decadeMatches && keywordMatches;
+  });
+
+  document.getElementById('chartSearchResultsBody').innerHTML = buildSearchRows(results);
+  document.getElementById('chartSearchResultCount').textContent = `${results.length}件`;
+  document.getElementById('chartSection').hidden = true;
+  document.getElementById('chartSearchResults').hidden = false;
+}
+
+function buildSearchRows(entries) {
+  if (entries.length === 0) {
+    return '<tr><td colspan="4" class="chart-search-empty">該当する曲はありません</td></tr>';
+  }
+
+  return entries.map(entry => (
+    '<tr>' +
+      `<td class="col-search-year">${esc(entry.year)}年</td>` +
+      `<td class="col-search-rank">${esc(entry.rank)}位</td>` +
+      `<td class="col-search-title">${esc(entry.title)}</td>` +
+      `<td class="col-search-artist">${esc(entry.artist)}</td>` +
+    '</tr>'
+  )).join('');
+}
+
+function normalizeSearchText(value) {
+  return String(value || '')
+    .replace(/[‘’‛′ʼ＇`´]/g, "'")
+    .normalize('NFKC')
+    .toLowerCase()
+    .replace(/[ぁ-ゖゝ-ゟ]/g, char => String.fromCharCode(char.charCodeAt(0) + 0x60))
+    .replace(/\s+/gu, '');
 }
 
 /* --------------------------------------------------------
@@ -161,6 +308,18 @@ function renderRankShortcuts(entries) {
    Keyboard navigation (← →)
    -------------------------------------------------------- */
 function handleKeyNav(e) {
+  if (e.isComposing || searchIsComposing || e.keyCode === 229) return;
+
+  if (e.key === 'Escape' && document.getElementById('chartSearchToggle').getAttribute('aria-expanded') === 'true') {
+    e.preventDefault();
+    closeSearch({ focusToggle: true });
+    return;
+  }
+
+  if (e.target?.closest?.('#chartSearchPanel')) return;
+
+  if (!document.getElementById('chartSearchResults').hidden) return;
+
   // Skip when focus is inside an input / link
   if (['INPUT', 'SELECT', 'TEXTAREA', 'A'].includes(document.activeElement?.tagName)) return;
 
