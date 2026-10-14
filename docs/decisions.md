@@ -377,3 +377,16 @@ GitHub Actionsではcheckout後の作業ツリーとHEADが同じ内容になる
 - 検索のクリアではパネルを開いたまま条件と結果を消し、トグル・結果側の閉じる・Escapeでは条件と結果を消してパネルも閉じる。検索中に年を選んだ場合は検索を終了してその年の通常表示へ移る
 - 対象外は、曲名とアーティスト名の検索欄分割、年代だけの全件表示、完全一致・前方一致の切替、あいまい検索、検索結果の永続保存、`data.json` の変更とする
 - 変更対象は `year-end-chart.html`、`app.js`、`style.css`、`docs/decisions.md` に限定し、ユーザー承認後にcommit / pushして本番表示まで確認する
+
+---
+
+## 2026-10-14 — 年間ランキング検索結果の一致箇所ハイライト
+
+### 決定
+
+- 検索結果の曲名・アーティスト名は、既存の検索正規化後にキーワードと一致したすべての元表記箇所をハイライトする。重複する一致をすべて列挙し、元文字列上で重なる、または接する範囲は1つに統合する
+- 元文字列をgrapheme clusterへ分割し、cluster単位の独立正規化token列と全文正規化token列を、match=0・substitution/insertion/deletion=1の順序付き編集距離でglobal alignmentする。同コストではmatch、substitution、deletion、insertionの順で現在位置に近い対応を優先し、正規化後の各コードポイントを元のUTF-16範囲へ対応付ける
+- matchとsubstitutionは対応する元token範囲を使う。連続edit blockにinsertionまたはdeletionが含まれる場合は、そのblockの元token範囲のunionをtarget blockへ割り当て、合成などに関与した元文字を失わない。これにより、結合文字の並び替え・合成はcluster全体へ、文脈依存の小文字化や同値tokenの反復は位置の近い元文字へ戻す
+- grapheme cluster分割には利用可能なら `Intl.Segmenter` を使う。非対応環境ではUnicodeコードポイント走査による簡易fallbackを使い、結合文字、半角カナ濁点・半濁点、variation selector、emoji modifier、ZWJ連結、regional indicatorの2個組、主要なIndic virama後の文字を直前clusterへ含める。主要対象ブラウザでは `Intl.Segmenter` を優先し、fallbackでもサロゲートペアとZWJ連結を分断しない。追加ライブラリは使用しない
+- 動的な元文字列断片は通常部・強調部とも既存の `esc()` でHTMLエスケープし、強調部だけを固定HTMLの `<mark class="chart-search-highlight">` で囲む。検索語はHTMLへ出力せず、正規表現にも組み込まない
+- 対象は `year-end-chart.html` の検索結果にある曲名・アーティスト名だけとし、元データ、表示表記、検索判定、年代絞り込み、並び順、件数、通常ランキング、`data.json` は変更しない

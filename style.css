@@ -626,6 +626,22 @@ a {
   min-width: 12rem;
 }
 
+.year-end-chart-page .chart-search-results .chart-search-highlight {
+  -webkit-box-decoration-break: clone;
+  background: #FFE27A;
+  box-decoration-break: clone;
+  color: #3E2700;
+  font-weight: 700;
+}
+
+@media (forced-colors: active) {
+  .year-end-chart-page .chart-search-results .chart-search-highlight {
+    background: Highlight;
+    color: HighlightText;
+    forced-color-adjust: none;
+  }
+}
+
 .year-end-chart-page .chart-search-empty {
   color: var(--text-muted);
   padding: 2rem !important;
