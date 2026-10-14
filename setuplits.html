@@ -2084,6 +2084,52 @@
       return normalizeWithMap(str).out;
     }
 
+    // ── アーティスト検索用alias ──
+    // 表示データは変更せず、検索語がaliasの正規化結果と完全一致した時だけ
+    // 同じグループの別表記へ展開する。
+    const ARTIST_SEARCH_ALIAS_GROUPS = [
+      ['CHAGE and ASKA', 'CHAGE&ASKA', 'CHAGE&ASUKA', 'チャゲ&飛鳥'],
+      ['THE ALFEE', 'ALFEE', 'アルフィー'],
+      ['TM NETWORK', 'TMN']
+    ];
+    const artistSearchAliasTermsByQuery = (() => {
+      const map = new Map();
+      for (const group of ARTIST_SEARCH_ALIAS_GROUPS) {
+        const terms = [...new Set(group.map(searchNormalize).filter(Boolean))];
+        for (const term of terms) map.set(term, terms);
+      }
+      return map;
+    })();
+    function resolveArtistSearchTerms(rawQuery) {
+      const normalized = searchNormalize(rawQuery);
+      if (!normalized) return [];
+      return artistSearchAliasTermsByQuery.get(normalized) || [normalized];
+    }
+    function artistMatchesSearchTerms(artist, terms) {
+      if (!terms || terms.length === 0) return false;
+      const normalizedArtist = searchNormalize(artist);
+      return terms.some(term => normalizedArtist.includes(term));
+    }
+    function compileSearchCriteria(raw) {
+      return {
+        ...raw,
+        _compiled: {
+          artistTerms: resolveArtistSearchTerms(raw.artist),
+          titleTerm: searchNormalize(raw.title),
+          featureTerm: searchNormalize(raw.feature),
+          freeTerm: searchNormalize(raw.free),
+          freeArtistTerms: resolveArtistSearchTerms(raw.free)
+        }
+      };
+    }
+    function getArtistHighlightTerms(criteria) {
+      if (!criteria || !criteria._compiled) return [];
+      return [
+        ...(criteria.artist ? criteria._compiled.artistTerms : []),
+        ...(criteria.free ? criteria._compiled.freeArtistTerms : [])
+      ];
+    }
+
     function highlightText(str, terms) {
       const raw = String(str ?? '');
       const activeTerms = (terms || []).map(t => searchNormalize(t)).filter(Boolean);
@@ -2137,7 +2183,7 @@
         '</tr></thead>';
       const tbody = document.createElement('tbody');
       const titleTerms = highlight ? [highlight.title, highlight.free].filter(Boolean) : [];
-      const artistTerms = highlight ? [highlight.artist, highlight.free].filter(Boolean) : [];
+      const artistTerms = getArtistHighlightTerms(highlight);
       for (const t of tracks) {
         const tr = document.createElement('tr');
         let noteCls = '';
@@ -2317,17 +2363,20 @@
     // ── 検索条件を1件のエピソードに対して判定 ──
     function episodeMatches(ep, c) {
       const tracks = ep.tracks || [];
-      const nArtist  = searchNormalize(c.artist);
-      const nTitle   = searchNormalize(c.title);
-      const nFeature = searchNormalize(c.feature);
-      const nFree    = searchNormalize(c.free);
+      const {
+        artistTerms,
+        titleTerm,
+        featureTerm,
+        freeTerm,
+        freeArtistTerms
+      } = c._compiled;
 
-      if (nArtist) {
-        const ok = tracks.some(t => searchNormalize(t.artist).includes(nArtist));
+      if (artistTerms.length > 0) {
+        const ok = tracks.some(t => artistMatchesSearchTerms(t.artist, artistTerms));
         if (!ok) return false;
       }
-      if (nTitle) {
-        const ok = tracks.some(t => searchNormalize(t.title).includes(nTitle));
+      if (titleTerm) {
+        const ok = tracks.some(t => searchNormalize(t.title).includes(titleTerm));
         if (!ok) return false;
       }
       if (c.epNo !== null) {
@@ -2336,8 +2385,8 @@
       if (c.airDate) {
         if (ep.air_date !== c.airDate) return false;
       }
-      if (nFeature) {
-        if (!searchNormalize(ep.special_feature).includes(nFeature)) return false;
+      if (featureTerm) {
+        if (!searchNormalize(ep.special_feature).includes(featureTerm)) return false;
       }
       if (c.puySingle !== null) {
         if (ep.puy_year !== c.puySingle) return false;
@@ -2345,12 +2394,12 @@
       if (c.puyMulti.length > 0) {
         if (!c.puyMulti.includes(ep.puy_year)) return false;
       }
-      if (nFree) {
+      if (freeTerm) {
         const inTracks = tracks.some(t =>
-          searchNormalize(t.title).includes(nFree) ||
-          searchNormalize(t.artist).includes(nFree)
+          searchNormalize(t.title).includes(freeTerm) ||
+          artistMatchesSearchTerms(t.artist, freeArtistTerms)
         );
-        const inFeature = searchNormalize(ep.special_feature).includes(nFree);
+        const inFeature = searchNormalize(ep.special_feature).includes(freeTerm);
         if (!inTracks && !inFeature) return false;
       }
       return true;
@@ -2448,13 +2497,14 @@
 
     // ── 検索実行・結果表示 ──
     function runSearch() {
-      const c = readCriteria();
-      if (!hasAnyCriteria(c)) return;
+      const rawCriteria = readCriteria();
+      if (!hasAnyCriteria(rawCriteria)) return;
+      const c = compileSearchCriteria(rawCriteria);
 
       const results = episodes.filter(ep => episodeMatches(ep, c)).sort((a, b) => b.episode_no - a.episode_no);
       lastSearchResults = results;
       lastSearchCriteria = c;
-      addHistory(c);
+      addHistory(rawCriteria);
       renderSearchResults(results, c);
 
       // 検索結果がすぐ見えるよう、検索条件パネルは自動的に折りたたむ
@@ -2524,7 +2574,7 @@
           const subLi = document.createElement('li');
           subLi.className = 'sul-item search-match-row';
           const titleHtml = highlightText(t.title, [criteria.title, criteria.free].filter(Boolean));
-          const artistHtml = highlightText(t.artist, [criteria.artist, criteria.free].filter(Boolean));
+          const artistHtml = highlightText(t.artist, getArtistHighlightTerms(criteria));
           const debutBadge = isDebutTrack(ep, t)
             ? '<span class="debut-badge">初登場</span>'
             : '';
@@ -2541,15 +2591,12 @@
     function getMatchingTracks(ep, c) {
       if (!c) return [];
       const tracks = ep.tracks || [];
-      const nArtist = searchNormalize(c.artist);
-      const nTitle  = searchNormalize(c.title);
-      const nFree   = searchNormalize(c.free);
+      const { artistTerms, titleTerm, freeTerm, freeArtistTerms } = c._compiled;
       return tracks.filter(t => {
-        const ta = searchNormalize(t.artist);
         const tt = searchNormalize(t.title);
-        if (nArtist && ta.includes(nArtist)) return true;
-        if (nTitle && tt.includes(nTitle)) return true;
-        if (nFree && (tt.includes(nFree) || ta.includes(nFree))) return true;
+        if (artistTerms.length > 0 && artistMatchesSearchTerms(t.artist, artistTerms)) return true;
+        if (titleTerm && tt.includes(titleTerm)) return true;
+        if (freeTerm && (tt.includes(freeTerm) || artistMatchesSearchTerms(t.artist, freeArtistTerms))) return true;
         return false;
       });
     }
