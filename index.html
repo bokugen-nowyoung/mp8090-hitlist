@@ -32,6 +32,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;600;700&family=Share+Tech+Mono&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="top-intro.css">
+  <script src="top-intro.js" defer></script>
   <style>
     /* ── Top page ── */
 
@@ -494,6 +496,14 @@
   </style>
 </head>
 <body>
+
+  <!-- トップページ表示前のオープニング演出（既存コンテンツには重ねるだけ） -->
+  <div class="mp-intro" id="mpIntro" role="dialog" aria-modal="true" aria-label="ナウヤン同盟の部屋 オープニング" aria-describedby="mpIntroDescription">
+    <canvas class="mp-intro-canvas" id="mpIntroCanvas" aria-hidden="true"></canvas>
+    <p class="mp-intro-description" id="mpIntroDescription">オープニングアニメーションを再生しています。スキップできます。</p>
+    <button class="mp-intro-skip" id="mpIntroSkip" type="button">SKIP</button>
+  </div>
+  <noscript><style>#mpIntro { display: none !important; }</style></noscript>
 
   <header class="site-header-banner">
     <h1 class="visually-hidden">ナウヤン同盟の部屋 - LuckyFM「Music Pick Up 80's & 90's」石井哲也アナウンサー公認・ファンサイト #mp8090</h1>
