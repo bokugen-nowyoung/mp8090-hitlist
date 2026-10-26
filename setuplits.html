@@ -609,7 +609,7 @@
       border-radius: var(--r-lg);
       box-shadow: 0 8px 40px rgba(0,0,0,0.55);
       width: 100%;
-      max-width: 620px;
+      max-width: 760px;
       margin: auto 0;
       display: flex;
       flex-direction: column;
@@ -733,7 +733,7 @@
       width: 100%;
       border-collapse: collapse;
       font-size: 0.82rem;
-      min-width: 320px;
+      min-width: 680px;
     }
     .ep-track-table th {
       background: var(--bg-secondary);
@@ -759,7 +759,17 @@
       text-align: center;
       white-space: nowrap;
     }
-    .ep-track-table .col-note { white-space: nowrap; }
+    .ep-track-table .col-title,
+    .ep-track-table .col-artist {
+      text-align: left;
+      overflow-wrap: anywhere;
+    }
+    .ep-track-table .col-ranking,
+    .ep-track-table .col-note {
+      text-align: center;
+      white-space: nowrap;
+    }
+    .ep-track-table .col-ranking { width: 6.5rem; }
 
     /* Note badges */
     .note-badge {
@@ -2058,6 +2068,7 @@
     let navMode = 'year';
     let lastSearchResults = [];
     let lastSearchCriteria = null;
+    let modalOpenGeneration = 0;
 
     function escHtml(s) {
       return String(s ?? '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -2100,6 +2111,106 @@
       }
       return map;
     })();
+
+    // ── 年間シングルランキング照合 ──
+    // 正本の data.json は1回だけ取得し、表示用の順位はメモリ上のindexから解決する。
+    // SETUPLIST_DATAやdata.jsonへ順位を書き戻さない。
+    function normalizeAnnualRankingArtistTerm(value) {
+      const withoutApprovedSeparators = String(value ?? '')
+        .normalize('NFKC')
+        .replace(/[、,・&+]/g, '');
+      return normalizeForMatch(withoutApprovedSeparators);
+    }
+    const annualRankingArtistAliasCanonicalByTerm = (() => {
+      const map = new Map();
+      for (const group of ARTIST_SEARCH_ALIAS_GROUPS) {
+        const terms = [...new Set(group.map(normalizeAnnualRankingArtistTerm).filter(Boolean))];
+        if (terms.length === 0) continue;
+        const canonical = terms[0];
+        for (const term of terms) map.set(term, canonical);
+      }
+      return map;
+    })();
+    function normalizeAnnualRankingArtist(value) {
+      const normalized = normalizeAnnualRankingArtistTerm(value);
+      return annualRankingArtistAliasCanonicalByTerm.get(normalized) || normalized;
+    }
+    function annualRankingTrackKey(title, artist) {
+      return JSON.stringify([normalizeForMatch(title), normalizeAnnualRankingArtist(artist)]);
+    }
+    function buildAnnualRankingIndex(data) {
+      const byYear = new Map();
+      for (const [year, rows] of Object.entries(data || {})) {
+        if (!Array.isArray(rows)) continue;
+        const byTrack = new Map();
+        for (const row of rows) {
+          const rank = Number(row && row.rank);
+          if (!Number.isFinite(rank)) continue;
+          const key = annualRankingTrackKey(row.title, row.artist);
+          if (!byTrack.has(key)) byTrack.set(key, new Set());
+          byTrack.get(key).add(rank);
+        }
+        byYear.set(String(year), byTrack);
+      }
+      return byYear;
+    }
+    let annualRankingLoadState = 'loading';
+    let annualRankingIndex = null;
+    const annualRankingPromise = fetch('./data.json')
+      .then(response => {
+        if (!response.ok) throw new Error(`data.json: HTTP ${response.status}`);
+        return response.json();
+      })
+      .then(data => {
+        annualRankingIndex = buildAnnualRankingIndex(data);
+        annualRankingLoadState = 'ready';
+        return annualRankingIndex;
+      })
+      .catch(error => {
+        annualRankingLoadState = 'error';
+        console.error('年間ランキングを取得できませんでした。', error);
+        return null;
+      });
+    function resolveAnnualRanking(index, ep, track) {
+      const ranks = index
+        ?.get(String(ep.puy_year))
+        ?.get(annualRankingTrackKey(track.title, track.artist));
+      if (!ranks || ranks.size === 0) return { text: 'ー', title: '' };
+      if (ranks.size > 1) {
+        return {
+          text: '要確認',
+          title: '年間ランキングに異なる順位が複数あります'
+        };
+      }
+      return { text: `${[...ranks][0]}位`, title: '' };
+    }
+    function setAnnualRankingCell(cell, result) {
+      cell.textContent = result.text;
+      if (result.title) cell.title = result.title;
+      else cell.removeAttribute('title');
+    }
+    function updateAnnualRankingCells(wrap, ep, tracks, generation) {
+      const eligible = tracks.some(track => track.note !== '洋楽枠');
+      wrap.setAttribute('aria-busy', String(eligible && annualRankingLoadState === 'loading'));
+      if (!eligible || annualRankingLoadState !== 'loading') return;
+      annualRankingPromise.then(index => {
+        if (generation !== modalOpenGeneration || !wrap.isConnected || modalOverlay.hidden) return;
+        const cells = wrap.querySelectorAll('.col-ranking[data-track-index]');
+        cells.forEach(cell => {
+          const track = tracks[Number(cell.dataset.trackIndex)];
+          if (!track || track.note === '洋楽枠') return;
+          if (!index) {
+            setAnnualRankingCell(cell, {
+              text: '取得不可',
+              title: '年間ランキングデータを取得できませんでした'
+            });
+          } else {
+            setAnnualRankingCell(cell, resolveAnnualRanking(index, ep, track));
+          }
+        });
+        wrap.setAttribute('aria-busy', 'false');
+      });
+    }
     function resolveArtistSearchTerms(rawQuery) {
       const normalized = searchNormalize(rawQuery);
       if (!normalized) return [];
@@ -2172,19 +2283,23 @@
     function renderTrackTable(tracks, highlight, ep) {
       const wrap = document.createElement('div');
       wrap.className = 'ep-track-scroll';
+      wrap.setAttribute('role', 'region');
+      wrap.setAttribute('aria-label', `第${ep.episode_no}回 Set Up List`);
+      wrap.setAttribute('tabindex', '0');
       const tbl = document.createElement('table');
       tbl.className = 'ep-track-table';
       tbl.innerHTML =
         '<thead><tr>' +
-        '<th class="col-no">No.</th>' +
-        '<th>曲名</th>' +
-        '<th>アーティスト</th>' +
-        '<th class="col-note">備考</th>' +
+        '<th class="col-no" scope="col">No.</th>' +
+        '<th class="col-title" scope="col">曲名</th>' +
+        '<th class="col-artist" scope="col">アーティスト</th>' +
+        '<th class="col-ranking" scope="col">年間ランキング</th>' +
+        '<th class="col-note" scope="col">備考</th>' +
         '</tr></thead>';
       const tbody = document.createElement('tbody');
       const titleTerms = highlight ? [highlight.title, highlight.free].filter(Boolean) : [];
       const artistTerms = getArtistHighlightTerms(highlight);
-      for (const t of tracks) {
+      tracks.forEach((t, trackIndex) => {
         const tr = document.createElement('tr');
         let noteCls = '';
         if (t.note === '特集枠') noteCls = 'tokushu';
@@ -2198,13 +2313,24 @@
         const debutBadge = isDebutTrack(ep, t)
           ? '<span class="debut-badge">初登場</span>'
           : '';
+        let ranking = { text: '…', title: '' };
+        if (t.note === '洋楽枠') ranking = { text: 'ー', title: '' };
+        else if (annualRankingLoadState === 'ready') ranking = resolveAnnualRanking(annualRankingIndex, ep, t);
+        else if (annualRankingLoadState === 'error') {
+          ranking = {
+            text: '取得不可',
+            title: '年間ランキングデータを取得できませんでした'
+          };
+        }
         tr.innerHTML =
           `<td class="col-no">${t.no}</td>` +
-          `<td>${titleHtml}${debutBadge}</td>` +
-          `<td>${artistHtml}</td>` +
+          `<td class="col-title">${titleHtml}${debutBadge}</td>` +
+          `<td class="col-artist">${artistHtml}</td>` +
+          `<td class="col-ranking" data-track-index="${trackIndex}">${escHtml(ranking.text)}</td>` +
           `<td class="col-note">${noteBadge}</td>`;
+        if (ranking.title) tr.querySelector('.col-ranking').title = ranking.title;
         tbody.appendChild(tr);
-      }
+      });
       tbl.appendChild(tbody);
       wrap.appendChild(tbl);
       return wrap;
@@ -2212,6 +2338,7 @@
 
     function openModal(ep, mode) {
       if (mode) navMode = mode;
+      const generation = ++modalOpenGeneration;
       const [y, m, d] = (ep.air_date || '').split('-').map(Number);
       const airFmt = ep.air_date ? `${y}.${m}.${d}` : '—';
       let titleText = `#${ep.episode_no} ｜ PUY ${ep.puy_year}年 ｜ ${airFmt}`;
@@ -2221,7 +2348,9 @@
 
       if (ep.tracks && ep.tracks.length > 0) {
         const highlight = (navMode === 'search' && lastSearchCriteria) ? lastSearchCriteria : null;
-        modalBody.appendChild(renderTrackTable(ep.tracks, highlight, ep));
+        const trackTable = renderTrackTable(ep.tracks, highlight, ep);
+        modalBody.appendChild(trackTable);
+        updateAnnualRankingCells(trackTable, ep, ep.tracks, generation);
       } else {
         const p = document.createElement('p');
         p.className = 'ep-modal-nodata';
@@ -2244,6 +2373,7 @@
     }
 
     function closeModal() {
+      modalOpenGeneration += 1;
       modalOverlay.setAttribute('hidden', '');
       document.body.style.overflow = '';
       modalBody.innerHTML = '';
