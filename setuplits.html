@@ -2169,8 +2169,17 @@
       const normalized = normalizeAnnualRankingArtistTerm(value);
       return annualRankingArtistAliasCanonicalByTerm.get(normalized) || normalized;
     }
+    function normalizeAnnualRankingTitle(value) {
+      // 年間ランキング照合に限り、中黒類の有無だけを吸収する。
+      // ASCIIピリオドは曲名の一部として保持し、通常検索・初登場判定には影響させない。
+      const withoutMiddleDots = String(value ?? '')
+        .replace(/‥/g, '・・')
+        .normalize('NFKC')
+        .replace(/[・·•]/g, '');
+      return normalizeForMatch(withoutMiddleDots);
+    }
     function annualRankingTrackKey(title, artist) {
-      return JSON.stringify([normalizeForMatch(title), normalizeAnnualRankingArtist(artist)]);
+      return JSON.stringify([normalizeAnnualRankingTitle(title), normalizeAnnualRankingArtist(artist)]);
     }
     function buildAnnualRankingIndex(data) {
       const byTrack = new Map();
