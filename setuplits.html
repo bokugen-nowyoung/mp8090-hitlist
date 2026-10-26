@@ -2137,6 +2137,21 @@
       ['THE ALFEE', 'ALFEE', 'アルフィー'],
       ['TM NETWORK', 'TMN']
     ];
+    const ANNUAL_RANKING_ARTIST_ALIAS_GROUPS = [
+      ...ARTIST_SEARCH_ALIAS_GROUPS,
+      ['TUBE', 'チューブ'],
+      ['DREAMS COME TRUE', 'ドリームズ・カム・トゥルー'],
+      ['1986オメガトライブ', '1986 OMEGA TRIBE'],
+      ['HOUND DOG', 'ハウンド・ドッグ'],
+      ['爆風スランプ', 'BAKUFU-SLUMP'],
+      ['BARBEE BOYS', 'バービーボーイズ'],
+      ['Sugar', 'シュガー'],
+      ['ORIGINAL LOVE', 'オリジナル・ラヴ'],
+      ['YMO', 'イエロー・マジック・オーケストラ'],
+      ['UNICORN', 'ユニコーン'],
+      ['PRINCESS PRINCESS', 'プリンセス・プリンセス'],
+      ['REBECCA', 'レベッカ']
+    ];
     const artistSearchAliasTermsByQuery = (() => {
       const map = new Map();
       for (const group of ARTIST_SEARCH_ALIAS_GROUPS) {
@@ -2157,7 +2172,7 @@
     }
     const annualRankingArtistAliasCanonicalByTerm = (() => {
       const map = new Map();
-      for (const group of ARTIST_SEARCH_ALIAS_GROUPS) {
+      for (const group of ANNUAL_RANKING_ARTIST_ALIAS_GROUPS) {
         const terms = [...new Set(group.map(normalizeAnnualRankingArtistTerm).filter(Boolean))];
         if (terms.length === 0) continue;
         const canonical = terms[0];
@@ -2181,8 +2196,28 @@
     function annualRankingTrackKey(title, artist) {
       return JSON.stringify([normalizeAnnualRankingTitle(title), normalizeAnnualRankingArtist(artist)]);
     }
+    function normalizeAnnualRankingTitleDecorationFallback(value) {
+      // 完全一致しない場合だけ使う限定フォールバック。
+      // 英数字・かな・漢字・長音・ハイフン・ASCIIピリオドは保持する。
+      return normalizeAnnualRankingTitle(value).replace(/[!！?？。、，,「」『』“”"☆★☽☾:：]/g, '');
+    }
+    function normalizeAnnualRankingArtistDecorationFallback(value) {
+      // ランキング正本に混在する装飾記号（星・月・コロン）だけを限定的に吸収する。
+      return normalizeAnnualRankingArtist(value).replace(/[☆★☽☾:：]/g, '');
+    }
+    function annualRankingDecorationFallbackKey(title, artist) {
+      return JSON.stringify([
+        normalizeAnnualRankingTitleDecorationFallback(title),
+        normalizeAnnualRankingArtistDecorationFallback(artist)
+      ]);
+    }
     function buildAnnualRankingIndex(data) {
       const byTrack = new Map();
+      const byDecorationFallback = new Map();
+      const addCandidate = (index, key, year, rank) => {
+        if (!index.has(key)) index.set(key, new Map());
+        index.get(key).set(`${year}:${rank}`, { year, rank });
+      };
       for (const [year, rows] of Object.entries(data || {})) {
         const yearNumber = Number(year);
         if (!Number.isInteger(yearNumber) || yearNumber < 1980 || yearNumber > 1999) continue;
@@ -2191,22 +2226,46 @@
           const rank = Number(row && row.rank);
           if (!Number.isFinite(rank)) continue;
           const rawTitle = String(row && row.title || '');
-          const titles = [rawTitle];
+          const rawArtist = String(row && row.artist || '');
+          const trackVariants = [{ title: rawTitle, artist: rawArtist }];
           // 年間ランキング正本で全角スラッシュ区切りの両A面だけを、各片側でも照合する。
           // ASCIIスラッシュなど、ほかの記号は推測で分割しない。
           if (rawTitle.includes('／')) {
             const sides = rawTitle.split('／').map(title => title.trim()).filter(Boolean);
-            if (sides.length > 1) titles.push(...sides);
+            if (sides.length > 1) {
+              trackVariants.push(...sides.map(title => ({ title, artist: rawArtist })));
+            }
           }
-          for (const title of new Set(titles)) {
-            const key = annualRankingTrackKey(title, row.artist);
-            if (!byTrack.has(key)) byTrack.set(key, new Map());
-            const candidates = byTrack.get(key);
-            candidates.set(`${yearNumber}:${rank}`, { year: yearNumber, rank });
+          // 曲名とアーティストがともに全角スラッシュで同数に分かれる場合だけ、
+          // 同じ位置の要素を両A面の名義として安全にペア化する。
+          if (rawTitle.includes('／') && rawArtist.includes('／')) {
+            const titleSides = rawTitle.split('／').map(value => value.trim());
+            const artistSides = rawArtist.split('／').map(value => value.trim());
+            const canPair = titleSides.length > 1 &&
+              titleSides.length === artistSides.length &&
+              titleSides.every(Boolean) && artistSides.every(Boolean);
+            if (canPair) {
+              for (let i = 0; i < titleSides.length; i++) {
+                trackVariants.push({ title: titleSides[i], artist: artistSides[i] });
+              }
+            }
+          }
+          const seenVariants = new Set();
+          for (const variant of trackVariants) {
+            const variantId = JSON.stringify([variant.title, variant.artist]);
+            if (seenVariants.has(variantId)) continue;
+            seenVariants.add(variantId);
+            addCandidate(byTrack, annualRankingTrackKey(variant.title, variant.artist), yearNumber, rank);
+            addCandidate(
+              byDecorationFallback,
+              annualRankingDecorationFallbackKey(variant.title, variant.artist),
+              yearNumber,
+              rank
+            );
           }
         }
       }
-      return byTrack;
+      return { byTrack, byDecorationFallback };
     }
     let annualRankingLoadState = 'loading';
     let annualRankingIndex = null;
@@ -2226,7 +2285,10 @@
         return null;
       });
     function resolveAnnualRanking(index, ep, track) {
-      const candidates = index?.get(annualRankingTrackKey(track.title, track.artist));
+      const exactCandidates = index?.byTrack?.get(annualRankingTrackKey(track.title, track.artist));
+      const candidates = exactCandidates && exactCandidates.size > 0
+        ? exactCandidates
+        : index?.byDecorationFallback?.get(annualRankingDecorationFallbackKey(track.title, track.artist));
       if (!candidates || candidates.size === 0) return { text: '―', title: '' };
       if (candidates.size > 1) {
         return {
