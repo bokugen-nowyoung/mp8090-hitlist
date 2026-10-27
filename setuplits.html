@@ -2211,6 +2211,120 @@
         normalizeAnnualRankingArtistDecorationFallback(artist)
       ]);
     }
+    // 副題・読み・英題などを含む表記は、承認済みの曲名＋アーティストの組だけを
+    // ランキング正本のキーへ接続する。一般的な副題除去や部分一致には使わない。
+    // 各要素は [ランキング正本側の曲名, アーティスト, Set Up List側の承認済み表記群]。
+    const ANNUAL_RANKING_TRACK_ALIAS_GROUPS = [
+      ['異邦人', '久保田早紀', ['異邦人 -シルクロードのテーマ-']],
+      ['パープルタウン', '八神純子', ['パープルタウン 〜You Oughta Know By Now〜']],
+      ['セクシー･ユー', '郷ひろみ', ['セクシー・ユー (モンロー・ウォーク)']],
+      ['シャドー･シティ', '寺尾聰', ['SHADOW CITY (シャドー・シティ)']],
+      ['ロンリー･ハート', 'クリエーション', ['ロンリー・ハート (Lonely Hearts)']],
+      ['スローなブギにしてくれ', '南佳孝', ['スローなブギにしてくれ (I want you)']],
+      ['Mr.ブルー', '八神純子', ['Mr.ブルー 〜私の地球〜']],
+      ['YES MY LOVE', '矢沢永吉', ['YES MY LOVE -愛はいつも-']],
+      ['トワイライト', '中森明菜', ['トワイライト -夕暮れ便り-']],
+      ['悲しい色やね', '上田正樹', ['悲しい色やね −OSAKA BAY BLUES−']],
+      ['君に、胸キュン。', 'イエロー･マジック･オーケストラ', [
+        '君に、胸キュン。(浮気なヴァカンス)',
+        '君に、胸キュン。 (浮気なヴァカンス)'
+      ]],
+      ['ボディ･スペシャルII', 'サザンオールスターズ', [
+        'ボディ・スペシャル II (BODY SPECIAL)',
+        'ボディ・スペシャルⅡ (BODY SPECIAL)'
+      ]],
+      ['ダンデライオン', '松任谷由実', ['ダンデライオン〜遅咲きのたんぽぽ']],
+      ['タイニー･メモリー', '柏原芳恵', ['タイニー・メモリー 〜小さな思い出〜']],
+      ['ラヴ･イズ･オーヴァー', '欧陽菲菲', ['ラヴ・イズ・オーヴァー (LOVE IS OVER)']],
+      ['STARSHIP', 'アルフィー', ['STARSHIP -光を求めて-']],
+      ['ミス･ブランニュー･デイ', 'サザンオールスターズ', ['ミス・ブランニュー・デイ (MISS BRAND-NEW DAY)']],
+      ['2億4千万の瞳', '郷ひろみ', [
+        '2億4千万の瞳-エキゾチック・ジャパン-',
+        '2億4千万の瞳 -エキゾチック・ジャパン-'
+      ]],
+      ['ラ･ヴィアンローズ', '吉川晃司', ['ラ・ヴィアンローズ (LA VIE EN ROSE)']],
+      ['晴れ、ときどき殺人', '渡辺典子', ['晴れ、ときどき殺人 (キル・ミー)']],
+      ['VOYAGER～日付のない墓標～', '松任谷由実', ['VOYAGER〜日付のない墓標']],
+      ['忘れていいの', '小川知子･谷村新司', [
+        '忘れていいの-愛の幕切れ-',
+        '忘れていいの -愛の幕切れ-'
+      ]],
+      ['ジュリアに傷心', 'チェッカーズ', [
+        'ジュリアに傷心 (ハートブレイク)',
+        'ジュリアに傷心（ハートブレイク）'
+      ]],
+      ['ミ･アモーレ', '中森明菜', ['ミ・アモーレ〔Meu amor é…〕']],
+      ['スターダスト･メモリー', '小泉今日子', ['The Stardust Memory (スターダスト・メモリー)']],
+      ['ふたりの夏物語', '杉山清貴＆オメガトライブ', [
+        'ふたりの夏物語 -NEVER ENDING SUMMER-',
+        'ふたりの夏物語 NEVER ENDING SUMMER'
+      ]],
+      ['メロディ', 'サザンオールスターズ', ['メロディ (Melody)']],
+      ['夢絆', '近藤真彦', ['夢絆 (きずな)', '夢絆（きずな）']],
+      ['デビュー', '河合奈保子', ['デビュー〜Fly Me To Love']],
+      ['恋愛症候群', 'さだまさし', ['恋愛症候群 - その発病及び傾向と対策に関する一考察 -']],
+      ['DESIRE', '中森明菜', ['DESIRE -情熱-', 'DESIRE −情熱−']],
+      ['スキップ･ビート', 'KUWATA BAND', ['スキップ・ビート (SKIPPED BEAT)']],
+      ['ダンシング･ヒーロー', '荻野目洋子', ['ダンシング・ヒーロー (Eat You Up)']],
+      ['ノーブルレッドの瞬間', '国生さゆり', ['ノーブルレッドの瞬間 (とき)']],
+      ['フォルティシモ', 'ハウンド･ドッグ', ['ff (フォルティシモ)', 'ff（フォルティシモ）', 'ƒƒ (フォルティシモ)']],
+      ['マリオネット', 'BOOWY', ['MARIONETTE (マリオネット)']],
+      ['君が通り過ぎたあとに', 'THE ALFEE', ["君が通り過ぎたあとに -Don't Pass Me By-"]],
+      ['Dance With You', 'チューブ', ['ダンス・ウィズ・ユー (Dance With You)']],
+      ['AL-MAUJ', '中森明菜', ['AL-MAUJ (アルマージ)']],
+      ['いつか何処かで', '桑田佳祐', ['いつか何処かで (I FEEL THE ECHO)']],
+      ['BEYOND THE TIME', 'TM NETWORK', ['BEYOND THE TIME (メビウスの宇宙を越えて)']],
+      ['愛が止まらない', 'Wink', ['愛が止まらない ～Turn It Into Love～', '愛が止まらない 〜Turn it into love〜']],
+      ['涙をみせないで', 'Wink', ["涙をみせないで 〜Boys Don't Cry〜"]],
+      ['秋', '男闘呼組', ["秋 -It's a ballad-"]],
+      ['Return to Myself', '浜田麻里', [
+        'Return to Myself ～しない、しない、ナツ。',
+        'Return to Myself 〜しない、しない、ナツ。'
+      ]],
+      ['ANNIVERSARY', '松任谷由実', ['ANNIVERSARY〜無限にCALLING YOU']],
+      ['リゾ･ラバ', 'BAKUFU-SLUMP', ['リゾ・ラバ -Resort Lovers-']],
+      ['勇気のしるし', '牛若丸三郎太', ['勇気のしるし ～リゲインのテーマ～']],
+      ['夜にはぐれて', 'Wink', ['夜にはぐれて 〜Where Were You Last Night〜']],
+      ['ETERNAL WIND', '森口博子', [
+        'ETERNAL WIND ～ほほえみは光る風の中～',
+        'ETERNAL WIND 〜ほほえみは光る風の中〜'
+      ]],
+      ['マモー･ミモー 野望のテーマ', 'マモー･ミモー', ['マモー・ミモー 野望のテーマ 〜情熱の嵐〜']],
+      ['BRIDGE～あの橋をわたるとき', 'HOUND DOG', [
+        'BRIDGE〜あの橋をわたるとき〜',
+        'BRIDGE 〜あの橋をわたるとき〜'
+      ]],
+      ['ステップ･バイ･ステップ', '島田歌穂', ['ステップ・バイ・ステップ (Let The River Run)']],
+      ['クリスマス･ラブ～涙のあとには白い雪が降る～', 'サザンオールスターズ', ['クリスマス・ラブ (涙のあとには白い雪が降る)']],
+      ['接吻', 'オリジナル･ラヴ', ['接吻 -kiss-', '接吻 kiss']],
+      ['奇跡の地球(ほし)', '桑田佳祐＆Mr.Children', ['奇跡の地球', '奇跡の地球（ほし）', '奇跡の地球 (ほし)']],
+      ['ミエナイチカラ', "B'z", ['ミエナイチカラ 〜INVISIBLE ONE〜']],
+      ['輪舞曲', '松任谷由実', ['輪舞曲（ロンド）']],
+      ['タイミング', 'BLACK BISCUITS', ['タイミング 〜Timing〜']],
+      ['POISON～言いたい事も言えないこんな世の中は～', '反町隆史', ['POISON ～言いたいことも言えないこんな世の中は～']],
+      ['ヒーロー', '麻倉未稀', ['ヒーロー HOLDING OUT FOR A HERO']],
+      ['卒業', '菊池桃子', ['卒業-GRADUATION-']],
+      ['ランニング･ショット', '柴田恭兵', ['ランニング・ショット RUNNING SHOT']],
+      ['出航', '寺尾聰', ['出航 SASURAI']],
+      ['エロティカ･セブン', 'サザンオールスターズ', ['エロティカ・セブン EROTICA SEVEN']],
+      ['あしたのジョー～美しき狼たち～', 'おぼたけし', ['美しき狼たち']],
+      ['輝きながら…', '徳永英明', ['輝きながら']],
+      ['迷惑でしょうが…', 'とんねるず', ['迷惑でしょうが']],
+      ['A.S.A.P.', 'Little Kiss', ['A.S.A.P']]
+    ];
+    function addApprovedAnnualRankingTrackAliases(byTrack) {
+      for (const [canonicalTitle, artist, aliasTitles] of ANNUAL_RANKING_TRACK_ALIAS_GROUPS) {
+        const candidates = byTrack.get(annualRankingTrackKey(canonicalTitle, artist));
+        if (!candidates || candidates.size === 0) continue;
+        for (const aliasTitle of aliasTitles) {
+          const aliasKey = annualRankingTrackKey(aliasTitle, artist);
+          if (!byTrack.has(aliasKey)) byTrack.set(aliasKey, new Map());
+          for (const [candidateId, candidate] of candidates) {
+            byTrack.get(aliasKey).set(candidateId, candidate);
+          }
+        }
+      }
+    }
     function buildAnnualRankingIndex(data) {
       const byTrack = new Map();
       const byDecorationFallback = new Map();
@@ -2265,6 +2379,7 @@
           }
         }
       }
+      addApprovedAnnualRankingTrackAliases(byTrack);
       return { byTrack, byDecorationFallback };
     }
     let annualRankingLoadState = 'loading';
