@@ -60,6 +60,7 @@ function compileRankingRuntime({ includeApprovedAliases }) {
     ${resolveSource}
     return {
       ANNUAL_RANKING_TRACK_ALIAS_GROUPS,
+      ANNUAL_RANKING_TRACK_YEAR_OVERRIDES,
       annualRankingTrackKey,
       buildAnnualRankingIndex,
       resolveAnnualRanking
@@ -108,23 +109,39 @@ assert(episodes.reduce((sum, episode) => sum + episode.tracks.length, 0) === 544
   'unexpected Set Up List track count');
 assert(JSON.stringify(beforeTotals) === JSON.stringify({ regular: 3155, confirm: 331, rankout: 1657, foreign: 301 }),
   `unexpected pre-alias totals: ${JSON.stringify(beforeTotals)}`);
-assert(JSON.stringify(afterTotals) === JSON.stringify({ regular: 3326, confirm: 331, rankout: 1486, foreign: 301 }),
+assert(JSON.stringify(afterTotals) === JSON.stringify({ regular: 3334, confirm: 331, rankout: 1478, foreign: 301 }),
   `unexpected post-alias totals: ${JSON.stringify(afterTotals)}`);
-assert(afterRuntime.ANNUAL_RANKING_TRACK_ALIAS_GROUPS.length === 69,
+assert(afterRuntime.ANNUAL_RANKING_TRACK_ALIAS_GROUPS.length === 74,
   `unexpected approved alias destination count: ${afterRuntime.ANNUAL_RANKING_TRACK_ALIAS_GROUPS.length}`);
-assert(newRegular === 171, `unexpected newly ranked count: ${newRegular}`);
+assert(newRegular === 179, `unexpected newly ranked count: ${newRegular}`);
 assert(existingChanged === 0, `existing ranking results changed: ${existingChanged}`);
 
 for (const [canonicalTitle, artist] of afterRuntime.ANNUAL_RANKING_TRACK_ALIAS_GROUPS) {
   const candidates = beforeIndex.byTrack.get(beforeRuntime.annualRankingTrackKey(canonicalTitle, artist));
-  assert(candidates?.size === 1,
+  const expectedSize = canonicalTitle === '人生の空から' && artist === '松山千春' ? 2 : 1;
+  assert(candidates?.size === expectedSize,
     `approved alias destination is missing or ambiguous: ${canonicalTitle} / ${artist} (${candidates?.size || 0})`);
 }
+
+const lifeOverrideKey = afterRuntime.annualRankingTrackKey('人生(たび)の空から', '松山千春');
+const lifeCanonicalCandidates = afterIndex.byTrack.get(lifeOverrideKey);
+assert(lifeCanonicalCandidates?.size === 2,
+  `人生の空から should retain both ranking candidates before override: ${lifeCanonicalCandidates?.size || 0}`);
+assert(afterRuntime.ANNUAL_RANKING_TRACK_YEAR_OVERRIDES.get(lifeOverrideKey) === 1980,
+  '人生(たび)の空から year override must be limited to 1980');
 
 const positiveCases = [
   [269, 2, '19位'],
   [269, 4, '2位'],
-  [269, 5, '73位']
+  [269, 5, '73位'],
+  [165, 19, '45位'],
+  [39, 3, '35位'],
+  [139, 3, '35位'],
+  [159, 12, '1981年 35位'],
+  [241, 5, '35位'],
+  [122, 5, '19位'],
+  [134, 17, '83位'],
+  [207, 13, '1983年 69位']
 ];
 for (const [episodeNo, trackNo, expected] of positiveCases) {
   const { episode, track } = findTrack(episodeNo, trackNo);
@@ -138,7 +155,11 @@ const negativeCases = [
   [164, 15],
   [14, 9],
   [173, 4],
-  [226, 5]
+  [226, 5],
+  [29, 15],
+  [48, 14],
+  [186, 5],
+  [257, 12]
 ];
 for (const [episodeNo, trackNo] of negativeCases) {
   const { episode, track } = findTrack(episodeNo, trackNo);
@@ -153,7 +174,8 @@ const untouchedGroups = [
   { title: '恋におちて', artist: '小林明子', count: 1, prefix: false },
   { title: 'ごめんね', artist: '高橋真梨子', count: 1, prefix: false },
   { title: 'E気持', artist: '沖田浩之', count: 3, prefix: false },
-  { title: 'センチメンタル・ジャーニ', artist: '松本伊代', count: 1, prefix: false }
+  { title: 'センチメンタル・ジャーニ', artist: '松本伊代', count: 1, prefix: false },
+  { title: 'ユー・メイ・ドリーム', artist: 'シーナ&ザ・ロケッツ', count: 3, prefix: true }
 ];
 for (const expected of untouchedGroups) {
   const matches = [];
@@ -175,8 +197,8 @@ for (const expected of untouchedGroups) {
 
 console.log('mp8090 annual ranking regression\n');
 console.log('[OK] production ranking functions loaded from setuplits.html');
-console.log('[OK] approved destinations=69; newly ranked=171; canonical ambiguity=0');
-console.log('[OK] totals: regular=3326, confirm=331, rankout=1486, foreign=301');
-console.log('[OK] required positives=3; untouched groups=6; negative cases=5');
+console.log('[OK] approved destinations=74; newly ranked=179; controlled canonical ambiguity=1');
+console.log('[OK] totals: regular=3334, confirm=331, rankout=1478, foreign=301');
+console.log('[OK] required positives=11; untouched groups=7; negative cases=9');
 console.log('[OK] existing ranking result changes=0');
 console.log('\nResult: PASS (failures=0)');

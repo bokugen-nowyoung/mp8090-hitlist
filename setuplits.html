@@ -2310,8 +2310,18 @@
       ['あしたのジョー～美しき狼たち～', 'おぼたけし', ['美しき狼たち']],
       ['輝きながら…', '徳永英明', ['輝きながら']],
       ['迷惑でしょうが…', 'とんねるず', ['迷惑でしょうが']],
-      ['A.S.A.P.', 'Little Kiss', ['A.S.A.P']]
+      ['A.S.A.P.', 'Little Kiss', ['A.S.A.P']],
+      ['人生の空から', '松山千春', ['人生(たび)の空から']],
+      ['悲しみ2ヤング', '田原俊彦', ['悲しみ2(TOO)ヤング', '悲しみ2 (TOO)ヤング']],
+      ['僕はこの瞳で嘘をつく', 'CHAGE&ASKA', ['僕はこの瞳(め)で嘘をつく']],
+      ['煌めく瞬間に捕われて', 'MANISH', ['煌めく瞬間（とき）に捕われて']],
+      ['Ya Ya(あの時代を忘れない)', 'サザンオールスターズ', ['Ya Ya (あの 時代 (とき)を忘れない)']]
     ];
+    // 同じ曲が複数年の年間ランキングへ入っている場合でも、ユーザーが
+    // 対象表記ごとに承認した年だけを選ぶ。PUY一致を一般則にはしない。
+    const ANNUAL_RANKING_TRACK_YEAR_OVERRIDES = new Map([
+      [annualRankingTrackKey('人生(たび)の空から', '松山千春'), 1980]
+    ]);
     function addApprovedAnnualRankingTrackAliases(byTrack) {
       for (const [canonicalTitle, artist, aliasTitles] of ANNUAL_RANKING_TRACK_ALIAS_GROUPS) {
         const candidates = byTrack.get(annualRankingTrackKey(canonicalTitle, artist));
@@ -2401,10 +2411,19 @@
       });
     function resolveAnnualRanking(index, ep, track) {
       const exactCandidates = index?.byTrack?.get(annualRankingTrackKey(track.title, track.artist));
-      const candidates = exactCandidates && exactCandidates.size > 0
+      let candidates = exactCandidates && exactCandidates.size > 0
         ? exactCandidates
         : index?.byDecorationFallback?.get(annualRankingDecorationFallbackKey(track.title, track.artist));
       if (!candidates || candidates.size === 0) return { text: '―', title: '' };
+      const approvedYear = ANNUAL_RANKING_TRACK_YEAR_OVERRIDES.get(
+        annualRankingTrackKey(track.title, track.artist)
+      );
+      if (approvedYear !== undefined) {
+        candidates = new Map(
+          [...candidates].filter(([, candidate]) => candidate.year === approvedYear)
+        );
+        if (candidates.size === 0) return { text: '―', title: '' };
+      }
       if (candidates.size > 1) {
         return {
           text: '要確認',
