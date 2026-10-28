@@ -771,6 +771,52 @@
     }
     .ep-track-table .col-ranking { width: 6.5rem; }
 
+    /* 年間ランキングの複数候補案内 */
+    .annual-ranking-help {
+      position: relative;
+      display: inline-block;
+      white-space: normal;
+    }
+    .annual-ranking-help-trigger {
+      appearance: none;
+      border: 0;
+      padding: 0;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      cursor: help;
+      text-decoration: underline dotted;
+      text-underline-offset: 0.18em;
+    }
+    .annual-ranking-help-text {
+      box-sizing: border-box;
+      display: block;
+      width: max-content;
+      max-width: min(14rem, calc(100vw - 1rem));
+      max-height: calc(100vh - 1rem);
+      overflow-y: auto;
+      margin-top: 0.3rem;
+      padding: 0.35rem 0.5rem;
+      border: 1px solid var(--border-table);
+      border-radius: var(--r-sm);
+      background: var(--bg-primary);
+      color: var(--text-mid);
+      box-shadow: 0 3px 10px rgba(70, 42, 16, 0.22);
+      font-size: 0.7rem;
+      line-height: 1.4;
+      text-align: left;
+      white-space: normal;
+    }
+    .annual-ranking-help-text[hidden] { display: none !important; }
+    @media (hover: hover) and (pointer: fine) {
+      .annual-ranking-help-text {
+        position: fixed;
+        z-index: 1001;
+        margin-top: 0;
+        transform: translateX(-50%);
+      }
+    }
+
     /* Note badges */
     .note-badge {
       display: inline-block;
@@ -2440,10 +2486,157 @@
       const yearPrefix = year === Number(ep.puy_year) ? '' : `${year}年 `;
       return { text: `${yearPrefix}${rank}位`, title: '' };
     }
+    const ANNUAL_RANKING_PENDING_LABEL = '確認中';
+    const ANNUAL_RANKING_PENDING_HELP = '複数年の年間ランキング候補があります';
+    const ANNUAL_RANKING_HELP_VIEWPORT_MARGIN = 8;
+    const ANNUAL_RANKING_HELP_GAP = 5;
+    let annualRankingHelpId = 0;
+    function positionAnnualRankingHelp(wrapper) {
+      const help = wrapper.querySelector('.annual-ranking-help-text');
+      const trigger = wrapper.querySelector('.annual-ranking-help-trigger');
+      if (!help || !trigger || help.hidden) return;
+      if (!window.matchMedia('(hover: hover) and (pointer: fine)').matches) {
+        help.style.removeProperty('left');
+        help.style.removeProperty('top');
+        return;
+      }
+      const rect = trigger.getBoundingClientRect();
+      const helpRect = help.getBoundingClientRect();
+      const viewportWidth = document.documentElement.clientWidth;
+      const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+      const availableWidth = Math.max(
+        0,
+        viewportWidth - ANNUAL_RANKING_HELP_VIEWPORT_MARGIN * 2
+      );
+      const halfWidth = Math.min(helpRect.width, availableWidth) / 2;
+      const center = Math.min(
+        viewportWidth - ANNUAL_RANKING_HELP_VIEWPORT_MARGIN - halfWidth,
+        Math.max(ANNUAL_RANKING_HELP_VIEWPORT_MARGIN + halfWidth, rect.left + rect.width / 2)
+      );
+      const below = rect.bottom + ANNUAL_RANKING_HELP_GAP;
+      const above = rect.top - ANNUAL_RANKING_HELP_GAP - helpRect.height;
+      const maxTop = Math.max(
+        ANNUAL_RANKING_HELP_VIEWPORT_MARGIN,
+        viewportHeight - ANNUAL_RANKING_HELP_VIEWPORT_MARGIN - helpRect.height
+      );
+      const top = below + helpRect.height <= viewportHeight - ANNUAL_RANKING_HELP_VIEWPORT_MARGIN
+        ? below
+        : (above >= ANNUAL_RANKING_HELP_VIEWPORT_MARGIN
+          ? above
+          : Math.min(maxTop, Math.max(ANNUAL_RANKING_HELP_VIEWPORT_MARGIN, below)));
+      help.style.left = `${center}px`;
+      help.style.top = `${top}px`;
+    }
+    function syncAnnualRankingHelp(wrapper) {
+      const trigger = wrapper.querySelector('.annual-ranking-help-trigger');
+      const help = wrapper.querySelector('.annual-ranking-help-text');
+      if (!trigger || !help) return;
+      const suppressed = wrapper.dataset.suppressed === 'true';
+      const visible = wrapper.dataset.pinned === 'true'
+        || (!suppressed && (wrapper.dataset.hovered === 'true' || wrapper.dataset.focused === 'true'));
+      wrapper.dataset.visible = String(visible);
+      trigger.setAttribute('aria-expanded', String(visible));
+      help.hidden = !visible;
+      if (visible) positionAnnualRankingHelp(wrapper);
+    }
+    function resetAnnualRankingHelp(wrapper, suppressTransient = false) {
+      wrapper.dataset.pinned = 'false';
+      wrapper.dataset.hovered = 'false';
+      wrapper.dataset.focused = 'false';
+      wrapper.dataset.suppressed = String(suppressTransient);
+      syncAnnualRankingHelp(wrapper);
+    }
+    function closeAnnualRankingHelp(except = null, restoreFocus = false) {
+      let focusTarget = null;
+      modalBody.querySelectorAll('.annual-ranking-help[data-visible="true"]').forEach(wrapper => {
+        if (wrapper === except) return;
+        if (!focusTarget) focusTarget = wrapper.querySelector('.annual-ranking-help-trigger');
+        resetAnnualRankingHelp(wrapper, true);
+      });
+      if (restoreFocus) focusTarget?.focus();
+      return focusTarget;
+    }
+    function closeAnnualRankingHelpOnEscape() {
+      const openHelp = modalBody.querySelector('.annual-ranking-help[data-visible="true"]');
+      if (!openHelp) return false;
+      resetAnnualRankingHelp(openHelp, true);
+      openHelp.querySelector('.annual-ranking-help-trigger')?.focus();
+      return true;
+    }
+    function createAnnualRankingHelp() {
+      annualRankingHelpId += 1;
+      const helpId = `annual-ranking-help-${annualRankingHelpId}`;
+      const wrapper = document.createElement('span');
+      wrapper.className = 'annual-ranking-help';
+      resetAnnualRankingHelp(wrapper);
+
+      const trigger = document.createElement('button');
+      trigger.type = 'button';
+      trigger.className = 'annual-ranking-help-trigger';
+      trigger.textContent = ANNUAL_RANKING_PENDING_LABEL;
+      trigger.setAttribute('aria-expanded', 'false');
+      trigger.setAttribute('aria-controls', helpId);
+      trigger.setAttribute('aria-describedby', helpId);
+      trigger.setAttribute('aria-label', `${ANNUAL_RANKING_PENDING_LABEL}。${ANNUAL_RANKING_PENDING_HELP}`);
+
+      const help = document.createElement('span');
+      help.id = helpId;
+      help.className = 'annual-ranking-help-text';
+      help.setAttribute('role', 'tooltip');
+      help.textContent = ANNUAL_RANKING_PENDING_HELP;
+      help.hidden = true;
+      wrapper.append(trigger, help);
+
+      wrapper.addEventListener('pointerenter', e => {
+        const hoverCapable = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+        if (!hoverCapable || e.pointerType === 'touch') return;
+        if (wrapper.dataset.suppressed === 'true') return;
+        closeAnnualRankingHelp(wrapper);
+        wrapper.dataset.hovered = 'true';
+        syncAnnualRankingHelp(wrapper);
+      });
+      wrapper.addEventListener('pointerleave', () => {
+        wrapper.dataset.hovered = 'false';
+        wrapper.dataset.suppressed = 'false';
+        syncAnnualRankingHelp(wrapper);
+      });
+      wrapper.addEventListener('focusin', () => {
+        if (wrapper.dataset.suppressed === 'true') return;
+        closeAnnualRankingHelp(wrapper);
+        wrapper.dataset.focused = 'true';
+        syncAnnualRankingHelp(wrapper);
+      });
+      wrapper.addEventListener('focusout', e => {
+        if (e.relatedTarget && wrapper.contains(e.relatedTarget)) return;
+        wrapper.dataset.focused = 'false';
+        wrapper.dataset.suppressed = 'false';
+        syncAnnualRankingHelp(wrapper);
+      });
+      trigger.addEventListener('click', () => {
+        const shouldPin = wrapper.dataset.pinned !== 'true';
+        if (shouldPin) {
+          closeAnnualRankingHelp(wrapper);
+          wrapper.dataset.pinned = 'true';
+          wrapper.dataset.suppressed = 'false';
+        } else {
+          wrapper.dataset.pinned = 'false';
+          wrapper.dataset.hovered = 'false';
+          wrapper.dataset.focused = 'false';
+          wrapper.dataset.suppressed = 'true';
+        }
+        syncAnnualRankingHelp(wrapper);
+      });
+      return wrapper;
+    }
     function setAnnualRankingCell(cell, result) {
+      cell.textContent = '';
+      cell.removeAttribute('title');
+      if (result.text === '要確認') {
+        cell.appendChild(createAnnualRankingHelp());
+        return;
+      }
       cell.textContent = result.text;
       if (result.title) cell.title = result.title;
-      else cell.removeAttribute('title');
     }
     function updateAnnualRankingCells(wrap, ep, tracks, generation) {
       const eligible = tracks.some(track => track.note !== '洋楽枠');
@@ -2582,9 +2775,9 @@
           `<td class="col-no">${t.no}</td>` +
           `<td class="col-title">${titleHtml}${debutBadge}</td>` +
           `<td class="col-artist">${artistHtml}</td>` +
-          `<td class="col-ranking" data-track-index="${trackIndex}">${escHtml(ranking.text)}</td>` +
+          `<td class="col-ranking" data-track-index="${trackIndex}"></td>` +
           `<td class="col-note">${noteBadge}</td>`;
-        if (ranking.title) tr.querySelector('.col-ranking').title = ranking.title;
+        setAnnualRankingCell(tr.querySelector('.col-ranking'), ranking);
         tbody.appendChild(tr);
       });
       tbl.appendChild(tbody);
@@ -2645,7 +2838,24 @@
       }
     });
     modalOverlay.addEventListener('click', e => { if (e.target === modalOverlay) closeModal(); });
-    document.addEventListener('keydown', e => { if (e.key === 'Escape' && !modalOverlay.hidden) closeModal(); });
+    document.addEventListener('click', e => {
+      const currentHelp = e.target.closest?.('.annual-ranking-help') || null;
+      closeAnnualRankingHelp(currentHelp);
+    });
+    const repositionAnnualRankingHelp = () => {
+      modalBody.querySelectorAll('.annual-ranking-help[data-visible="true"]').forEach(positionAnnualRankingHelp);
+    };
+    modalBody.addEventListener('scroll', repositionAnnualRankingHelp, true);
+    window.addEventListener('resize', repositionAnnualRankingHelp);
+    document.addEventListener('keydown', e => {
+      if (e.key !== 'Escape' || modalOverlay.hidden) return;
+      if (closeAnnualRankingHelpOnEscape()) {
+        e.preventDefault();
+        e.stopPropagation();
+        return;
+      }
+      closeModal();
+    });
     modalPrev.addEventListener('click', () => {
       const step = (navMode === 'global') ? -1 : 1;
       const idx = (currentEpIndex + step + navEpisodes.length) % navEpisodes.length;

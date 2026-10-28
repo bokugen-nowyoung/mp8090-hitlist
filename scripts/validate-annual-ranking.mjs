@@ -69,11 +69,296 @@ function compileRankingRuntime({ includeApprovedAliases }) {
   `)();
 }
 
+class FakeElement {
+  constructor(tagName) {
+    this.tagName = String(tagName).toUpperCase();
+    this.className = '';
+    this.children = [];
+    this.parentNode = null;
+    this.attributes = new Map();
+    this.dataset = {};
+    this.hidden = false;
+    this.style = {
+      removeProperty: name => { delete this.style[name]; }
+    };
+    this.listeners = new Map();
+    this.focused = false;
+    this.rect = { left: 100, top: 20, right: 150, bottom: 40, width: 50, height: 20 };
+    this._textContent = '';
+  }
+
+  get textContent() {
+    return this.children.length > 0
+      ? this.children.map(child => child.textContent).join('')
+      : this._textContent;
+  }
+
+  set textContent(value) {
+    this._textContent = String(value);
+    this.children = [];
+  }
+
+  get title() {
+    return this.attributes.get('title') || '';
+  }
+
+  set title(value) {
+    this.attributes.set('title', String(value));
+  }
+
+  append(...children) {
+    children.forEach(child => this.appendChild(child));
+  }
+
+  appendChild(child) {
+    child.parentNode = this;
+    this.children.push(child);
+    return child;
+  }
+
+  setAttribute(name, value) {
+    this.attributes.set(name, String(value));
+  }
+
+  removeAttribute(name) {
+    this.attributes.delete(name);
+  }
+
+  addEventListener(type, listener) {
+    const listeners = this.listeners.get(type) || [];
+    listeners.push(listener);
+    this.listeners.set(type, listeners);
+  }
+
+  dispatch(type, properties = {}) {
+    const event = { type, target: this, relatedTarget: null, ...properties };
+    for (const listener of this.listeners.get(type) || []) listener(event);
+    return event;
+  }
+
+  focus() {
+    this.focused = true;
+  }
+
+  contains(element) {
+    for (let current = element; current; current = current.parentNode) {
+      if (current === this) return true;
+    }
+    return false;
+  }
+
+  matches(selector) {
+    const match = selector.match(/^\.([\w-]+)(?:\[data-visible="(true|false)"\])?$/);
+    if (!match) return false;
+    const classes = this.className.split(/\s+/).filter(Boolean);
+    return classes.includes(match[1]) && (match[2] === undefined || this.dataset.visible === match[2]);
+  }
+
+  querySelectorAll(selector) {
+    const results = [];
+    const visit = element => {
+      for (const child of element.children) {
+        if (child.matches(selector)) results.push(child);
+        visit(child);
+      }
+    };
+    visit(this);
+    return results;
+  }
+
+  querySelector(selector) {
+    return this.querySelectorAll(selector)[0] || null;
+  }
+
+  getBoundingClientRect() {
+    return this.rect;
+  }
+}
+
+function compileAnnualRankingDisplayRuntime() {
+  const displaySource = sourceBetween(
+    "    const ANNUAL_RANKING_PENDING_LABEL = '確認中';",
+    '\n    function updateAnnualRankingCells'
+  );
+  const document = {
+    documentElement: { clientWidth: 1024 },
+    createElement(tagName) {
+      return new FakeElement(tagName);
+    }
+  };
+  const window = {
+    innerHeight: 600,
+    hoverCapable: true,
+    matchMedia() { return { matches: this.hoverCapable }; }
+  };
+  const modalBody = new FakeElement('div');
+  return Function('document', 'window', 'modalBody', `
+    ${displaySource}
+    return {
+      ANNUAL_RANKING_PENDING_LABEL,
+      ANNUAL_RANKING_PENDING_HELP,
+      setAnnualRankingCell,
+      positionAnnualRankingHelp,
+      closeAnnualRankingHelp,
+      closeAnnualRankingHelpOnEscape,
+      modalBody,
+      testWindow: window,
+      testDocument: document
+    };
+  `)(document, window, modalBody);
+}
+
 const episodes = extractEpisodes();
 const beforeRuntime = compileRankingRuntime({ includeApprovedAliases: false });
 const afterRuntime = compileRankingRuntime({ includeApprovedAliases: true });
 const beforeIndex = beforeRuntime.buildAnnualRankingIndex(rankingData);
 const afterIndex = afterRuntime.buildAnnualRankingIndex(rankingData);
+const displayRuntime = compileAnnualRankingDisplayRuntime();
+
+assert(displayRuntime.ANNUAL_RANKING_PENDING_LABEL === '確認中',
+  'annual ranking pending display label changed');
+assert(displayRuntime.ANNUAL_RANKING_PENDING_HELP === '複数年の年間ランキング候補があります',
+  'annual ranking pending help text changed');
+
+const pendingCell = new FakeElement('td');
+pendingCell.setAttribute('title', 'old title');
+displayRuntime.modalBody.appendChild(pendingCell);
+displayRuntime.setAnnualRankingCell(pendingCell, {
+  text: '要確認',
+  title: '年間ランキングに異なる年または順位が複数あります'
+});
+assert(pendingCell.children.length === 1 && pendingCell.children[0].tagName === 'SPAN',
+  'pending annual ranking must render a help wrapper');
+const [pendingHelp] = pendingCell.children;
+const pendingTrigger = pendingHelp.querySelector('.annual-ranking-help-trigger');
+const pendingText = pendingHelp.querySelector('.annual-ranking-help-text');
+assert(pendingHelp.className === 'annual-ranking-help',
+  'pending annual ranking wrapper class changed');
+assert(pendingTrigger?.tagName === 'BUTTON' && pendingTrigger.type === 'button'
+  && pendingTrigger.textContent === '確認中',
+  'pending annual ranking button changed');
+assert(pendingText?.textContent === '複数年の年間ランキング候補があります',
+  'pending annual ranking help content changed');
+assert(pendingTrigger.attributes.get('aria-label')?.includes('複数年の年間ランキング候補があります'),
+  'pending annual ranking accessible label is missing help text');
+assert(pendingTrigger.attributes.get('aria-controls') === pendingText.id
+  && pendingTrigger.attributes.get('aria-describedby') === pendingText.id
+  && pendingText.attributes.get('role') === 'tooltip',
+  'pending annual ranking accessible relationship changed');
+assert(!pendingCell.attributes.has('title'),
+  'pending annual ranking cell retained a stale title');
+
+pendingTrigger.rect = { left: 100, top: 100, right: 140, bottom: 120, width: 40, height: 20 };
+pendingText.rect = { left: 0, top: 0, right: 200, bottom: 50, width: 200, height: 50 };
+pendingText.hidden = false;
+displayRuntime.positionAnnualRankingHelp(pendingHelp);
+assert(pendingText.style.top === '125px' && pendingText.style.left === '120px',
+  'annual ranking help must use the normal below-trigger position');
+pendingTrigger.rect = { left: 100, top: 560, right: 140, bottom: 580, width: 40, height: 20 };
+displayRuntime.positionAnnualRankingHelp(pendingHelp);
+assert(pendingText.style.top === '505px',
+  'annual ranking help must flip above the trigger near the viewport bottom');
+displayRuntime.testWindow.innerHeight = 80;
+pendingTrigger.rect = { left: 100, top: 30, right: 140, bottom: 50, width: 40, height: 20 };
+pendingText.rect = { left: 0, top: 0, right: 200, bottom: 100, width: 200, height: 100 };
+displayRuntime.positionAnnualRankingHelp(pendingHelp);
+assert(pendingText.style.top === '8px',
+  'annual ranking help must clamp to the viewport margin when neither side fits');
+displayRuntime.testWindow.innerHeight = 600;
+pendingText.rect = { left: 0, top: 0, right: 200, bottom: 50, width: 200, height: 50 };
+pendingTrigger.rect = { left: -50, top: 100, right: -30, bottom: 120, width: 20, height: 20 };
+displayRuntime.positionAnnualRankingHelp(pendingHelp);
+assert(pendingText.style.left === '108px',
+  'annual ranking help must clamp its left edge to the viewport margin');
+pendingTrigger.rect = { left: 1100, top: 100, right: 1120, bottom: 120, width: 20, height: 20 };
+displayRuntime.positionAnnualRankingHelp(pendingHelp);
+assert(pendingText.style.left === '916px',
+  'annual ranking help must clamp its right edge to the viewport margin');
+pendingText.rect = { left: 0, top: 0, right: 80, bottom: 50, width: 80, height: 50 };
+pendingTrigger.rect = { left: -50, top: 100, right: -30, bottom: 120, width: 20, height: 20 };
+displayRuntime.positionAnnualRankingHelp(pendingHelp);
+assert(pendingText.style.left === '48px',
+  'annual ranking help must use its measured width for a narrower left clamp');
+pendingTrigger.rect = { left: 1100, top: 100, right: 1120, bottom: 120, width: 20, height: 20 };
+displayRuntime.positionAnnualRankingHelp(pendingHelp);
+assert(pendingText.style.left === '976px',
+  'annual ranking help must use its measured width for a narrower right clamp');
+pendingText.rect = { left: 0, top: 0, right: 1200, bottom: 50, width: 1200, height: 50 };
+pendingTrigger.rect = { left: -50, top: 100, right: -30, bottom: 120, width: 20, height: 20 };
+displayRuntime.positionAnnualRankingHelp(pendingHelp);
+assert(pendingText.style.left === '512px',
+  'oversized annual ranking help must center within the available viewport width');
+pendingText.hidden = true;
+
+displayRuntime.testWindow.hoverCapable = false;
+pendingHelp.dispatch('pointerenter', { pointerType: 'mouse' });
+assert(pendingText.hidden, 'non-hover-capable pointers must not show transient annual ranking help');
+displayRuntime.testWindow.hoverCapable = true;
+pendingHelp.dispatch('pointerenter', { pointerType: 'touch' });
+assert(pendingText.hidden, 'touch pointerenter must not show transient annual ranking help');
+pendingHelp.dispatch('pointerenter', { pointerType: 'mouse' });
+assert(!pendingText.hidden && pendingTrigger.attributes.get('aria-expanded') === 'true',
+  'hover-capable pointerenter must show annual ranking help');
+pendingHelp.dispatch('pointerleave');
+assert(pendingText.hidden && pendingTrigger.attributes.get('aria-expanded') === 'false',
+  'pointerleave must hide unpinned annual ranking help');
+pendingHelp.dispatch('focusin');
+assert(!pendingText.hidden && pendingTrigger.attributes.get('aria-expanded') === 'true',
+  'focusin must show annual ranking help');
+pendingHelp.dispatch('focusout');
+assert(pendingText.hidden && pendingTrigger.attributes.get('aria-expanded') === 'false',
+  'focusout must hide annual ranking help');
+displayRuntime.testWindow.hoverCapable = false;
+pendingTrigger.dispatch('click');
+assert(!pendingText.hidden && pendingHelp.dataset.pinned === 'true',
+  'tap/click must pin annual ranking help open without hover support');
+pendingTrigger.dispatch('click');
+assert(pendingText.hidden && pendingHelp.dataset.pinned === 'false',
+  'second tap/click must close pinned annual ranking help');
+displayRuntime.testWindow.hoverCapable = true;
+
+const secondCell = new FakeElement('td');
+displayRuntime.modalBody.appendChild(secondCell);
+displayRuntime.setAnnualRankingCell(secondCell, { text: '要確認', title: '' });
+const secondHelp = secondCell.querySelector('.annual-ranking-help');
+const secondTrigger = secondHelp.querySelector('.annual-ranking-help-trigger');
+pendingHelp.dispatch('pointerleave');
+pendingTrigger.dispatch('click');
+secondTrigger.dispatch('click');
+assert(pendingText.hidden && pendingTrigger.attributes.get('aria-expanded') === 'false'
+  && secondHelp.dataset.pinned === 'true',
+  'opening another annual ranking help must close the first');
+displayRuntime.closeAnnualRankingHelp();
+assert(secondHelp.querySelector('.annual-ranking-help-text').hidden,
+  'outside-close path must hide annual ranking help');
+secondHelp.dispatch('pointerleave');
+secondTrigger.dispatch('click');
+assert(displayRuntime.closeAnnualRankingHelpOnEscape(),
+  'Escape handler must report that it closed annual ranking help');
+assert(secondHelp.querySelector('.annual-ranking-help-text').hidden
+  && secondTrigger.attributes.get('aria-expanded') === 'false'
+  && secondTrigger.focused,
+  'Escape must close annual ranking help, update aria, and restore trigger focus');
+assert(!displayRuntime.closeAnnualRankingHelpOnEscape(),
+  'a second Escape must fall through when no annual ranking help is visible');
+
+for (const result of [
+  { text: '14位', title: '' },
+  { text: '―', title: '' },
+  { text: '取得不可', title: '年間ランキングデータを取得できませんでした' }
+]) {
+  const cell = new FakeElement('td');
+  displayRuntime.setAnnualRankingCell(cell, result);
+  assert(cell.textContent === result.text && cell.children.length === 0,
+    `ordinary annual ranking display changed: ${result.text}`);
+  assert((cell.attributes.get('title') || '') === result.title,
+    `ordinary annual ranking title changed: ${result.text}`);
+}
+
+assert(html.includes('@media (hover: hover) and (pointer: fine)'),
+  'pointer-specific annual ranking help styling is missing');
+assert(/\.annual-ranking-help-text\s*\{[^}]*box-sizing:\s*border-box;[^}]*max-width:\s*min\(14rem, calc\(100vw - 1rem\)\);/s.test(html),
+  'annual ranking help must include padding and borders within its viewport max-width');
 
 function resultFor(runtime, index, episode, track) {
   if (track.note === '洋楽枠') return { kind: 'foreign', text: '―' };
@@ -254,4 +539,5 @@ console.log('[OK] totals: regular=3346, confirm=331, rankout=1483, foreign=302')
 console.log('[OK] required positives=29; untouched groups=7; negative cases=9');
 console.log('[OK] episode-specific year overrides=4; leakage checks=6');
 console.log('[OK] existing ranking result changes=0');
+console.log('[OK] pending display=確認中; placement/touch/hover/focus/click/outside/Escape verified');
 console.log('\nResult: PASS (failures=0)');
