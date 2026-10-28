@@ -27,14 +27,26 @@ function extractEpisodes() {
   return JSON.parse(match[1]);
 }
 
-function compileRankingRuntime({ includeApprovedAliases }) {
+function compileRankingRuntime({ includeApprovedAliases, includeYokohamaGinbaeAlias = true }) {
   const normalizeSource = sourceBetween(
     '    const normalizeForMatch = (s) => {',
     '\n\n    // ── 初登場（デビュー）判定 ──'
   );
-  const artistAliasSource = sourceBetween(
+  const searchNormalizeSource = sourceBetween(
+    '    function normalizeWithMap(str) {',
+    '\n\n    // ── アーティスト検索用alias ──'
+  );
+  let artistAliasSource = sourceBetween(
     '    const ARTIST_SEARCH_ALIAS_GROUPS = [',
-    '\n    const artistSearchAliasTermsByQuery'
+    '\n\n    // ── 年間シングルランキング照合 ──'
+  );
+  const artistSearchSource = sourceBetween(
+    '    function resolveArtistSearchTerms(rawQuery) {',
+    '\n    function getArtistHighlightTerms'
+  );
+  const episodeSearchSource = sourceBetween(
+    '    function episodeMatches(ep, c) {',
+    '\n    function readCriteria'
   );
   let rankingSource = sourceBetween(
     '    function normalizeAnnualRankingArtistTerm(value) {',
@@ -51,22 +63,54 @@ function compileRankingRuntime({ includeApprovedAliases }) {
     rankingSource = rankingSource.replace(aliasCall, '');
     assert(!rankingSource.includes(aliasCall), 'approved alias registration call appears more than once');
   }
+  if (!includeYokohamaGinbaeAlias) {
+    const yokohamaGinbaeAlias = "      ['横浜銀蝿', 'T.C.R.横浜銀蝿R.S.']\n";
+    assert(artistAliasSource.includes(yokohamaGinbaeAlias), '横浜銀蝿 artist alias not found');
+    artistAliasSource = artistAliasSource.replace(yokohamaGinbaeAlias, '');
+  }
 
   // setuplits.htmlの実コードをそのまま評価し、テスト側へ照合ロジックを複製しない。
   return Function(`
     ${normalizeSource}
+    ${searchNormalizeSource}
     ${artistAliasSource}
+    ${artistSearchSource}
+    ${episodeSearchSource}
     ${rankingSource}
     ${resolveSource}
     return {
+      ARTIST_SEARCH_ALIAS_GROUPS,
       ANNUAL_RANKING_TRACK_ALIAS_GROUPS,
       ANNUAL_RANKING_TRACK_YEAR_OVERRIDES,
+      artistSearchAliasTermsByQuery,
+      searchNormalize,
+      resolveArtistSearchTerms,
+      artistMatchesSearchTerms,
+      compileSearchCriteria,
+      episodeMatches,
+      normalizeAnnualRankingArtist,
       annualRankingTrackKey,
       annualRankingTrackYearOverrideKey,
       buildAnnualRankingIndex,
       resolveAnnualRanking
     };
   `)();
+}
+
+function compileDebutRuntime() {
+  const normalizeSource = sourceBetween(
+    '    const normalizeForMatch = (s) => {',
+    '\n\n    // ── 初登場（デビュー）判定 ──'
+  );
+  const debutSource = sourceBetween(
+    '    const debutTrackKey = (t) =>',
+    '\n\n\n    const yearButtons'
+  );
+  return Function('episodes', `
+    ${normalizeSource}
+    ${debutSource}
+    return { debutTrackKey, debutEpNoByKey, isDebutTrack };
+  `)(episodes);
 }
 
 class FakeElement {
@@ -211,9 +255,62 @@ function compileAnnualRankingDisplayRuntime() {
 const episodes = extractEpisodes();
 const beforeRuntime = compileRankingRuntime({ includeApprovedAliases: false });
 const afterRuntime = compileRankingRuntime({ includeApprovedAliases: true });
+const preYokohamaGinbaeRuntime = compileRankingRuntime({
+  includeApprovedAliases: true,
+  includeYokohamaGinbaeAlias: false
+});
 const beforeIndex = beforeRuntime.buildAnnualRankingIndex(rankingData);
 const afterIndex = afterRuntime.buildAnnualRankingIndex(rankingData);
+const preYokohamaGinbaeIndex = preYokohamaGinbaeRuntime.buildAnnualRankingIndex(rankingData);
+const debutRuntime = compileDebutRuntime();
 const displayRuntime = compileAnnualRankingDisplayRuntime();
+
+function countEpisodeSearchMatches(runtime, field, rawQuery) {
+  const criteria = runtime.compileSearchCriteria({
+    artist: '',
+    title: '',
+    epNo: null,
+    airDate: '',
+    feature: '',
+    free: '',
+    puySingle: null,
+    puyMulti: [],
+    [field]: rawQuery
+  });
+  return episodes.filter(episode => runtime.episodeMatches(episode, criteria)).length;
+}
+
+for (const query of ['横浜銀蝿', 'T.C.R.横浜銀蝿R.S.']) {
+  assert(countEpisodeSearchMatches(afterRuntime, 'artist', query) === 3,
+    `横浜銀蝿 artist-field search count changed: ${query}`);
+  assert(countEpisodeSearchMatches(afterRuntime, 'free', query) === 3,
+    `横浜銀蝿 free-word search count changed: ${query}`);
+}
+const ginbaeCommonKey = afterRuntime.normalizeAnnualRankingArtist('横浜銀蝿');
+const ginbaeFormalKey = afterRuntime.normalizeAnnualRankingArtist('T.C.R.横浜銀蝿R.S.');
+const ginbaeWithShimadaKey = afterRuntime.normalizeAnnualRankingArtist('T.C.R.横浜銀蝿R.S.嶋大輔');
+assert(ginbaeCommonKey === ginbaeFormalKey,
+  '横浜銀蝿 common/formal annual ranking alias keys differ');
+assert(ginbaeWithShimadaKey !== ginbaeCommonKey,
+  'T.C.R.横浜銀蝿R.S.嶋大輔 must remain a separate annual ranking artist key');
+assert(!afterRuntime.artistSearchAliasTermsByQuery.has(
+  afterRuntime.searchNormalize('T.C.R.横浜銀蝿R.S.嶋大輔')
+), 'T.C.R.横浜銀蝿R.S.嶋大輔 must not become an exact search alias');
+
+const debutTrackCount = episodes.reduce((sum, episode) => sum + (episode.tracks || []).filter(
+  track => debutRuntime.isDebutTrack(episode, track)
+).length, 0);
+assert(debutTrackCount === 2576,
+  `unexpected debut track count: ${debutTrackCount}`);
+for (const [episodeNo, trackNo, expected] of [
+  [14, 5, true],
+  [95, 3, false],
+  [217, 11, false]
+]) {
+  const { episode, track } = findTrack(episodeNo, trackNo);
+  assert(debutRuntime.isDebutTrack(episode, track) === expected,
+    `横浜銀蝿 debut state changed: #${episodeNo} No.${trackNo}`);
+}
 
 assert(displayRuntime.ANNUAL_RANKING_PENDING_LABEL === '確認中',
   'annual ranking pending display label changed');
@@ -378,29 +475,51 @@ function findTrack(episodeNo, trackNo) {
 
 const beforeTotals = { regular: 0, confirm: 0, rankout: 0, foreign: 0 };
 const afterTotals = { regular: 0, confirm: 0, rankout: 0, foreign: 0 };
+const preYokohamaGinbaeTotals = { regular: 0, confirm: 0, rankout: 0, foreign: 0 };
 let newRegular = 0;
 let existingChanged = 0;
+let yokohamaGinbaeNewRegular = 0;
+let yokohamaGinbaeExistingChanged = 0;
 for (const episode of episodes) {
   for (const track of episode.tracks || []) {
     const before = resultFor(beforeRuntime, beforeIndex, episode, track);
     const after = resultFor(afterRuntime, afterIndex, episode, track);
+    const preYokohamaGinbae = resultFor(
+      preYokohamaGinbaeRuntime,
+      preYokohamaGinbaeIndex,
+      episode,
+      track
+    );
     beforeTotals[before.kind] += 1;
     afterTotals[after.kind] += 1;
+    preYokohamaGinbaeTotals[preYokohamaGinbae.kind] += 1;
     if (before.kind === 'rankout' && after.kind === 'regular') newRegular += 1;
     if (before.kind !== 'rankout' && before.text !== after.text) existingChanged += 1;
+    if (preYokohamaGinbae.kind === 'rankout' && after.kind === 'regular') {
+      yokohamaGinbaeNewRegular += 1;
+    }
+    if (preYokohamaGinbae.kind !== 'rankout' && preYokohamaGinbae.text !== after.text) {
+      yokohamaGinbaeExistingChanged += 1;
+    }
   }
 }
 
 assert(episodes.reduce((sum, episode) => sum + episode.tracks.length, 0) === 5462,
   'unexpected Set Up List track count');
-assert(JSON.stringify(beforeTotals) === JSON.stringify({ regular: 3166, confirm: 331, rankout: 1663, foreign: 302 }),
+assert(JSON.stringify(beforeTotals) === JSON.stringify({ regular: 3169, confirm: 331, rankout: 1660, foreign: 302 }),
   `unexpected pre-alias totals: ${JSON.stringify(beforeTotals)}`);
-assert(JSON.stringify(afterTotals) === JSON.stringify({ regular: 3346, confirm: 331, rankout: 1483, foreign: 302 }),
+assert(JSON.stringify(preYokohamaGinbaeTotals) === JSON.stringify({ regular: 3346, confirm: 331, rankout: 1483, foreign: 302 }),
+  `unexpected pre-横浜銀蝿 totals: ${JSON.stringify(preYokohamaGinbaeTotals)}`);
+assert(JSON.stringify(afterTotals) === JSON.stringify({ regular: 3349, confirm: 331, rankout: 1480, foreign: 302 }),
   `unexpected post-alias totals: ${JSON.stringify(afterTotals)}`);
 assert(afterRuntime.ANNUAL_RANKING_TRACK_ALIAS_GROUPS.length === 74,
   `unexpected approved alias destination count: ${afterRuntime.ANNUAL_RANKING_TRACK_ALIAS_GROUPS.length}`);
 assert(newRegular === 180, `unexpected newly ranked count: ${newRegular}`);
 assert(existingChanged === 0, `existing ranking results changed: ${existingChanged}`);
+assert(yokohamaGinbaeNewRegular === 3,
+  `unexpected 横浜銀蝿 newly ranked count: ${yokohamaGinbaeNewRegular}`);
+assert(yokohamaGinbaeExistingChanged === 0,
+  `existing ranking results changed by 横浜銀蝿 alias: ${yokohamaGinbaeExistingChanged}`);
 
 for (const [canonicalTitle, artist] of afterRuntime.ANNUAL_RANKING_TRACK_ALIAS_GROUPS) {
   const candidates = beforeIndex.byTrack.get(beforeRuntime.annualRankingTrackKey(canonicalTitle, artist));
@@ -435,6 +554,9 @@ assert(afterRuntime.ANNUAL_RANKING_TRACK_YEAR_OVERRIDES.size === 4,
   `unexpected year override count: ${afterRuntime.ANNUAL_RANKING_TRACK_YEAR_OVERRIDES.size}`);
 
 const positiveCases = [
+  [14, 5, '15位'],
+  [95, 3, '15位'],
+  [217, 11, '1981年 15位'],
   [269, 2, '19位'],
   [269, 4, '2位'],
   [269, 5, '73位'],
@@ -535,9 +657,12 @@ for (const expected of untouchedGroups) {
 console.log('mp8090 annual ranking regression\n');
 console.log('[OK] production ranking functions loaded from setuplits.html');
 console.log('[OK] approved destinations=74; newly ranked=180; controlled canonical ambiguity=1');
-console.log('[OK] totals: regular=3346, confirm=331, rankout=1483, foreign=302');
-console.log('[OK] required positives=29; untouched groups=7; negative cases=9');
+console.log('[OK] 横浜銀蝿 exact artist alias: newly ranked=3; existing changes=0');
+console.log('[OK] artist/free search: 横浜銀蝿=3; T.C.R.横浜銀蝿R.S.=3; 嶋大輔=separate');
+console.log('[OK] totals: regular=3349, confirm=331, rankout=1480, foreign=302');
+console.log('[OK] required positives=32; untouched groups=7; negative cases=9');
 console.log('[OK] episode-specific year overrides=4; leakage checks=6');
 console.log('[OK] existing ranking result changes=0');
+console.log('[OK] debut tracks=2576; 横浜銀蝿 states=#14 first, #95/#217 existing');
 console.log('[OK] pending display=確認中; placement/touch/hover/focus/click/outside/Escape verified');
 console.log('\nResult: PASS (failures=0)');
