@@ -559,20 +559,6 @@
       text-align: center;
     }
 
-    /* ── Back link in header ── */
-    .header-back-link {
-      display: inline-block;
-      color: var(--accent-cyan-xl);
-      font-family: var(--font-sans);
-      font-size: 0.8rem;
-      text-decoration: none;
-      letter-spacing: 0.06em;
-      margin-bottom: 0.9rem;
-      opacity: 0.85;
-      transition: opacity 0.12s;
-    }
-    .header-back-link:hover { opacity: 1; }
-
     /* ── Responsive ── */
     @media (max-width: 600px) {
       .sul-item {
@@ -1333,9 +1319,10 @@
       <span class="tf-name">狐吉くん🦊</span>
     </a>
     <div class="header-inner">
-      <div style="display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:0.9rem;">
-        <a href="year-end-chart.html" class="header-back-link" style="margin-bottom:0;">🎵 年間シングルヒット曲ランキング</a>
-      </div>
+      <nav class="page-switcher" aria-label="コンテンツページ切替">
+        <span class="page-switcher__item page-switcher__item--current" aria-current="page"><span class="page-switcher__icon" aria-hidden="true">📋</span>Set Up List</span>
+        <a href="year-end-chart.html" class="page-switcher__item"><span class="page-switcher__icon" aria-hidden="true">📊</span>年間ランキング</a>
+      </nav>
       <p class="header-badge">mp8090のオンエア曲がここに集結</p>
       <h1 class="site-title"><span class="title-note" aria-hidden="true">🎵</span> mp8090 Set Up List アーカイブ</h1>
       <p class="site-subtitle">LuckyFM「Music Pick Up 80's &amp; 90's」<br>石井哲也アナウンサー公認・ファンサイト</p>

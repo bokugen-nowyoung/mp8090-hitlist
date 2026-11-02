@@ -158,39 +158,100 @@ a {
 }
 
 /* ============================================================
-   Top-level page links (inside year-nav, above year buttons)
+   Page switcher
    ============================================================ */
-.top-page-links {
+.page-switcher {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  margin-bottom: 0.55rem;
+  width: 380px;
+  max-width: 100%;
+  margin: 0 auto 0.9rem;
 }
 
-.top-page-link-btn {
-  display: inline-block;
-  background: var(--accent-mg);
-  color: #fff;
-  text-decoration: none;
+.page-switcher__item {
+  display: flex;
+  flex: 1;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  min-height: 40px;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--gold-d);
+  border-radius: 999px 0 0 999px;
+  background: var(--bg-nav-btn);
+  color: var(--text-on-dark);
   font-family: var(--font-sans);
-  font-size: 0.74rem;
+  font-size: 0.82rem;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  padding: 0.3rem 0.85rem;
-  border-radius: 999px;
-  box-shadow: 0 2px 8px rgba(232,67,147,0.35);
-  transition: background 0.12s, transform 0.1s, box-shadow 0.12s;
+  line-height: 1.2;
+  text-decoration: none;
   white-space: nowrap;
+  transition: background 120ms, color 120ms;
 }
 
-.top-page-link-btn:hover {
-  background: var(--accent-mg-l);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(232,67,147,0.45);
+.page-switcher__item + .page-switcher__item {
+  border-left: 0;
+  border-radius: 0 999px 999px 0;
 }
 
-.top-page-link-btn:active {
-  transform: translateY(0);
+.page-switcher a.page-switcher__item:hover {
+  background: var(--bg-nav-btn-h);
+  color: #fff;
+}
+
+.page-switcher a.page-switcher__item:focus-visible {
+  position: relative;
+  z-index: 2;
+  outline: 3px solid var(--accent-cyan-xl);
+  outline-offset: 3px;
+}
+
+.page-switcher a.page-switcher__item:active {
+  background: var(--bg-header);
+}
+
+.page-switcher__item--current {
+  background: var(--gold-l);
+  color: var(--text-dark);
+  font-weight: 800;
+  box-shadow: inset 0 -3px 0 var(--gold-d);
+  cursor: default;
+}
+
+.page-switcher__icon {
+  flex-shrink: 0;
+}
+
+@media (max-width: 600px) {
+  .page-switcher {
+    width: min(100%, 420px);
+  }
+
+  .page-switcher__item {
+    min-height: 44px;
+    padding: 0.55rem 0.5rem;
+    font-size: 0.8rem;
+  }
+
+  .thanks-fusen + .header-inner {
+    padding-top: 3rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .page-switcher {
+    width: 100%;
+  }
+
+  .page-switcher__item {
+    gap: 0.25rem;
+    padding-right: 0.35rem;
+    padding-left: 0.35rem;
+    font-size: 0.75rem;
+  }
+
+  .thanks-fusen + .header-inner {
+    padding-top: 3.5rem;
+  }
 }
 
 /* ============================================================
