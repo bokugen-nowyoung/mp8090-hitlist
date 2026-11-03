@@ -300,7 +300,7 @@ assert(!afterRuntime.artistSearchAliasTermsByQuery.has(
 const debutTrackCount = episodes.reduce((sum, episode) => sum + (episode.tracks || []).filter(
   track => debutRuntime.isDebutTrack(episode, track)
 ).length, 0);
-assert(debutTrackCount === 2576,
+assert(debutTrackCount === 2575,
   `unexpected debut track count: ${debutTrackCount}`);
 for (const [episodeNo, trackNo, expected] of [
   [14, 5, true],
@@ -310,6 +310,18 @@ for (const [episodeNo, trackNo, expected] of [
   const { episode, track } = findTrack(episodeNo, trackNo);
   assert(debutRuntime.isDebutTrack(episode, track) === expected,
     `横浜銀蝿 debut state changed: #${episodeNo} No.${trackNo}`);
+}
+for (const [episodeNo, trackNo, expected] of [
+  [14, 3, true],
+  [57, 12, false],
+  [155, 1, false],
+  [191, 19, false],
+  [223, 1, false],
+  [275, 16, false]
+]) {
+  const { episode, track } = findTrack(episodeNo, trackNo);
+  assert(debutRuntime.isDebutTrack(episode, track) === expected,
+    `ルビーの指環 debut state changed: #${episodeNo} No.${trackNo}`);
 }
 
 assert(displayRuntime.ANNUAL_RANKING_PENDING_LABEL === '確認中',
@@ -506,11 +518,11 @@ for (const episode of episodes) {
 
 assert(episodes.reduce((sum, episode) => sum + episode.tracks.length, 0) === 5462,
   'unexpected Set Up List track count');
-assert(JSON.stringify(beforeTotals) === JSON.stringify({ regular: 3169, confirm: 331, rankout: 1660, foreign: 302 }),
+assert(JSON.stringify(beforeTotals) === JSON.stringify({ regular: 3173, confirm: 331, rankout: 1656, foreign: 302 }),
   `unexpected pre-alias totals: ${JSON.stringify(beforeTotals)}`);
-assert(JSON.stringify(preYokohamaGinbaeTotals) === JSON.stringify({ regular: 3353, confirm: 331, rankout: 1476, foreign: 302 }),
+assert(JSON.stringify(preYokohamaGinbaeTotals) === JSON.stringify({ regular: 3357, confirm: 331, rankout: 1472, foreign: 302 }),
   `unexpected pre-横浜銀蝿 totals: ${JSON.stringify(preYokohamaGinbaeTotals)}`);
-assert(JSON.stringify(afterTotals) === JSON.stringify({ regular: 3356, confirm: 331, rankout: 1473, foreign: 302 }),
+assert(JSON.stringify(afterTotals) === JSON.stringify({ regular: 3360, confirm: 331, rankout: 1469, foreign: 302 }),
   `unexpected post-alias totals: ${JSON.stringify(afterTotals)}`);
 assert(afterRuntime.ANNUAL_RANKING_TRACK_ALIAS_GROUPS.length === 75,
   `unexpected approved alias destination count: ${afterRuntime.ANNUAL_RANKING_TRACK_ALIAS_GROUPS.length}`);
@@ -561,6 +573,10 @@ const positiveCases = [
   [215, 2, '6位'],
   [241, 11, '1983年 6位'],
   [275, 4, '6位'],
+  [155, 1, '1位'],
+  [191, 19, '1位'],
+  [223, 1, '1位'],
+  [275, 16, '1981年 1位'],
   [14, 5, '15位'],
   [95, 3, '15位'],
   [217, 11, '1981年 15位'],
@@ -666,10 +682,10 @@ console.log('[OK] production ranking functions loaded from setuplits.html');
 console.log('[OK] approved destinations=75; newly ranked=187; controlled canonical ambiguity=1');
 console.log('[OK] 横浜銀蝿 exact artist alias: newly ranked=3; existing changes=0');
 console.log('[OK] artist/free search: 横浜銀蝿=3; T.C.R.横浜銀蝿R.S.=3; 嶋大輔=separate');
-console.log('[OK] totals: regular=3356, confirm=331, rankout=1473, foreign=302');
-console.log('[OK] required positives=39; untouched groups=7; negative cases=9');
+console.log('[OK] totals: regular=3360, confirm=331, rankout=1469, foreign=302');
+console.log('[OK] required positives=43; untouched groups=7; negative cases=9');
 console.log('[OK] episode-specific year overrides=4; leakage checks=6');
 console.log('[OK] existing ranking result changes=0');
-console.log('[OK] debut tracks=2576; 横浜銀蝿 states=#14 first, #95/#217 existing');
+console.log('[OK] debut tracks=2575; 横浜銀蝿 and ルビーの指環 debut states verified');
 console.log('[OK] pending display=確認中; placement/touch/hover/focus/click/outside/Escape verified');
 console.log('\nResult: PASS (failures=0)');
