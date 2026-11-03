@@ -508,13 +508,13 @@ assert(episodes.reduce((sum, episode) => sum + episode.tracks.length, 0) === 546
   'unexpected Set Up List track count');
 assert(JSON.stringify(beforeTotals) === JSON.stringify({ regular: 3169, confirm: 331, rankout: 1660, foreign: 302 }),
   `unexpected pre-alias totals: ${JSON.stringify(beforeTotals)}`);
-assert(JSON.stringify(preYokohamaGinbaeTotals) === JSON.stringify({ regular: 3346, confirm: 331, rankout: 1483, foreign: 302 }),
+assert(JSON.stringify(preYokohamaGinbaeTotals) === JSON.stringify({ regular: 3353, confirm: 331, rankout: 1476, foreign: 302 }),
   `unexpected pre-横浜銀蝿 totals: ${JSON.stringify(preYokohamaGinbaeTotals)}`);
-assert(JSON.stringify(afterTotals) === JSON.stringify({ regular: 3349, confirm: 331, rankout: 1480, foreign: 302 }),
+assert(JSON.stringify(afterTotals) === JSON.stringify({ regular: 3356, confirm: 331, rankout: 1473, foreign: 302 }),
   `unexpected post-alias totals: ${JSON.stringify(afterTotals)}`);
-assert(afterRuntime.ANNUAL_RANKING_TRACK_ALIAS_GROUPS.length === 74,
+assert(afterRuntime.ANNUAL_RANKING_TRACK_ALIAS_GROUPS.length === 75,
   `unexpected approved alias destination count: ${afterRuntime.ANNUAL_RANKING_TRACK_ALIAS_GROUPS.length}`);
-assert(newRegular === 180, `unexpected newly ranked count: ${newRegular}`);
+assert(newRegular === 187, `unexpected newly ranked count: ${newRegular}`);
 assert(existingChanged === 0, `existing ranking results changed: ${existingChanged}`);
 assert(yokohamaGinbaeNewRegular === 3,
   `unexpected 横浜銀蝿 newly ranked count: ${yokohamaGinbaeNewRegular}`);
@@ -554,6 +554,13 @@ assert(afterRuntime.ANNUAL_RANKING_TRACK_YEAR_OVERRIDES.size === 4,
   `unexpected year override count: ${afterRuntime.ANNUAL_RANKING_TRACK_YEAR_OVERRIDES.size}`);
 
 const positiveCases = [
+  [21, 1, '6位'],
+  [65, 1, '6位'],
+  [81, 14, '6位'],
+  [105, 10, '6位'],
+  [215, 2, '6位'],
+  [241, 11, '1983年 6位'],
+  [275, 4, '6位'],
   [14, 5, '15位'],
   [95, 3, '15位'],
   [217, 11, '1981年 15位'],
@@ -656,11 +663,11 @@ for (const expected of untouchedGroups) {
 
 console.log('mp8090 annual ranking regression\n');
 console.log('[OK] production ranking functions loaded from setuplits.html');
-console.log('[OK] approved destinations=74; newly ranked=180; controlled canonical ambiguity=1');
+console.log('[OK] approved destinations=75; newly ranked=187; controlled canonical ambiguity=1');
 console.log('[OK] 横浜銀蝿 exact artist alias: newly ranked=3; existing changes=0');
 console.log('[OK] artist/free search: 横浜銀蝿=3; T.C.R.横浜銀蝿R.S.=3; 嶋大輔=separate');
-console.log('[OK] totals: regular=3349, confirm=331, rankout=1480, foreign=302');
-console.log('[OK] required positives=32; untouched groups=7; negative cases=9');
+console.log('[OK] totals: regular=3356, confirm=331, rankout=1473, foreign=302');
+console.log('[OK] required positives=39; untouched groups=7; negative cases=9');
 console.log('[OK] episode-specific year overrides=4; leakage checks=6');
 console.log('[OK] existing ranking result changes=0');
 console.log('[OK] debut tracks=2576; 横浜銀蝿 states=#14 first, #95/#217 existing');
