@@ -27,7 +27,11 @@ function extractEpisodes() {
   return JSON.parse(match[1]);
 }
 
-function compileRankingRuntime({ includeApprovedAliases, includeYokohamaGinbaeAlias = true }) {
+function compileRankingRuntime({
+  includeApprovedAliases,
+  includeYokohamaGinbaeAlias = true,
+  includeLuckyChanceAlias = true
+}) {
   const normalizeSource = sourceBetween(
     '    const normalizeForMatch = (s) => {',
     '\n\n    // ── 初登場（デビュー）判定 ──'
@@ -67,6 +71,14 @@ function compileRankingRuntime({ includeApprovedAliases, includeYokohamaGinbaeAl
     const yokohamaGinbaeAlias = "      ['横浜銀蝿', 'T.C.R.横浜銀蝿R.S.']\n";
     assert(artistAliasSource.includes(yokohamaGinbaeAlias), '横浜銀蝿 artist alias not found');
     artistAliasSource = artistAliasSource.replace(yokohamaGinbaeAlias, '');
+  }
+  if (!includeLuckyChanceAlias) {
+    const luckyChanceAlias =
+      "      ['ラッキー･チャンスをもう一度', 'C-C-B', ['Lucky Chanceをもう一度']],\n";
+    assert(rankingSource.includes(luckyChanceAlias), 'Lucky Chanceをもう一度 track alias not found');
+    rankingSource = rankingSource.replace(luckyChanceAlias, '');
+    assert(!rankingSource.includes(luckyChanceAlias),
+      'Lucky Chanceをもう一度 track alias appears more than once');
   }
 
   // setuplits.htmlの実コードをそのまま評価し、テスト側へ照合ロジックを複製しない。
@@ -259,9 +271,14 @@ const preYokohamaGinbaeRuntime = compileRankingRuntime({
   includeApprovedAliases: true,
   includeYokohamaGinbaeAlias: false
 });
+const preLuckyChanceRuntime = compileRankingRuntime({
+  includeApprovedAliases: true,
+  includeLuckyChanceAlias: false
+});
 const beforeIndex = beforeRuntime.buildAnnualRankingIndex(rankingData);
 const afterIndex = afterRuntime.buildAnnualRankingIndex(rankingData);
 const preYokohamaGinbaeIndex = preYokohamaGinbaeRuntime.buildAnnualRankingIndex(rankingData);
+const preLuckyChanceIndex = preLuckyChanceRuntime.buildAnnualRankingIndex(rankingData);
 const debutRuntime = compileDebutRuntime();
 const displayRuntime = compileAnnualRankingDisplayRuntime();
 
@@ -488,10 +505,13 @@ function findTrack(episodeNo, trackNo) {
 const beforeTotals = { regular: 0, confirm: 0, rankout: 0, foreign: 0 };
 const afterTotals = { regular: 0, confirm: 0, rankout: 0, foreign: 0 };
 const preYokohamaGinbaeTotals = { regular: 0, confirm: 0, rankout: 0, foreign: 0 };
+const preLuckyChanceTotals = { regular: 0, confirm: 0, rankout: 0, foreign: 0 };
 let newRegular = 0;
 let existingChanged = 0;
 let yokohamaGinbaeNewRegular = 0;
 let yokohamaGinbaeExistingChanged = 0;
+let luckyChanceNewRegular = 0;
+let luckyChanceExistingChanged = 0;
 for (const episode of episodes) {
   for (const track of episode.tracks || []) {
     const before = resultFor(beforeRuntime, beforeIndex, episode, track);
@@ -502,9 +522,16 @@ for (const episode of episodes) {
       episode,
       track
     );
+    const preLuckyChance = resultFor(
+      preLuckyChanceRuntime,
+      preLuckyChanceIndex,
+      episode,
+      track
+    );
     beforeTotals[before.kind] += 1;
     afterTotals[after.kind] += 1;
     preYokohamaGinbaeTotals[preYokohamaGinbae.kind] += 1;
+    preLuckyChanceTotals[preLuckyChance.kind] += 1;
     if (before.kind === 'rankout' && after.kind === 'regular') newRegular += 1;
     if (before.kind !== 'rankout' && before.text !== after.text) existingChanged += 1;
     if (preYokohamaGinbae.kind === 'rankout' && after.kind === 'regular') {
@@ -513,6 +540,12 @@ for (const episode of episodes) {
     if (preYokohamaGinbae.kind !== 'rankout' && preYokohamaGinbae.text !== after.text) {
       yokohamaGinbaeExistingChanged += 1;
     }
+    if (preLuckyChance.kind === 'rankout' && after.kind === 'regular') {
+      luckyChanceNewRegular += 1;
+    }
+    if (preLuckyChance.kind !== 'rankout' && preLuckyChance.text !== after.text) {
+      luckyChanceExistingChanged += 1;
+    }
   }
 }
 
@@ -520,18 +553,29 @@ assert(episodes.reduce((sum, episode) => sum + episode.tracks.length, 0) === 547
   'unexpected Set Up List track count');
 assert(JSON.stringify(beforeTotals) === JSON.stringify({ regular: 3184, confirm: 331, rankout: 1661, foreign: 303 }),
   `unexpected pre-alias totals: ${JSON.stringify(beforeTotals)}`);
-assert(JSON.stringify(preYokohamaGinbaeTotals) === JSON.stringify({ regular: 3368, confirm: 331, rankout: 1477, foreign: 303 }),
+assert(JSON.stringify(preYokohamaGinbaeTotals) === JSON.stringify({ regular: 3371, confirm: 331, rankout: 1474, foreign: 303 }),
   `unexpected pre-横浜銀蝿 totals: ${JSON.stringify(preYokohamaGinbaeTotals)}`);
-assert(JSON.stringify(afterTotals) === JSON.stringify({ regular: 3371, confirm: 331, rankout: 1474, foreign: 303 }),
+assert(JSON.stringify(preLuckyChanceTotals) === JSON.stringify({ regular: 3371, confirm: 331, rankout: 1474, foreign: 303 }),
+  `unexpected pre-Lucky Chance alias totals: ${JSON.stringify(preLuckyChanceTotals)}`);
+assert(JSON.stringify(afterTotals) === JSON.stringify({ regular: 3374, confirm: 331, rankout: 1471, foreign: 303 }),
   `unexpected post-alias totals: ${JSON.stringify(afterTotals)}`);
-assert(afterRuntime.ANNUAL_RANKING_TRACK_ALIAS_GROUPS.length === 75,
+assert(afterRuntime.ANNUAL_RANKING_TRACK_ALIAS_GROUPS.length === 76,
   `unexpected approved alias destination count: ${afterRuntime.ANNUAL_RANKING_TRACK_ALIAS_GROUPS.length}`);
-assert(newRegular === 187, `unexpected newly ranked count: ${newRegular}`);
+assert(newRegular === 190, `unexpected newly ranked count: ${newRegular}`);
 assert(existingChanged === 0, `existing ranking results changed: ${existingChanged}`);
 assert(yokohamaGinbaeNewRegular === 3,
   `unexpected 横浜銀蝿 newly ranked count: ${yokohamaGinbaeNewRegular}`);
 assert(yokohamaGinbaeExistingChanged === 0,
   `existing ranking results changed by 横浜銀蝿 alias: ${yokohamaGinbaeExistingChanged}`);
+assert(luckyChanceNewRegular === 3,
+  `unexpected Lucky Chanceをもう一度 newly ranked count: ${luckyChanceNewRegular}`);
+assert(luckyChanceExistingChanged === 0,
+  `existing ranking results changed by Lucky Chanceをもう一度 alias: ${luckyChanceExistingChanged}`);
+assert(afterTotals.regular - preLuckyChanceTotals.regular === 3 &&
+  afterTotals.rankout - preLuckyChanceTotals.rankout === -3 &&
+  afterTotals.confirm === preLuckyChanceTotals.confirm &&
+  afterTotals.foreign === preLuckyChanceTotals.foreign,
+  `Lucky Chanceをもう一度 totals delta is unexpected: before=${JSON.stringify(preLuckyChanceTotals)} after=${JSON.stringify(afterTotals)}`);
 
 for (const [canonicalTitle, artist] of afterRuntime.ANNUAL_RANKING_TRACK_ALIAS_GROUPS) {
   const candidates = beforeIndex.byTrack.get(beforeRuntime.annualRankingTrackKey(canonicalTitle, artist));
@@ -539,6 +583,15 @@ for (const [canonicalTitle, artist] of afterRuntime.ANNUAL_RANKING_TRACK_ALIAS_G
   assert(candidates?.size === expectedSize,
     `approved alias destination is missing or ambiguous: ${canonicalTitle} / ${artist} (${candidates?.size || 0})`);
 }
+
+const luckyChanceAliasGroups = afterRuntime.ANNUAL_RANKING_TRACK_ALIAS_GROUPS.filter(
+  ([canonicalTitle, artist]) =>
+    canonicalTitle === 'ラッキー･チャンスをもう一度' && artist === 'C-C-B'
+);
+assert(luckyChanceAliasGroups.length === 1,
+  `Lucky Chanceをもう一度 alias group count must be 1: ${luckyChanceAliasGroups.length}`);
+assert(JSON.stringify(luckyChanceAliasGroups[0][2]) === JSON.stringify(['Lucky Chanceをもう一度']),
+  `Lucky Chanceをもう一度 alias titles are unexpected: ${JSON.stringify(luckyChanceAliasGroups[0][2])}`);
 
 const lifeAliasKey = afterRuntime.annualRankingTrackKey('人生(たび)の空から', '松山千春');
 const lifeOverrideKey = afterRuntime.annualRankingTrackYearOverrideKey(
@@ -565,7 +618,14 @@ for (const [title, artist, expectedYear] of episode297Overrides) {
 assert(afterRuntime.ANNUAL_RANKING_TRACK_YEAR_OVERRIDES.size === 4,
   `unexpected year override count: ${afterRuntime.ANNUAL_RANKING_TRACK_YEAR_OVERRIDES.size}`);
 
+const luckyChancePositiveCases = [
+  [43, 1985, 6, '50位'],
+  [255, 1984, 12, '1985年 50位'],
+  [293, 1985, 13, '50位']
+];
 const positiveCases = [
+  ...luckyChancePositiveCases.map(([episodeNo, , trackNo, expected]) =>
+    [episodeNo, trackNo, expected]),
   [21, 1, '6位'],
   [65, 1, '6位'],
   [81, 14, '6位'],
@@ -634,6 +694,27 @@ for (const [episodeNo, trackNo, expected] of positiveCases) {
     `positive case failed: #${episodeNo} No.${trackNo} expected ${expected}, got ${result.text}`);
 }
 
+const luckyChanceTracks = [];
+for (const episode of episodes) {
+  for (const track of episode.tracks || []) {
+    if (track.title === 'Lucky Chanceをもう一度' && track.artist === 'C-C-B') {
+      luckyChanceTracks.push({ episode, track });
+    }
+  }
+}
+assert(luckyChanceTracks.length === 3,
+  `Lucky Chanceをもう一度 / C-C-B occurrence count must be 3: ${luckyChanceTracks.length}`);
+for (const [episodeNo, puyYear, trackNo, expected] of luckyChancePositiveCases) {
+  const { episode, track } = findTrack(episodeNo, trackNo);
+  assert(episode.puy_year === puyYear,
+    `Lucky Chanceをもう一度 PUY changed: #${episodeNo} expected ${puyYear}, got ${episode.puy_year}`);
+  assert(track.title === 'Lucky Chanceをもう一度' && track.artist === 'C-C-B',
+    `Lucky Chanceをもう一度 source text changed: #${episodeNo} No.${trackNo} ${track.title} / ${track.artist}`);
+  const result = afterRuntime.resolveAnnualRanking(afterIndex, episode, track);
+  assert(result.text === expected,
+    `Lucky Chanceをもう一度 result failed: #${episodeNo} No.${trackNo} expected ${expected}, got ${result.text}`);
+}
+
 const episodeSpecificOverrideNegativeCases = [
   [61, 12],
   [173, 5],
@@ -667,6 +748,84 @@ for (const [episodeNo, trackNo] of negativeCases) {
     `negative case was connected: #${episodeNo} No.${trackNo} ${track.title} -> ${result.text}`);
 }
 
+const luckyChanceCanonicalCandidateId = '1985:50';
+function assertNotLuckyChanceCanonical(episode, track, label) {
+  const before = preLuckyChanceRuntime.resolveAnnualRanking(
+    preLuckyChanceIndex,
+    episode,
+    track
+  );
+  const after = afterRuntime.resolveAnnualRanking(afterIndex, episode, track);
+  assert(after.text === before.text,
+    `${label} changed after Lucky Chance alias: #${episode.episode_no} No.${track.no} ${before.text} -> ${after.text}`);
+  const candidates = afterIndex.byTrack.get(
+    afterRuntime.annualRankingTrackKey(track.title, track.artist)
+  );
+  assert(!candidates?.has(luckyChanceCanonicalCandidateId),
+    `${label} was connected to Lucky Chance canonical: #${episode.episode_no} No.${track.no} ${track.title} / ${track.artist}`);
+}
+
+const luckyChanceNegativeGroups = [
+  {
+    label: 'Super Chance / 1986オメガトライブ',
+    count: 1,
+    matches: track => track.title === 'Super Chance' && track.artist === '1986オメガトライブ'
+  },
+  {
+    label: 'Chase the Chance / 安室奈美恵',
+    count: 3,
+    matches: track => track.title === 'Chase the Chance' && track.artist === '安室奈美恵'
+  },
+  {
+    label: 'Chance! / 白井貴子',
+    count: 2,
+    matches: track => track.title === 'Chance!' && track.artist === '白井貴子'
+  },
+  {
+    label: 'ラストチャンス / Something Else',
+    count: 5,
+    matches: track => track.title === 'ラストチャンス' && track.artist === 'Something Else'
+  },
+  {
+    label: '涙のtake a chance / 風見しんご',
+    count: 2,
+    matches: track => track.title === '涙のtake a chance' && track.artist === '風見しんご'
+  },
+  {
+    label: 'ラッキー・ラヴ / カイリー・ミノーグ',
+    count: 2,
+    matches: track =>
+      track.title.startsWith('ラッキー・ラヴ') && track.artist.startsWith('カイリー・ミノーグ')
+  }
+];
+for (const expected of luckyChanceNegativeGroups) {
+  const matches = [];
+  for (const episode of episodes) {
+    for (const track of episode.tracks || []) {
+      if (expected.matches(track)) matches.push({ episode, track });
+    }
+  }
+  assert(matches.length === expected.count,
+    `unexpected Lucky Chance negative count: ${expected.label} (${matches.length})`);
+  for (const { episode, track } of matches) {
+    assertNotLuckyChanceCanonical(episode, track, expected.label);
+  }
+}
+
+const otherCcbTracks = [];
+for (const episode of episodes) {
+  for (const track of episode.tracks || []) {
+    if (track.artist === 'C-C-B' && track.title !== 'Lucky Chanceをもう一度') {
+      otherCcbTracks.push({ episode, track });
+    }
+  }
+}
+assert(otherCcbTracks.length === 15,
+  `unexpected non-target C-C-B track count: ${otherCcbTracks.length}`);
+for (const { episode, track } of otherCcbTracks) {
+  assertNotLuckyChanceCanonical(episode, track, 'C-C-B non-target track');
+}
+
 const untouchedGroups = [
   { title: 'Get Along Together', artist: '山根康広', count: 3, prefix: false },
   { title: '悲しい気持ち', artist: '桑田佳祐', count: 4, prefix: true },
@@ -696,11 +855,13 @@ for (const expected of untouchedGroups) {
 
 console.log('mp8090 annual ranking regression\n');
 console.log('[OK] production ranking functions loaded from setuplits.html');
-console.log('[OK] approved destinations=75; newly ranked=187; controlled canonical ambiguity=1');
+console.log('[OK] approved destinations=76; newly ranked=190; controlled canonical ambiguity=1');
 console.log('[OK] 横浜銀蝿 exact artist alias: newly ranked=3; existing changes=0');
+console.log('[OK] Lucky Chanceをもう一度 exact track alias: newly ranked=3; existing changes=0');
 console.log('[OK] artist/free search: 横浜銀蝿=3; T.C.R.横浜銀蝿R.S.=3; 嶋大輔=separate');
-console.log('[OK] totals: regular=3371, confirm=331, rankout=1474, foreign=303');
-console.log('[OK] required positives=60; untouched groups=7; negative cases=9');
+console.log('[OK] totals: regular=3374, confirm=331, rankout=1471, foreign=303');
+console.log('[OK] required positives=63; untouched groups=7; negative cases=9');
+console.log('[OK] Lucky Chance positives=3; negative groups=7; non-target C-C-B tracks=15');
 console.log('[OK] episode-specific year overrides=4; leakage checks=6');
 console.log('[OK] existing ranking result changes=0');
 console.log('[OK] debut tracks=2578; 横浜銀蝿 and ルビーの指環 debut states verified');
