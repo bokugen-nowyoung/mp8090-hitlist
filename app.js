@@ -74,7 +74,8 @@ function renderYearButtons() {
    -------------------------------------------------------- */
 const RANKING_SEARCH_ARTIST_ALIAS_GROUPS = [
   ['UNICORN', 'ユニコーン'],
-  ['松任谷由実', '荒井由実']
+  ['松任谷由実', '荒井由実'],
+  ['REBECCA', 'レベッカ']
 ];
 const rankingSearchArtistAliasTermsByQuery = (() => {
   const map = new Map();

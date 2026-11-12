@@ -36,7 +36,8 @@ function compileRankingRuntime({
   includeApprovedAliases,
   includeYokohamaGinbaeAlias = true,
   includeLuckyChanceAlias = true,
-  includeYumingSearchAlias = true
+  includeYumingSearchAlias = true,
+  includeRebeccaSearchAlias = true
 }) {
   const normalizeSource = sourceBetween(
     '    const normalizeForMatch = (s) => {',
@@ -99,11 +100,19 @@ function compileRankingRuntime({
       'Lucky Chanceをもう一度 track alias appears more than once');
   }
   if (!includeYumingSearchAlias) {
-    const yumingSearchAlias = "      ['松任谷由実', '荒井由実']\n";
+    const yumingSearchAlias = "      ['松任谷由実', '荒井由実'],\n";
     assert(artistAliasSource.includes(yumingSearchAlias), '松任谷由実/荒井由実 search alias not found');
     artistAliasSource = artistAliasSource.replace(yumingSearchAlias, '');
     assert(!artistAliasSource.includes(yumingSearchAlias),
       '松任谷由実/荒井由実 search alias appears more than once');
+  }
+  if (!includeRebeccaSearchAlias) {
+    const rebeccaSearchAlias = "      ['REBECCA', 'レベッカ']\n";
+    assert(artistAliasSource.split(rebeccaSearchAlias).length - 1 === 2,
+      'REBECCA/レベッカ search and annual ranking aliases were not both found');
+    artistAliasSource = artistAliasSource.replace(rebeccaSearchAlias, '');
+    assert(artistAliasSource.split(rebeccaSearchAlias).length - 1 === 1,
+      'REBECCA/レベッカ search alias removal changed the existing annual ranking alias');
   }
 
   // setuplits.htmlの実コードをそのまま評価し、テスト側へ照合ロジックを複製しない。
@@ -360,11 +369,16 @@ const preYumingSearchAliasRuntime = compileRankingRuntime({
   includeApprovedAliases: true,
   includeYumingSearchAlias: false
 });
+const preRebeccaSearchAliasRuntime = compileRankingRuntime({
+  includeApprovedAliases: true,
+  includeRebeccaSearchAlias: false
+});
 const beforeIndex = beforeRuntime.buildAnnualRankingIndex(rankingData);
 const afterIndex = afterRuntime.buildAnnualRankingIndex(rankingData);
 const preYokohamaGinbaeIndex = preYokohamaGinbaeRuntime.buildAnnualRankingIndex(rankingData);
 const preLuckyChanceIndex = preLuckyChanceRuntime.buildAnnualRankingIndex(rankingData);
 const preYumingSearchAliasIndex = preYumingSearchAliasRuntime.buildAnnualRankingIndex(rankingData);
+const preRebeccaSearchAliasIndex = preRebeccaSearchAliasRuntime.buildAnnualRankingIndex(rankingData);
 const debutRuntime = compileDebutRuntime();
 const displayRuntime = compileAnnualRankingDisplayRuntime();
 const appSearchRuntime = compileAppSearchRuntime();
@@ -492,7 +506,7 @@ assert(rawUnicornTracks.some(track => track.artist.includes('UNICORN'))
   'Set Up List UNICORN source spellings were not preserved');
 
 assert(JSON.stringify(afterRuntime.ARTIST_SEARCH_ONLY_ALIAS_GROUPS) ===
-  JSON.stringify([['松任谷由実', '荒井由実']]),
+  JSON.stringify([['松任谷由実', '荒井由実'], ['REBECCA', 'レベッカ']]),
   'Set Up List search-only artist alias groups changed');
 assert(!afterRuntime.ARTIST_SEARCH_AND_ANNUAL_RANKING_ALIAS_GROUPS.some(group =>
   group.includes('松任谷由実') || group.includes('荒井由実')
@@ -562,6 +576,77 @@ const rawYumingTracks = episodes.flatMap(episode => episode.tracks || []).filter
 assert(rawYumingTracks.some(track => track.artist.includes('松任谷由実'))
   && rawYumingTracks.some(track => track.artist.includes('荒井由実')),
   'Set Up List Yuming source spellings were not preserved');
+
+const rebeccaSearchOnlyGroups = afterRuntime.ARTIST_SEARCH_ONLY_ALIAS_GROUPS.filter(group =>
+  group.includes('REBECCA') || group.includes('レベッカ')
+);
+const rebeccaSharedGroups = afterRuntime.ARTIST_SEARCH_AND_ANNUAL_RANKING_ALIAS_GROUPS.filter(group =>
+  group.includes('REBECCA') || group.includes('レベッカ')
+);
+const rebeccaAnnualRankingGroups = afterRuntime.ANNUAL_RANKING_ARTIST_ALIAS_GROUPS.filter(group =>
+  group.includes('REBECCA') || group.includes('レベッカ')
+);
+assert(JSON.stringify(rebeccaSearchOnlyGroups) === JSON.stringify([['REBECCA', 'レベッカ']]),
+  'REBECCA/レベッカ must have exactly one Set Up List search-only alias group');
+assert(rebeccaSharedGroups.length === 0,
+  'REBECCA/レベッカ search alias must not be included in shared ranking aliases');
+assert(JSON.stringify(rebeccaAnnualRankingGroups) === JSON.stringify([['REBECCA', 'レベッカ']]),
+  'existing REBECCA/レベッカ annual ranking alias must remain exactly once');
+
+for (const field of ['artist', 'free']) {
+  for (const query of ['REBECCA', 'レベッカ']) {
+    const result = countEpisodeAndTrackSearchMatches(afterRuntime, field, query);
+    assert(result.episodeCount === 14 && result.trackCount === 18,
+      `REBECCA Set Up List ${field} search count changed: ${query} ` +
+      `(episodes=${result.episodeCount}, tracks=${result.trackCount})`);
+    const episode106 = result.matchingEpisodes.find(item => item.episode_no === 106);
+    assert(episode106?.tracks.some(track =>
+      track.no === 17 && track.title === 'フレンズ ～remixed edition～' && track.artist === 'レベッカ'
+    ), `#106 No.17 フレンズ ～remixed edition～ is missing from ${field} search: ${query}`);
+    const highlighted = afterRuntime.highlightText(
+      'レベッカ',
+      afterRuntime.getArtistHighlightTerms(result.criteria)
+    );
+    assert(highlighted === '<mark class="search-hit">レベッカ</mark>',
+      `Set Up List REBECCA alias did not highlight the displayed artist spelling: ${field}/${query}`);
+  }
+}
+for (const query of ['REB', 'レベ', 'REBECCA特集', 'レベッカ 特集', 'REBECCA レベッカ']) {
+  const normalized = afterRuntime.searchNormalize(query);
+  assert(!afterRuntime.artistSearchAliasTermsByQuery.has(normalized),
+    `Set Up List REBECCA alias must require a complete query match: ${query}`);
+  assert(JSON.stringify(afterRuntime.resolveArtistSearchTerms(query)) === JSON.stringify([normalized]),
+    `Set Up List REBECCA shortened/decorated/compound query was expanded: ${query}`);
+}
+for (const field of ['artist', 'free']) {
+  const partial = countEpisodeAndTrackSearchMatches(afterRuntime, field, 'レベ');
+  assert(partial.episodeCount === 14 && partial.trackCount === 18,
+    `Set Up List ordinary artist substring matching changed: ${field}/レベ`);
+}
+const rebeccaTitleAliasCriteria = afterRuntime.compileSearchCriteria({
+  artist: '',
+  title: 'REBECCA',
+  epNo: null,
+  airDate: '',
+  feature: '',
+  free: '',
+  puySingle: null,
+  puyMulti: []
+});
+assert(!afterRuntime.episodeMatches({
+  episode_no: 0,
+  air_date: '',
+  puy_year: 0,
+  special_feature: '',
+  tracks: [{ title: 'レベッカ', artist: '別アーティスト' }]
+}, rebeccaTitleAliasCriteria), 'Set Up List REBECCA artist alias must not expand the title condition');
+const rawRebeccaTracks = episodes.flatMap(episode => episode.tracks || []).filter(track =>
+  /REBECCA|レベッカ/.test(track.artist)
+);
+assert(rawRebeccaTracks.length === 18
+  && rawRebeccaTracks.filter(track => track.artist.includes('レベッカ')).length === 18
+  && rawRebeccaTracks.filter(track => track.artist.includes('REBECCA')).length === 0,
+  'Set Up List REBECCA source spelling breakdown changed');
 
 function searchAnnualRanking(query, decade = 'all') {
   const normalizedQuery = appSearchRuntime.normalizeSearchText(query);
@@ -686,6 +771,72 @@ assert(!appSearchRuntime.rankingSearchEntryMatches(
 assert(expectedYumingRankingRecords.filter(([, , , artist]) => artist.includes('松任谷由実')).length === 12
   && expectedYumingRankingRecords.filter(([, , , artist]) => artist.includes('荒井由実')).length === 1,
   'data.json Yuming source spellings were not preserved');
+
+assert(JSON.stringify(appSearchRuntime.RANKING_SEARCH_ARTIST_ALIAS_GROUPS.filter(group =>
+  group.includes('REBECCA') || group.includes('レベッカ')
+)) === JSON.stringify([['REBECCA', 'レベッカ']]),
+'annual ranking search must have exactly one REBECCA/レベッカ alias group');
+const expectedRebeccaRankingRecords = [
+  [1986, 30, 'フレンズ', 'レベッカ'],
+  [1986, 40, 'ラズベリー･ドリーム', 'レベッカ'],
+  [1986, 90, 'モーター･ドライブ', 'レベッカ'],
+  [1987, 50, 'モノトーン･ボーイ', 'レベッカ'],
+  [1989, 73, 'One More Kiss', 'レベッカ'],
+  [1999, 86, 'フレンズ～remixed edition～', 'REBECCA']
+];
+for (const query of ['REBECCA', 'レベッカ']) {
+  const all = searchAnnualRanking(query);
+  const actualRecords = all.entries.map(entry => [entry.year, entry.rank, entry.title, entry.artist]);
+  assert(JSON.stringify(actualRecords) === JSON.stringify(expectedRebeccaRankingRecords),
+    `REBECCA annual ranking results changed: ${query}`);
+  assert(searchAnnualRanking(query, '1980').entries.length === 5,
+    `REBECCA annual ranking 1980s count changed: ${query}`);
+  assert(searchAnnualRanking(query, '1990').entries.length === 1,
+    `REBECCA annual ranking 1990s count changed: ${query}`);
+  assert(all.entries.filter(entry => entry.artist.includes('レベッカ')).length === 5
+    && all.entries.filter(entry => entry.artist.includes('REBECCA')).length === 1,
+  `REBECCA annual ranking source spelling breakdown changed: ${query}`);
+
+  const rows = appSearchRuntime.buildSearchRows(
+    all.entries,
+    all.normalizedQuery,
+    all.artistTerms
+  );
+  assert((rows.match(/<mark class="chart-search-highlight">レベッカ<\/mark>/g) || []).length === 5
+    && (rows.match(/<mark class="chart-search-highlight">REBECCA<\/mark>/g) || []).length === 1,
+  `REBECCA alias result does not highlight only displayed artist spellings: ${query}`);
+}
+for (const [query, expectedCount] of [
+  ['REB', 2],
+  ['レベ', 5],
+  ['REBECCA特集', 0],
+  ['レベッカ 特集', 0],
+  ['REBECCA レベッカ', 0]
+]) {
+  const normalized = appSearchRuntime.normalizeSearchText(query);
+  assert(!appSearchRuntime.rankingSearchArtistAliasTermsByQuery.has(normalized),
+    `annual ranking REBECCA alias must require a complete query match: ${query}`);
+  assert(JSON.stringify(appSearchRuntime.resolveRankingSearchArtistTerms(query)) ===
+    JSON.stringify([normalized]),
+  `annual ranking REBECCA shortened/decorated/compound query was expanded: ${query}`);
+  assert(searchAnnualRanking(query).entries.length === expectedCount,
+    `annual ranking ordinary substring matching changed: ${query}`);
+}
+const rebeccaTitleOnlyAliasEntry = {
+  year: 1986,
+  normalizedTitle: appSearchRuntime.normalizeSearchText('レベッカ'),
+  normalizedArtist: appSearchRuntime.normalizeSearchText('別アーティスト')
+};
+const rebeccaQuery = appSearchRuntime.normalizeSearchText('REBECCA');
+assert(!appSearchRuntime.rankingSearchEntryMatches(
+  rebeccaTitleOnlyAliasEntry,
+  rebeccaQuery,
+  appSearchRuntime.resolveRankingSearchArtistTerms(rebeccaQuery),
+  'all'
+), 'annual ranking REBECCA artist alias must not expand the title condition');
+assert(expectedRebeccaRankingRecords.filter(([, , , artist]) => artist.includes('レベッカ')).length === 5
+  && expectedRebeccaRankingRecords.filter(([, , , artist]) => artist.includes('REBECCA')).length === 1,
+  'data.json REBECCA source spellings were not preserved');
 
 const debutTrackCount = episodes.reduce((sum, episode) => sum + (episode.tracks || []).filter(
   track => debutRuntime.isDebutTrack(episode, track)
@@ -892,6 +1043,30 @@ for (const episode of episodes) {
 }
 assert(yumingSearchAliasRankingComparisonCount === 5497,
   `unexpected Yuming annual ranking comparison count: ${yumingSearchAliasRankingComparisonCount}`);
+
+assert(preRebeccaSearchAliasRuntime.ANNUAL_RANKING_ARTIST_ALIAS_GROUPS.filter(group =>
+  group.includes('REBECCA') || group.includes('レベッカ')
+).length === 1, 'pre-search-alias runtime lost the existing REBECCA annual ranking alias');
+assert(afterRuntime.ANNUAL_RANKING_ARTIST_ALIAS_GROUPS.filter(group =>
+  group.includes('REBECCA') || group.includes('レベッカ')
+).length === 1, 'post-search-alias runtime changed the existing REBECCA annual ranking alias');
+let rebeccaSearchAliasRankingComparisonCount = 0;
+for (const episode of episodes) {
+  for (const track of episode.tracks || []) {
+    const beforeRebeccaSearchAlias = preRebeccaSearchAliasRuntime.resolveAnnualRanking(
+      preRebeccaSearchAliasIndex,
+      episode,
+      track
+    );
+    const afterRebeccaSearchAlias = afterRuntime.resolveAnnualRanking(afterIndex, episode, track);
+    assert(JSON.stringify(afterRebeccaSearchAlias) === JSON.stringify(beforeRebeccaSearchAlias),
+      `REBECCA search-only alias changed annual ranking: #${episode.episode_no} No.${track.no} ` +
+      `${JSON.stringify(beforeRebeccaSearchAlias)} -> ${JSON.stringify(afterRebeccaSearchAlias)}`);
+    rebeccaSearchAliasRankingComparisonCount += 1;
+  }
+}
+assert(rebeccaSearchAliasRankingComparisonCount === 5497,
+  `unexpected REBECCA annual ranking comparison count: ${rebeccaSearchAliasRankingComparisonCount}`);
 
 const beforeTotals = { regular: 0, confirm: 0, rankout: 0, foreign: 0 };
 const afterTotals = { regular: 0, confirm: 0, rankout: 0, foreign: 0 };
@@ -1276,6 +1451,8 @@ console.log('[OK] UNICORN Set Up List alias: artist/free both spellings=10 episo
 console.log('[OK] UNICORN annual search alias: both spellings=2 tracks; 1980s=1; 1990s=1; highlight verified');
 console.log('[OK] Yuming Set Up List alias: artist/free both names=44 episodes/58 tracks; #88/#89 included; highlight verified');
 console.log('[OK] Yuming annual search alias: both names=13 entries; 1980s=6; 1990s=7; source spellings=12/1; 5,497 rankings unchanged');
+console.log('[OK] REBECCA Set Up List alias: artist/free both spellings=14 episodes/18 tracks; #106 No.17 included; source spellings=18/0');
+console.log('[OK] REBECCA annual search alias: both spellings=6 entries; 1980s=5; 1990s=1; source spellings=5/1; 5,497 rankings unchanged');
 console.log('[OK] totals: regular=3386, confirm=331, rankout=1476, foreign=304');
 console.log('[OK] #307 metadata/tracks=18; PUY 1987 tracks=302; image references=263; preparing=14');
 console.log('[OK] required positives=81; untouched groups=7; negative cases=9');
