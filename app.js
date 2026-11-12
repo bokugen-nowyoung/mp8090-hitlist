@@ -72,6 +72,35 @@ function renderYearButtons() {
 /* --------------------------------------------------------
    Search
    -------------------------------------------------------- */
+const RANKING_SEARCH_ARTIST_ALIAS_GROUPS = [
+  ['UNICORN', 'ユニコーン']
+];
+const rankingSearchArtistAliasTermsByQuery = (() => {
+  const map = new Map();
+  RANKING_SEARCH_ARTIST_ALIAS_GROUPS.forEach(group => {
+    const terms = [...new Set(group.map(normalizeSearchText).filter(Boolean))];
+    terms.forEach(term => map.set(term, terms));
+  });
+  return map;
+})();
+
+function resolveRankingSearchArtistTerms(query) {
+  const normalized = normalizeSearchText(query);
+  if (!normalized) return [];
+  return rankingSearchArtistAliasTermsByQuery.get(normalized) || [normalized];
+}
+
+function rankingSearchEntryMatches(entry, query, artistTerms, decade) {
+  const decadeMatches = decade === 'all' || Math.floor(entry.year / 10) * 10 === Number(decade);
+  const keywordMatches = entry.normalizedTitle.includes(query)
+    || artistTerms.some(term => entry.normalizedArtist.includes(term));
+  return decadeMatches && keywordMatches;
+}
+
+function findRankingSearchArtistHighlightTerm(entry, artistTerms) {
+  return artistTerms.find(term => entry.normalizedArtist.includes(term)) || '';
+}
+
 function buildRankingSearchIndex(data) {
   return YEARS.flatMap(year => (data[String(year)] || []).map(entry => ({
     year,
@@ -172,31 +201,33 @@ function runSearch() {
   }
 
   const decade = new FormData(form).get('decade');
-  const results = rankingSearchIndex.filter(entry => {
-    const decadeMatches = decade === 'all' || Math.floor(entry.year / 10) * 10 === Number(decade);
-    const keywordMatches = entry.normalizedTitle.includes(query) || entry.normalizedArtist.includes(query);
-    return decadeMatches && keywordMatches;
-  });
+  const artistTerms = resolveRankingSearchArtistTerms(query);
+  const results = rankingSearchIndex.filter(entry =>
+    rankingSearchEntryMatches(entry, query, artistTerms, decade)
+  );
 
-  document.getElementById('chartSearchResultsBody').innerHTML = buildSearchRows(results, query);
+  document.getElementById('chartSearchResultsBody').innerHTML = buildSearchRows(results, query, artistTerms);
   document.getElementById('chartSearchResultCount').textContent = `${results.length}件`;
   document.getElementById('chartSection').hidden = true;
   document.getElementById('chartSearchResults').hidden = false;
 }
 
-function buildSearchRows(entries, query) {
+function buildSearchRows(entries, query, artistTerms) {
   if (entries.length === 0) {
     return '<tr><td colspan="4" class="chart-search-empty">該当する曲はありません</td></tr>';
   }
 
-  return entries.map(entry => (
-    '<tr>' +
-      `<td class="col-search-year">${esc(entry.year)}年</td>` +
-      `<td class="col-search-rank">${esc(entry.rank)}位</td>` +
-      `<td class="col-search-title">${entry.normalizedTitle.includes(query) ? renderHighlightedText(entry.title, query) : esc(entry.title)}</td>` +
-      `<td class="col-search-artist">${entry.normalizedArtist.includes(query) ? renderHighlightedText(entry.artist, query) : esc(entry.artist)}</td>` +
-    '</tr>'
-  )).join('');
+  return entries.map(entry => {
+    const artistHighlightTerm = findRankingSearchArtistHighlightTerm(entry, artistTerms);
+    return (
+      '<tr>' +
+        `<td class="col-search-year">${esc(entry.year)}年</td>` +
+        `<td class="col-search-rank">${esc(entry.rank)}位</td>` +
+        `<td class="col-search-title">${entry.normalizedTitle.includes(query) ? renderHighlightedText(entry.title, query) : esc(entry.title)}</td>` +
+        `<td class="col-search-artist">${artistHighlightTerm ? renderHighlightedText(entry.artist, artistHighlightTerm) : esc(entry.artist)}</td>` +
+      '</tr>'
+    );
+  }).join('');
 }
 
 function normalizeSearchText(value) {

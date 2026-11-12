@@ -4,18 +4,23 @@ import { fileURLToPath } from 'node:url';
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const html = readFileSync(join(root, 'setuplits.html'), 'utf8').replace(/\r\n?/g, '\n');
+const app = readFileSync(join(root, 'app.js'), 'utf8').replace(/\r\n?/g, '\n');
 const rankingData = JSON.parse(readFileSync(join(root, 'data.json'), 'utf8').replace(/^\uFEFF/, ''));
 
 function assert(condition, message) {
   if (!condition) throw new Error(message);
 }
 
-function sourceBetween(startMarker, endMarker) {
-  const start = html.indexOf(startMarker);
-  const end = html.indexOf(endMarker, start + startMarker.length);
+function sourceBetweenText(source, startMarker, endMarker) {
+  const start = source.indexOf(startMarker);
+  const end = source.indexOf(endMarker, start + startMarker.length);
   assert(start >= 0, `source marker not found: ${startMarker}`);
   assert(end > start, `source marker not found or out of order: ${endMarker}`);
-  return html.slice(start, end);
+  return source.slice(start, end);
+}
+
+function sourceBetween(startMarker, endMarker) {
+  return sourceBetweenText(html, startMarker, endMarker);
 }
 
 function extractEpisodes() {
@@ -52,6 +57,10 @@ function compileRankingRuntime({
     '    function episodeMatches(ep, c) {',
     '\n    function readCriteria'
   );
+  const matchingTracksSource = sourceBetween(
+    '    function getMatchingTracks(ep, c) {',
+    '\n    function clearSearch'
+  );
   let rankingSource = sourceBetween(
     '    function normalizeAnnualRankingArtistTerm(value) {',
     '\n    let annualRankingLoadState'
@@ -68,7 +77,7 @@ function compileRankingRuntime({
     assert(!rankingSource.includes(aliasCall), 'approved alias registration call appears more than once');
   }
   if (!includeYokohamaGinbaeAlias) {
-    const yokohamaGinbaeAlias = "      ['横浜銀蝿', 'T.C.R.横浜銀蝿R.S.']\n";
+    const yokohamaGinbaeAlias = "      ['横浜銀蝿', 'T.C.R.横浜銀蝿R.S.'],\n";
     assert(artistAliasSource.includes(yokohamaGinbaeAlias), '横浜銀蝿 artist alias not found');
     artistAliasSource = artistAliasSource.replace(yokohamaGinbaeAlias, '');
   }
@@ -88,6 +97,7 @@ function compileRankingRuntime({
     ${artistAliasSource}
     ${artistSearchSource}
     ${episodeSearchSource}
+    ${matchingTracksSource}
     ${rankingSource}
     ${resolveSource}
     return {
@@ -100,11 +110,59 @@ function compileRankingRuntime({
       artistMatchesSearchTerms,
       compileSearchCriteria,
       episodeMatches,
+      getMatchingTracks,
       normalizeAnnualRankingArtist,
       annualRankingTrackKey,
       annualRankingTrackYearOverrideKey,
       buildAnnualRankingIndex,
       resolveAnnualRanking
+    };
+  `)();
+}
+
+function compileAppSearchRuntime() {
+  const searchConstantsSource = sourceBetweenText(
+    app,
+    'const YEARS = ',
+    '\n\nlet rankingData'
+  );
+  const searchIndexAndAliasSource = sourceBetweenText(
+    app,
+    'const RANKING_SEARCH_ARTIST_ALIAS_GROUPS = [',
+    '\n\nfunction setupSearch'
+  );
+  const searchRowsSource = sourceBetweenText(
+    app,
+    'function buildSearchRows(entries, query, artistTerms) {',
+    '\n\nfunction normalizeSearchText'
+  );
+  const searchHighlightSource = sourceBetweenText(
+    app,
+    'function normalizeSearchText(value) {',
+    '\n\n/* --------------------------------------------------------\n   Show year'
+  );
+  const escapeSource = sourceBetweenText(
+    app,
+    'function esc(str) {',
+    '\n\n/* --------------------------------------------------------\n   Back to top'
+  );
+
+  // app.jsの本番helper・判定・行生成をそのまま評価する。
+  return Function(`
+    ${searchConstantsSource}
+    ${searchIndexAndAliasSource}
+    ${searchRowsSource}
+    ${searchHighlightSource}
+    ${escapeSource}
+    return {
+      RANKING_SEARCH_ARTIST_ALIAS_GROUPS,
+      rankingSearchArtistAliasTermsByQuery,
+      buildRankingSearchIndex,
+      resolveRankingSearchArtistTerms,
+      rankingSearchEntryMatches,
+      findRankingSearchArtistHighlightTerm,
+      buildSearchRows,
+      normalizeSearchText
     };
   `)();
 }
@@ -281,6 +339,8 @@ const preYokohamaGinbaeIndex = preYokohamaGinbaeRuntime.buildAnnualRankingIndex(
 const preLuckyChanceIndex = preLuckyChanceRuntime.buildAnnualRankingIndex(rankingData);
 const debutRuntime = compileDebutRuntime();
 const displayRuntime = compileAnnualRankingDisplayRuntime();
+const appSearchRuntime = compileAppSearchRuntime();
+const rankingSearchIndex = appSearchRuntime.buildRankingSearchIndex(rankingData);
 
 const episode307ExpectedTracks = [
   [1, 'stripe blue', '少年隊', null, '16位'],
@@ -336,6 +396,30 @@ function countEpisodeSearchMatches(runtime, field, rawQuery) {
   return episodes.filter(episode => runtime.episodeMatches(episode, criteria)).length;
 }
 
+function countEpisodeAndTrackSearchMatches(runtime, field, rawQuery) {
+  const criteria = runtime.compileSearchCriteria({
+    artist: '',
+    title: '',
+    epNo: null,
+    airDate: '',
+    feature: '',
+    free: '',
+    puySingle: null,
+    puyMulti: [],
+    [field]: rawQuery
+  });
+  const matchingEpisodes = episodes.filter(episode => runtime.episodeMatches(episode, criteria));
+  return {
+    episodeCount: matchingEpisodes.length,
+    trackCount: matchingEpisodes.reduce(
+      (sum, episode) => sum + runtime.getMatchingTracks(episode, criteria).length,
+      0
+    ),
+    matchingEpisodes,
+    criteria
+  };
+}
+
 for (const query of ['横浜銀蝿', 'T.C.R.横浜銀蝿R.S.']) {
   assert(countEpisodeSearchMatches(afterRuntime, 'artist', query) === 3,
     `横浜銀蝿 artist-field search count changed: ${query}`);
@@ -352,6 +436,88 @@ assert(ginbaeWithShimadaKey !== ginbaeCommonKey,
 assert(!afterRuntime.artistSearchAliasTermsByQuery.has(
   afterRuntime.searchNormalize('T.C.R.横浜銀蝿R.S.嶋大輔')
 ), 'T.C.R.横浜銀蝿R.S.嶋大輔 must not become an exact search alias');
+
+for (const field of ['artist', 'free']) {
+  for (const query of ['UNICORN', 'ユニコーン']) {
+    const result = countEpisodeAndTrackSearchMatches(afterRuntime, field, query);
+    assert(result.episodeCount === 10 && result.trackCount === 14,
+      `UNICORN Set Up List ${field} search count changed: ${query} ` +
+      `(episodes=${result.episodeCount}, tracks=${result.trackCount})`);
+    const episode149 = result.matchingEpisodes.find(episode => episode.episode_no === 149);
+    assert(episode149?.tracks.some(track =>
+      track.title === 'デーゲーム' && track.artist === '坂上二郎とユニコーン'
+    ), `#149 デーゲーム is missing from ${field} search: ${query}`);
+  }
+}
+for (const query of ['UNI', 'ユニコ', 'UNICORN特集']) {
+  const normalized = afterRuntime.searchNormalize(query);
+  assert(!afterRuntime.artistSearchAliasTermsByQuery.has(normalized),
+    `Set Up List artist alias must require a complete query match: ${query}`);
+  assert(JSON.stringify(afterRuntime.resolveArtistSearchTerms(query)) === JSON.stringify([normalized]),
+    `Set Up List shortened/decorated query was expanded: ${query}`);
+}
+const rawUnicornTracks = episodes.flatMap(episode => episode.tracks || []).filter(track =>
+  /UNICORN|ユニコーン/.test(track.artist)
+);
+assert(rawUnicornTracks.some(track => track.artist.includes('UNICORN'))
+  && rawUnicornTracks.some(track => track.artist.includes('ユニコーン')),
+  'Set Up List UNICORN source spellings were not preserved');
+
+function searchAnnualRanking(query, decade = 'all') {
+  const normalizedQuery = appSearchRuntime.normalizeSearchText(query);
+  const artistTerms = appSearchRuntime.resolveRankingSearchArtistTerms(normalizedQuery);
+  const entries = rankingSearchIndex.filter(entry =>
+    appSearchRuntime.rankingSearchEntryMatches(entry, normalizedQuery, artistTerms, decade)
+  );
+  return { normalizedQuery, artistTerms, entries };
+}
+
+for (const query of ['UNICORN', 'ユニコーン']) {
+  const all = searchAnnualRanking(query);
+  assert(all.entries.length === 2,
+    `UNICORN annual ranking all-decade count changed: ${query} (${all.entries.length})`);
+  assert(JSON.stringify(all.entries.map(entry => [entry.year, entry.rank, entry.title, entry.artist])) ===
+    JSON.stringify([
+      [1989, 81, '大迷惑', 'ユニコーン'],
+      [1990, 36, '働く男', 'ユニコーン']
+    ]), `UNICORN annual ranking results changed: ${query}`);
+  assert(searchAnnualRanking(query, '1980').entries.length === 1,
+    `UNICORN annual ranking 1980s count changed: ${query}`);
+  assert(searchAnnualRanking(query, '1990').entries.length === 1,
+    `UNICORN annual ranking 1990s count changed: ${query}`);
+
+  const rows = appSearchRuntime.buildSearchRows(
+    all.entries,
+    all.normalizedQuery,
+    all.artistTerms
+  );
+  assert((rows.match(/<mark class="chart-search-highlight">ユニコーン<\/mark>/g) || []).length === 2,
+    `UNICORN alias result does not highlight the displayed artist spelling: ${query}`);
+}
+for (const query of ['UNI', 'ユニコ', 'UNICORN特集']) {
+  const normalized = appSearchRuntime.normalizeSearchText(query);
+  assert(!appSearchRuntime.rankingSearchArtistAliasTermsByQuery.has(normalized),
+    `annual ranking artist alias must require a complete query match: ${query}`);
+  assert(JSON.stringify(appSearchRuntime.resolveRankingSearchArtistTerms(query)) ===
+    JSON.stringify([normalized]), `annual ranking shortened/decorated query was expanded: ${query}`);
+}
+const titleOnlyAliasEntry = {
+  year: 1989,
+  normalizedTitle: appSearchRuntime.normalizeSearchText('ユニコーン'),
+  normalizedArtist: appSearchRuntime.normalizeSearchText('別アーティスト')
+};
+const unicornQuery = appSearchRuntime.normalizeSearchText('UNICORN');
+assert(!appSearchRuntime.rankingSearchEntryMatches(
+  titleOnlyAliasEntry,
+  unicornQuery,
+  appSearchRuntime.resolveRankingSearchArtistTerms(unicornQuery),
+  'all'
+), 'annual ranking artist alias must not expand the title condition');
+assert(rankingData['1989'].some(entry =>
+  entry.rank === 81 && entry.title === '大迷惑' && entry.artist === 'ユニコーン'
+) && rankingData['1990'].some(entry =>
+  entry.rank === 36 && entry.title === '働く男' && entry.artist === 'ユニコーン'
+), 'data.json UNICORN source spellings were not preserved');
 
 const debutTrackCount = episodes.reduce((sum, episode) => sum + (episode.tracks || []).filter(
   track => debutRuntime.isDebutTrack(episode, track)
@@ -920,6 +1086,8 @@ console.log('[OK] approved destinations=76; newly ranked=190; controlled canonic
 console.log('[OK] 横浜銀蝿 exact artist alias: newly ranked=3; existing changes=0');
 console.log('[OK] Lucky Chanceをもう一度 exact track alias: newly ranked=3; existing changes=0');
 console.log('[OK] artist/free search: 横浜銀蝿=3; T.C.R.横浜銀蝿R.S.=3; 嶋大輔=separate');
+console.log('[OK] UNICORN Set Up List alias: artist/free both spellings=10 episodes/14 tracks; #149 included');
+console.log('[OK] UNICORN annual search alias: both spellings=2 tracks; 1980s=1; 1990s=1; highlight verified');
 console.log('[OK] totals: regular=3386, confirm=331, rankout=1476, foreign=304');
 console.log('[OK] #307 metadata/tracks=18; PUY 1987 tracks=302; image references=263; preparing=14');
 console.log('[OK] required positives=81; untouched groups=7; negative cases=9');
