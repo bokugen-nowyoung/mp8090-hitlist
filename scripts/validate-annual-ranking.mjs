@@ -282,6 +282,45 @@ const preLuckyChanceIndex = preLuckyChanceRuntime.buildAnnualRankingIndex(rankin
 const debutRuntime = compileDebutRuntime();
 const displayRuntime = compileAnnualRankingDisplayRuntime();
 
+const episode307ExpectedTracks = [
+  [1, 'stripe blue', '少年隊', null, '16位'],
+  [2, 'STAR LIGHT', '光GENJI', null, '4位'],
+  [3, '水のルージュ', '小泉今日子', null, '32位'],
+  [4, '水の中のAnswer', '杉山清貴', null, '47位'],
+  [5, 'WAKU WAKUさせて', '中山美穂', null, '17位'],
+  [6, 'じれったい', '安全地帯', null, '77位'],
+  [7, "I Don't Know!", 'BaBe', null, '62位'],
+  [8, "愛はとまらない (Nothing's Gonna Stop Us Now)", 'スターシップ (Starship)', '洋楽枠', '―'],
+  [9, 'YOU', '大江千里', null, '―'],
+  [10, 'A・r・i・e・s', '柏原芳恵', null, '―'],
+  [11, '渚', 'スピッツ', '特集枠', '1996年 29位'],
+  [12, 'Replay', 'Mr.Children', '特集枠', '―'],
+  [13, '秋からも、そばにいて', '南野陽子', '特集枠', '1988年 30位'],
+  [14, 'もう逢えないかもしれない', '菊池桃子', '特集枠', '1985年 40位'],
+  [15, '風立ちぬ', '松田聖子', '特集枠', '1981年 34位'],
+  [16, 'Strangers Dream', 'ジャッキー・リン＆パラビオン', null, '―'],
+  [17, 'ルネッサンス情熱', '国安わたる', null, '―'],
+  [18, '難破船', '中森明菜', null, '6位']
+];
+const episode307Matches = episodes.filter(episode => episode.episode_no === 307);
+assert(episode307Matches.length === 1, `#307 occurrence count must be 1: ${episode307Matches.length}`);
+const [episode307] = episode307Matches;
+assert(episode307.puy_year === 1987 && episode307.air_date === '2026-08-11'
+  && episode307.special_feature === 'CMソング特集～ポッキー編～'
+  && episode307.image_file === '1987.307.png' && !Object.hasOwn(episode307, 'status'),
+  '#307 metadata or completed status is unexpected');
+assert(JSON.stringify(episode307.tracks) === JSON.stringify(
+  episode307ExpectedTracks.map(([no, title, artist, note]) => ({ no, title, artist, note }))
+), '#307 tracks do not exactly match the approved 18 tracks');
+assert(episodes.length === 315, `unexpected episode count: ${episodes.length}`);
+assert(episodes.filter(episode => episode.puy_year === 1987)
+  .reduce((sum, episode) => sum + episode.tracks.length, 0) === 302,
+  'unexpected PUY 1987 track count');
+assert(episodes.filter(episode => episode.image_file).length === 263,
+  'unexpected episode image reference count');
+assert(episodes.filter(episode => episode.status === 'preparing').length === 14,
+  'unexpected preparing episode count');
+
 function countEpisodeSearchMatches(runtime, field, rawQuery) {
   const criteria = runtime.compileSearchCriteria({
     artist: '',
@@ -317,7 +356,7 @@ assert(!afterRuntime.artistSearchAliasTermsByQuery.has(
 const debutTrackCount = episodes.reduce((sum, episode) => sum + (episode.tracks || []).filter(
   track => debutRuntime.isDebutTrack(episode, track)
 ).length, 0);
-assert(debutTrackCount === 2578,
+assert(debutTrackCount === 2582,
   `unexpected debut track count: ${debutTrackCount}`);
 for (const [episodeNo, trackNo, expected] of [
   [14, 5, true],
@@ -549,15 +588,15 @@ for (const episode of episodes) {
   }
 }
 
-assert(episodes.reduce((sum, episode) => sum + episode.tracks.length, 0) === 5479,
+assert(episodes.reduce((sum, episode) => sum + episode.tracks.length, 0) === 5497,
   'unexpected Set Up List track count');
-assert(JSON.stringify(beforeTotals) === JSON.stringify({ regular: 3184, confirm: 331, rankout: 1661, foreign: 303 }),
+assert(JSON.stringify(beforeTotals) === JSON.stringify({ regular: 3196, confirm: 331, rankout: 1666, foreign: 304 }),
   `unexpected pre-alias totals: ${JSON.stringify(beforeTotals)}`);
-assert(JSON.stringify(preYokohamaGinbaeTotals) === JSON.stringify({ regular: 3371, confirm: 331, rankout: 1474, foreign: 303 }),
+assert(JSON.stringify(preYokohamaGinbaeTotals) === JSON.stringify({ regular: 3383, confirm: 331, rankout: 1479, foreign: 304 }),
   `unexpected pre-横浜銀蝿 totals: ${JSON.stringify(preYokohamaGinbaeTotals)}`);
-assert(JSON.stringify(preLuckyChanceTotals) === JSON.stringify({ regular: 3371, confirm: 331, rankout: 1474, foreign: 303 }),
+assert(JSON.stringify(preLuckyChanceTotals) === JSON.stringify({ regular: 3383, confirm: 331, rankout: 1479, foreign: 304 }),
   `unexpected pre-Lucky Chance alias totals: ${JSON.stringify(preLuckyChanceTotals)}`);
-assert(JSON.stringify(afterTotals) === JSON.stringify({ regular: 3374, confirm: 331, rankout: 1471, foreign: 303 }),
+assert(JSON.stringify(afterTotals) === JSON.stringify({ regular: 3386, confirm: 331, rankout: 1476, foreign: 304 }),
   `unexpected post-alias totals: ${JSON.stringify(afterTotals)}`);
 assert(afterRuntime.ANNUAL_RANKING_TRACK_ALIAS_GROUPS.length === 76,
   `unexpected approved alias destination count: ${afterRuntime.ANNUAL_RANKING_TRACK_ALIAS_GROUPS.length}`);
@@ -615,7 +654,16 @@ for (const [title, artist, expectedYear] of episode297Overrides) {
   assert(afterRuntime.ANNUAL_RANKING_TRACK_YEAR_OVERRIDES.get(overrideKey) === expectedYear,
     `#297 year override is missing: ${title} / ${artist}`);
 }
-assert(afterRuntime.ANNUAL_RANKING_TRACK_YEAR_OVERRIDES.size === 4,
+const episode307Overrides = [
+  ['STAR LIGHT', '光GENJI', 1987],
+  ['難破船', '中森明菜', 1987]
+];
+for (const [title, artist, expectedYear] of episode307Overrides) {
+  const overrideKey = afterRuntime.annualRankingTrackYearOverrideKey(307, title, artist);
+  assert(afterRuntime.ANNUAL_RANKING_TRACK_YEAR_OVERRIDES.get(overrideKey) === expectedYear,
+    `#307 year override is missing: ${title} / ${artist}`);
+}
+assert(afterRuntime.ANNUAL_RANKING_TRACK_YEAR_OVERRIDES.size === 6,
   `unexpected year override count: ${afterRuntime.ANNUAL_RANKING_TRACK_YEAR_OVERRIDES.size}`);
 
 const luckyChancePositiveCases = [
@@ -685,7 +733,8 @@ const positiveCases = [
   [297, 15, '―'],
   [297, 16, '16位'],
   [297, 17, '17位'],
-  [297, 18, '86位']
+  [297, 18, '86位'],
+  ...episode307ExpectedTracks.map(([trackNo, , , , expected]) => [307, trackNo, expected])
 ];
 for (const [episodeNo, trackNo, expected] of positiveCases) {
   const { episode, track } = findTrack(episodeNo, trackNo);
@@ -728,6 +777,18 @@ for (const [episodeNo, trackNo] of episodeSpecificOverrideNegativeCases) {
   const result = afterRuntime.resolveAnnualRanking(afterIndex, episode, track);
   assert(result.text === '要確認',
     `#297-only year override leaked to #${episodeNo} No.${trackNo}: ${result.text}`);
+}
+
+for (const episode of episodes) {
+  for (const track of episode.tracks || []) {
+    const isEpisode307OverrideTrack =
+      (track.title === 'STAR LIGHT' && track.artist === '光GENJI')
+      || (track.title === '難破船' && track.artist === '中森明菜');
+    if (!isEpisode307OverrideTrack || episode.episode_no === 307) continue;
+    const result = afterRuntime.resolveAnnualRanking(afterIndex, episode, track);
+    assert(result.text === '要確認',
+      `#307-only year override leaked to #${episode.episode_no} No.${track.no}: ${result.text}`);
+  }
 }
 
 const negativeCases = [
@@ -859,11 +920,12 @@ console.log('[OK] approved destinations=76; newly ranked=190; controlled canonic
 console.log('[OK] 横浜銀蝿 exact artist alias: newly ranked=3; existing changes=0');
 console.log('[OK] Lucky Chanceをもう一度 exact track alias: newly ranked=3; existing changes=0');
 console.log('[OK] artist/free search: 横浜銀蝿=3; T.C.R.横浜銀蝿R.S.=3; 嶋大輔=separate');
-console.log('[OK] totals: regular=3374, confirm=331, rankout=1471, foreign=303');
-console.log('[OK] required positives=63; untouched groups=7; negative cases=9');
+console.log('[OK] totals: regular=3386, confirm=331, rankout=1476, foreign=304');
+console.log('[OK] #307 metadata/tracks=18; PUY 1987 tracks=302; image references=263; preparing=14');
+console.log('[OK] required positives=81; untouched groups=7; negative cases=9');
 console.log('[OK] Lucky Chance positives=3; negative groups=7; non-target C-C-B tracks=15');
-console.log('[OK] episode-specific year overrides=4; leakage checks=6');
+console.log('[OK] episode-specific year overrides=6; #307 same-track leakage checks=9');
 console.log('[OK] existing ranking result changes=0');
-console.log('[OK] debut tracks=2578; 横浜銀蝿 and ルビーの指環 debut states verified');
+console.log('[OK] debut tracks=2582; 横浜銀蝿 and ルビーの指環 debut states verified');
 console.log('[OK] pending display=確認中; placement/touch/hover/focus/click/outside/Escape verified');
 console.log('\nResult: PASS (failures=0)');
