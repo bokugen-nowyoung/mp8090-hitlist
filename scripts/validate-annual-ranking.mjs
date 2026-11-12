@@ -35,7 +35,8 @@ function extractEpisodes() {
 function compileRankingRuntime({
   includeApprovedAliases,
   includeYokohamaGinbaeAlias = true,
-  includeLuckyChanceAlias = true
+  includeLuckyChanceAlias = true,
+  includeYumingSearchAlias = true
 }) {
   const normalizeSource = sourceBetween(
     '    const normalizeForMatch = (s) => {',
@@ -45,13 +46,21 @@ function compileRankingRuntime({
     '    function normalizeWithMap(str) {',
     '\n\n    // ── アーティスト検索用alias ──'
   );
+  const escapeSource = sourceBetween(
+    '    function escHtml(s) {',
+    '\n\n    // ── 検索用正規化 ──'
+  );
   let artistAliasSource = sourceBetween(
-    '    const ARTIST_SEARCH_ALIAS_GROUPS = [',
+    '    const ARTIST_SEARCH_AND_ANNUAL_RANKING_ALIAS_GROUPS = [',
     '\n\n    // ── 年間シングルランキング照合 ──'
   );
   const artistSearchSource = sourceBetween(
     '    function resolveArtistSearchTerms(rawQuery) {',
     '\n    function getArtistHighlightTerms'
+  );
+  const artistHighlightSource = sourceBetween(
+    '    function getArtistHighlightTerms(criteria) {',
+    '\n\n    function renderTrackTable'
   );
   const episodeSearchSource = sourceBetween(
     '    function episodeMatches(ep, c) {',
@@ -89,19 +98,31 @@ function compileRankingRuntime({
     assert(!rankingSource.includes(luckyChanceAlias),
       'Lucky Chanceをもう一度 track alias appears more than once');
   }
+  if (!includeYumingSearchAlias) {
+    const yumingSearchAlias = "      ['松任谷由実', '荒井由実']\n";
+    assert(artistAliasSource.includes(yumingSearchAlias), '松任谷由実/荒井由実 search alias not found');
+    artistAliasSource = artistAliasSource.replace(yumingSearchAlias, '');
+    assert(!artistAliasSource.includes(yumingSearchAlias),
+      '松任谷由実/荒井由実 search alias appears more than once');
+  }
 
   // setuplits.htmlの実コードをそのまま評価し、テスト側へ照合ロジックを複製しない。
   return Function(`
     ${normalizeSource}
+    ${escapeSource}
     ${searchNormalizeSource}
     ${artistAliasSource}
     ${artistSearchSource}
+    ${artistHighlightSource}
     ${episodeSearchSource}
     ${matchingTracksSource}
     ${rankingSource}
     ${resolveSource}
     return {
+      ARTIST_SEARCH_AND_ANNUAL_RANKING_ALIAS_GROUPS,
+      ARTIST_SEARCH_ONLY_ALIAS_GROUPS,
       ARTIST_SEARCH_ALIAS_GROUPS,
+      ANNUAL_RANKING_ARTIST_ALIAS_GROUPS,
       ANNUAL_RANKING_TRACK_ALIAS_GROUPS,
       ANNUAL_RANKING_TRACK_YEAR_OVERRIDES,
       artistSearchAliasTermsByQuery,
@@ -109,6 +130,8 @@ function compileRankingRuntime({
       resolveArtistSearchTerms,
       artistMatchesSearchTerms,
       compileSearchCriteria,
+      getArtistHighlightTerms,
+      highlightText,
       episodeMatches,
       getMatchingTracks,
       normalizeAnnualRankingArtist,
@@ -333,10 +356,15 @@ const preLuckyChanceRuntime = compileRankingRuntime({
   includeApprovedAliases: true,
   includeLuckyChanceAlias: false
 });
+const preYumingSearchAliasRuntime = compileRankingRuntime({
+  includeApprovedAliases: true,
+  includeYumingSearchAlias: false
+});
 const beforeIndex = beforeRuntime.buildAnnualRankingIndex(rankingData);
 const afterIndex = afterRuntime.buildAnnualRankingIndex(rankingData);
 const preYokohamaGinbaeIndex = preYokohamaGinbaeRuntime.buildAnnualRankingIndex(rankingData);
 const preLuckyChanceIndex = preLuckyChanceRuntime.buildAnnualRankingIndex(rankingData);
+const preYumingSearchAliasIndex = preYumingSearchAliasRuntime.buildAnnualRankingIndex(rankingData);
 const debutRuntime = compileDebutRuntime();
 const displayRuntime = compileAnnualRankingDisplayRuntime();
 const appSearchRuntime = compileAppSearchRuntime();
@@ -463,6 +491,78 @@ assert(rawUnicornTracks.some(track => track.artist.includes('UNICORN'))
   && rawUnicornTracks.some(track => track.artist.includes('ユニコーン')),
   'Set Up List UNICORN source spellings were not preserved');
 
+assert(JSON.stringify(afterRuntime.ARTIST_SEARCH_ONLY_ALIAS_GROUPS) ===
+  JSON.stringify([['松任谷由実', '荒井由実']]),
+  'Set Up List search-only artist alias groups changed');
+assert(!afterRuntime.ARTIST_SEARCH_AND_ANNUAL_RANKING_ALIAS_GROUPS.some(group =>
+  group.includes('松任谷由実') || group.includes('荒井由実')
+), '松任谷由実/荒井由実 must not be included in shared ranking aliases');
+assert(!afterRuntime.ANNUAL_RANKING_ARTIST_ALIAS_GROUPS.some(group =>
+  group.includes('松任谷由実') || group.includes('荒井由実')
+), '松任谷由実/荒井由実 search alias leaked into annual ranking matching');
+
+for (const field of ['artist', 'free']) {
+  for (const query of ['松任谷由実', '荒井由実']) {
+    const result = countEpisodeAndTrackSearchMatches(afterRuntime, field, query);
+    assert(result.episodeCount === 44 && result.trackCount === 58,
+      `Yuming Set Up List ${field} search count changed: ${query} ` +
+      `(episodes=${result.episodeCount}, tracks=${result.trackCount})`);
+    for (const [episodeNo, title, artist] of [
+      [88, '愛のWAVE', '松任谷由実・カールスモーキー石井'],
+      [89, '今だから', '松任谷由実、小田和正、財津和夫']
+    ]) {
+      const episode = result.matchingEpisodes.find(item => item.episode_no === episodeNo);
+      assert(episode?.tracks.some(track => track.title === title && track.artist === artist),
+        `#${episodeNo} ${title} is missing from ${field} search: ${query}`);
+    }
+    const highlightTerms = afterRuntime.getArtistHighlightTerms(result.criteria);
+    for (const displayedArtist of ['松任谷由実', '荒井由実']) {
+      const highlighted = afterRuntime.highlightText(displayedArtist, highlightTerms);
+      assert(highlighted === `<mark class="search-hit">${displayedArtist}</mark>`,
+        `Set Up List alias did not highlight only the displayed artist spelling: ` +
+        `${field}/${query}/${displayedArtist}`);
+    }
+  }
+}
+for (const query of [
+  '松任谷',
+  '荒井',
+  '由実',
+  '松任谷由実特集',
+  '荒井由実 特集',
+  '松任谷由実 荒井由実'
+]) {
+  const normalized = afterRuntime.searchNormalize(query);
+  assert(!afterRuntime.artistSearchAliasTermsByQuery.has(normalized),
+    `Set Up List Yuming artist alias must require a complete query match: ${query}`);
+  assert(JSON.stringify(afterRuntime.resolveArtistSearchTerms(query)) === JSON.stringify([normalized]),
+    `Set Up List Yuming shortened/decorated/compound query was expanded: ${query}`);
+}
+const titleAliasCriteria = afterRuntime.compileSearchCriteria({
+  artist: '',
+  title: '松任谷由実',
+  epNo: null,
+  airDate: '',
+  feature: '',
+  free: '',
+  puySingle: null,
+  puyMulti: []
+});
+assert(!afterRuntime.episodeMatches({
+  episode_no: 0,
+  air_date: '',
+  puy_year: 0,
+  special_feature: '',
+  tracks: [{ title: '荒井由実', artist: '別アーティスト' }]
+}, titleAliasCriteria), 'Set Up List artist alias must not expand the title condition');
+
+const rawYumingTracks = episodes.flatMap(episode => episode.tracks || []).filter(track =>
+  /松任谷由実|荒井由実/.test(track.artist)
+);
+assert(rawYumingTracks.some(track => track.artist.includes('松任谷由実'))
+  && rawYumingTracks.some(track => track.artist.includes('荒井由実')),
+  'Set Up List Yuming source spellings were not preserved');
+
 function searchAnnualRanking(query, decade = 'all') {
   const normalizedQuery = appSearchRuntime.normalizeSearchText(query);
   const artistTerms = appSearchRuntime.resolveRankingSearchArtistTerms(normalizedQuery);
@@ -518,6 +618,74 @@ assert(rankingData['1989'].some(entry =>
 ) && rankingData['1990'].some(entry =>
   entry.rank === 36 && entry.title === '働く男' && entry.artist === 'ユニコーン'
 ), 'data.json UNICORN source spellings were not preserved');
+
+const expectedYumingRankingRecords = [
+  [1981, 10, '守ってあげたい', '松任谷由実'],
+  [1983, 79, 'ダンデライオン', '松任谷由実'],
+  [1984, 87, 'VOYAGER～日付のない墓標～', '松任谷由実'],
+  [1985, 16, '今だから', '松任谷由実･小田和正･財津和夫'],
+  [1985, 86, 'メトロポリスの片隅で', '松任谷由実'],
+  [1989, 17, 'ANNIVERSARY', '松任谷由実'],
+  [1992, 85, '愛のWAVE', 'カールスモーキー石井･松任谷由実'],
+  [1993, 8, '真夏の夜の夢', '松任谷由実'],
+  [1994, 6, 'Hello,my friend', '松任谷由実'],
+  [1994, 47, '春よ、来い', '松任谷由実'],
+  [1995, 49, '春よ、来い', '松任谷由実'],
+  [1996, 68, '輪舞曲', '松任谷由実'],
+  [1996, 81, 'まちぶせ', '荒井由実']
+];
+for (const query of ['松任谷由実', '荒井由実']) {
+  const all = searchAnnualRanking(query);
+  const actualRecords = all.entries.map(entry => [entry.year, entry.rank, entry.title, entry.artist]);
+  assert(JSON.stringify(actualRecords) === JSON.stringify(expectedYumingRankingRecords),
+    `Yuming annual ranking results changed: ${query}`);
+  assert(searchAnnualRanking(query, '1980').entries.length === 6,
+    `Yuming annual ranking 1980s count changed: ${query}`);
+  assert(searchAnnualRanking(query, '1990').entries.length === 7,
+    `Yuming annual ranking 1990s count changed: ${query}`);
+  assert(all.entries.filter(entry => entry.artist.includes('松任谷由実')).length === 12
+    && all.entries.filter(entry => entry.artist.includes('荒井由実')).length === 1,
+  `Yuming annual ranking source spelling breakdown changed: ${query}`);
+
+  const rows = appSearchRuntime.buildSearchRows(
+    all.entries,
+    all.normalizedQuery,
+    all.artistTerms
+  );
+  assert((rows.match(/<mark class="chart-search-highlight">松任谷由実<\/mark>/g) || []).length === 12
+    && (rows.match(/<mark class="chart-search-highlight">荒井由実<\/mark>/g) || []).length === 1,
+  `Yuming alias result does not highlight only displayed artist spellings: ${query}`);
+}
+for (const query of [
+  '松任谷',
+  '荒井',
+  '由実',
+  '松任谷由実特集',
+  '荒井由実 特集',
+  '松任谷由実 荒井由実'
+]) {
+  const normalized = appSearchRuntime.normalizeSearchText(query);
+  assert(!appSearchRuntime.rankingSearchArtistAliasTermsByQuery.has(normalized),
+    `annual ranking Yuming alias must require a complete query match: ${query}`);
+  assert(JSON.stringify(appSearchRuntime.resolveRankingSearchArtistTerms(query)) ===
+    JSON.stringify([normalized]),
+  `annual ranking Yuming shortened/decorated/compound query was expanded: ${query}`);
+}
+const yumingTitleOnlyAliasEntry = {
+  year: 1990,
+  normalizedTitle: appSearchRuntime.normalizeSearchText('荒井由実'),
+  normalizedArtist: appSearchRuntime.normalizeSearchText('別アーティスト')
+};
+const yumingQuery = appSearchRuntime.normalizeSearchText('松任谷由実');
+assert(!appSearchRuntime.rankingSearchEntryMatches(
+  yumingTitleOnlyAliasEntry,
+  yumingQuery,
+  appSearchRuntime.resolveRankingSearchArtistTerms(yumingQuery),
+  'all'
+), 'annual ranking Yuming artist alias must not expand the title condition');
+assert(expectedYumingRankingRecords.filter(([, , , artist]) => artist.includes('松任谷由実')).length === 12
+  && expectedYumingRankingRecords.filter(([, , , artist]) => artist.includes('荒井由実')).length === 1,
+  'data.json Yuming source spellings were not preserved');
 
 const debutTrackCount = episodes.reduce((sum, episode) => sum + (episode.tracks || []).filter(
   track => debutRuntime.isDebutTrack(episode, track)
@@ -706,6 +874,24 @@ function findTrack(episodeNo, trackNo) {
   assert(track, `track not found: #${episodeNo} No.${trackNo}`);
   return { episode, track };
 }
+
+let yumingSearchAliasRankingComparisonCount = 0;
+for (const episode of episodes) {
+  for (const track of episode.tracks || []) {
+    const beforeYumingSearchAlias = preYumingSearchAliasRuntime.resolveAnnualRanking(
+      preYumingSearchAliasIndex,
+      episode,
+      track
+    );
+    const afterYumingSearchAlias = afterRuntime.resolveAnnualRanking(afterIndex, episode, track);
+    assert(JSON.stringify(afterYumingSearchAlias) === JSON.stringify(beforeYumingSearchAlias),
+      `Yuming search-only alias changed annual ranking: #${episode.episode_no} No.${track.no} ` +
+      `${JSON.stringify(beforeYumingSearchAlias)} -> ${JSON.stringify(afterYumingSearchAlias)}`);
+    yumingSearchAliasRankingComparisonCount += 1;
+  }
+}
+assert(yumingSearchAliasRankingComparisonCount === 5497,
+  `unexpected Yuming annual ranking comparison count: ${yumingSearchAliasRankingComparisonCount}`);
 
 const beforeTotals = { regular: 0, confirm: 0, rankout: 0, foreign: 0 };
 const afterTotals = { regular: 0, confirm: 0, rankout: 0, foreign: 0 };
@@ -1088,6 +1274,8 @@ console.log('[OK] Lucky Chanceをもう一度 exact track alias: newly ranked=3;
 console.log('[OK] artist/free search: 横浜銀蝿=3; T.C.R.横浜銀蝿R.S.=3; 嶋大輔=separate');
 console.log('[OK] UNICORN Set Up List alias: artist/free both spellings=10 episodes/14 tracks; #149 included');
 console.log('[OK] UNICORN annual search alias: both spellings=2 tracks; 1980s=1; 1990s=1; highlight verified');
+console.log('[OK] Yuming Set Up List alias: artist/free both names=44 episodes/58 tracks; #88/#89 included; highlight verified');
+console.log('[OK] Yuming annual search alias: both names=13 entries; 1980s=6; 1990s=7; source spellings=12/1; 5,497 rankings unchanged');
 console.log('[OK] totals: regular=3386, confirm=331, rankout=1476, foreign=304');
 console.log('[OK] #307 metadata/tracks=18; PUY 1987 tracks=302; image references=263; preparing=14');
 console.log('[OK] required positives=81; untouched groups=7; negative cases=9');

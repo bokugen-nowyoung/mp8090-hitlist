@@ -2165,15 +2165,22 @@
     // ── アーティスト検索用alias ──
     // 表示データは変更せず、検索語がaliasの正規化結果と完全一致した時だけ
     // 同じグループの別表記へ展開する。
-    const ARTIST_SEARCH_ALIAS_GROUPS = [
+    const ARTIST_SEARCH_AND_ANNUAL_RANKING_ALIAS_GROUPS = [
       ['CHAGE and ASKA', 'CHAGE&ASKA', 'CHAGE&ASUKA', 'チャゲ&飛鳥'],
       ['THE ALFEE', 'ALFEE', 'アルフィー'],
       ['TM NETWORK', 'TMN'],
       ['横浜銀蝿', 'T.C.R.横浜銀蝿R.S.'],
       ['UNICORN', 'ユニコーン']
     ];
+    const ARTIST_SEARCH_ONLY_ALIAS_GROUPS = [
+      ['松任谷由実', '荒井由実']
+    ];
+    const ARTIST_SEARCH_ALIAS_GROUPS = [
+      ...ARTIST_SEARCH_AND_ANNUAL_RANKING_ALIAS_GROUPS,
+      ...ARTIST_SEARCH_ONLY_ALIAS_GROUPS
+    ];
     const ANNUAL_RANKING_ARTIST_ALIAS_GROUPS = [
-      ...ARTIST_SEARCH_ALIAS_GROUPS,
+      ...ARTIST_SEARCH_AND_ANNUAL_RANKING_ALIAS_GROUPS,
       ['TUBE', 'チューブ'],
       ['DREAMS COME TRUE', 'ドリームズ・カム・トゥルー'],
       ['1986オメガトライブ', '1986 OMEGA TRIBE'],
