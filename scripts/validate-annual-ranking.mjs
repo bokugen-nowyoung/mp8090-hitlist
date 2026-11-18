@@ -384,6 +384,36 @@ const displayRuntime = compileAnnualRankingDisplayRuntime();
 const appSearchRuntime = compileAppSearchRuntime();
 const rankingSearchIndex = appSearchRuntime.buildRankingSearchIndex(rankingData);
 
+const episode306ExpectedTracks = [
+  [1, "You're my sunshine", '安室奈美恵', null, '13位'],
+  [2, 'ララ サンシャイン', '森高千里', null, '―'],
+  [3, '太陽は罪な奴', 'サザンオールスターズ', null, '82位'],
+  [4, '今夜はHearty Party', '竹内まりや', null, '74位'],
+  [5, 'ミッドナイト・シャッフル', '近藤真彦', null, '34位'],
+  [6, 'あなたが世界一', '宇徳敬子', null, '―'],
+  [7, 'それだけしか言えない', 'ジョー・リノイエ', null, '―'],
+  [8, 'クレイジー (How Crazy Are You?)', 'メイヤ (Meja)', '洋楽枠', '―'],
+  [9, 'エピキュリアン (Epicurean)', 'BE∀T BOYS', null, '―'],
+  [10, 'Diamonds', 'プリンセス プリンセス', '特集枠', '1989年 1位'],
+  [11, 'あー夏休み', 'TUBE', '特集枠', '1990年 48位'],
+  [12, '夢見る少女じゃいられない', '相川七瀬', '特集枠', '86位'],
+  [13, 'BEAMS', '黒夢', '特集枠', '―'],
+  [14, 'HOT LIMIT', 'T.M.Revolution', '特集枠', '1998年 30位'],
+  [15, '渚にまつわるエトセトラ', 'PUFFY', null, '1997年 18位'],
+  [16, '熱くなれ', '大黒摩季', null, '24位'],
+  [17, 'バンザイ ～好きでよかった～', 'ウルフルズ', null, '46位']
+];
+const episode306Matches = episodes.filter(episode => episode.episode_no === 306);
+assert(episode306Matches.length === 1, `#306 occurrence count must be 1: ${episode306Matches.length}`);
+const [episode306] = episode306Matches;
+assert(episode306.puy_year === 1996 && episode306.air_date === '2026-08-04'
+  && episode306.special_feature === 'LuckyFes出演アーティスト特集'
+  && episode306.image_file === '1996.306.jfif' && !Object.hasOwn(episode306, 'status'),
+  '#306 metadata or completed status is unexpected');
+assert(JSON.stringify(episode306.tracks) === JSON.stringify(
+  episode306ExpectedTracks.map(([no, title, artist, note]) => ({ no, title, artist, note }))
+), '#306 tracks do not exactly match the approved 17 tracks');
+
 const episode307ExpectedTracks = [
   [1, 'stripe blue', '少年隊', null, '16位'],
   [2, 'STAR LIGHT', '光GENJI', null, '4位'],
@@ -418,9 +448,12 @@ assert(episodes.length === 315, `unexpected episode count: ${episodes.length}`);
 assert(episodes.filter(episode => episode.puy_year === 1987)
   .reduce((sum, episode) => sum + episode.tracks.length, 0) === 302,
   'unexpected PUY 1987 track count');
-assert(episodes.filter(episode => episode.image_file).length === 263,
+assert(episodes.filter(episode => episode.puy_year === 1996)
+  .reduce((sum, episode) => sum + episode.tracks.length, 0) === 281,
+  'unexpected PUY 1996 track count');
+assert(episodes.filter(episode => episode.image_file).length === 264,
   'unexpected episode image reference count');
-assert(episodes.filter(episode => episode.status === 'preparing').length === 14,
+assert(episodes.filter(episode => episode.status === 'preparing').length === 13,
   'unexpected preparing episode count');
 
 function countEpisodeSearchMatches(runtime, field, rawQuery) {
@@ -982,7 +1015,7 @@ assert(expectedRebeccaRankingRecords.filter(([, , , artist]) => artist.includes(
 const debutTrackCount = episodes.reduce((sum, episode) => sum + (episode.tracks || []).filter(
   track => debutRuntime.isDebutTrack(episode, track)
 ).length, 0);
-assert(debutTrackCount === 2582,
+assert(debutTrackCount === 2587,
   `unexpected debut track count: ${debutTrackCount}`);
 for (const [episodeNo, trackNo, expected] of [
   [14, 5, true],
@@ -1182,7 +1215,7 @@ for (const episode of episodes) {
     yumingSearchAliasRankingComparisonCount += 1;
   }
 }
-assert(yumingSearchAliasRankingComparisonCount === 5497,
+assert(yumingSearchAliasRankingComparisonCount === 5514,
   `unexpected Yuming annual ranking comparison count: ${yumingSearchAliasRankingComparisonCount}`);
 
 assert(preRebeccaSearchAliasRuntime.ANNUAL_RANKING_ARTIST_ALIAS_GROUPS.filter(group =>
@@ -1206,7 +1239,7 @@ for (const episode of episodes) {
     rebeccaSearchAliasRankingComparisonCount += 1;
   }
 }
-assert(rebeccaSearchAliasRankingComparisonCount === 5497,
+assert(rebeccaSearchAliasRankingComparisonCount === 5514,
   `unexpected REBECCA annual ranking comparison count: ${rebeccaSearchAliasRankingComparisonCount}`);
 
 const beforeTotals = { regular: 0, confirm: 0, rankout: 0, foreign: 0 };
@@ -1256,15 +1289,15 @@ for (const episode of episodes) {
   }
 }
 
-assert(episodes.reduce((sum, episode) => sum + episode.tracks.length, 0) === 5497,
+assert(episodes.reduce((sum, episode) => sum + episode.tracks.length, 0) === 5514,
   'unexpected Set Up List track count');
-assert(JSON.stringify(beforeTotals) === JSON.stringify({ regular: 3196, confirm: 331, rankout: 1666, foreign: 304 }),
+assert(JSON.stringify(beforeTotals) === JSON.stringify({ regular: 3207, confirm: 331, rankout: 1671, foreign: 305 }),
   `unexpected pre-alias totals: ${JSON.stringify(beforeTotals)}`);
-assert(JSON.stringify(preYokohamaGinbaeTotals) === JSON.stringify({ regular: 3383, confirm: 331, rankout: 1479, foreign: 304 }),
+assert(JSON.stringify(preYokohamaGinbaeTotals) === JSON.stringify({ regular: 3394, confirm: 331, rankout: 1484, foreign: 305 }),
   `unexpected pre-横浜銀蝿 totals: ${JSON.stringify(preYokohamaGinbaeTotals)}`);
-assert(JSON.stringify(preLuckyChanceTotals) === JSON.stringify({ regular: 3383, confirm: 331, rankout: 1479, foreign: 304 }),
+assert(JSON.stringify(preLuckyChanceTotals) === JSON.stringify({ regular: 3394, confirm: 331, rankout: 1484, foreign: 305 }),
   `unexpected pre-Lucky Chance alias totals: ${JSON.stringify(preLuckyChanceTotals)}`);
-assert(JSON.stringify(afterTotals) === JSON.stringify({ regular: 3386, confirm: 331, rankout: 1476, foreign: 304 }),
+assert(JSON.stringify(afterTotals) === JSON.stringify({ regular: 3397, confirm: 331, rankout: 1481, foreign: 305 }),
   `unexpected post-alias totals: ${JSON.stringify(afterTotals)}`);
 assert(afterRuntime.ANNUAL_RANKING_TRACK_ALIAS_GROUPS.length === 76,
   `unexpected approved alias destination count: ${afterRuntime.ANNUAL_RANKING_TRACK_ALIAS_GROUPS.length}`);
@@ -1331,7 +1364,14 @@ for (const [title, artist, expectedYear] of episode307Overrides) {
   assert(afterRuntime.ANNUAL_RANKING_TRACK_YEAR_OVERRIDES.get(overrideKey) === expectedYear,
     `#307 year override is missing: ${title} / ${artist}`);
 }
-assert(afterRuntime.ANNUAL_RANKING_TRACK_YEAR_OVERRIDES.size === 6,
+const episode306DiamondsOverrideKey = afterRuntime.annualRankingTrackYearOverrideKey(
+  306,
+  'Diamonds',
+  'プリンセス プリンセス'
+);
+assert(afterRuntime.ANNUAL_RANKING_TRACK_YEAR_OVERRIDES.get(episode306DiamondsOverrideKey) === 1989,
+  '#306 Diamonds year override must be limited to #306 and 1989');
+assert(afterRuntime.ANNUAL_RANKING_TRACK_YEAR_OVERRIDES.size === 7,
   `unexpected year override count: ${afterRuntime.ANNUAL_RANKING_TRACK_YEAR_OVERRIDES.size}`);
 
 const luckyChancePositiveCases = [
@@ -1402,6 +1442,7 @@ const positiveCases = [
   [297, 16, '16位'],
   [297, 17, '17位'],
   [297, 18, '86位'],
+  ...episode306ExpectedTracks.map(([trackNo, , , , expected]) => [306, trackNo, expected]),
   ...episode307ExpectedTracks.map(([trackNo, , , , expected]) => [307, trackNo, expected])
 ];
 for (const [episodeNo, trackNo, expected] of positiveCases) {
@@ -1419,6 +1460,34 @@ for (const episode of episodes) {
     }
   }
 }
+
+const existingJapaneseDiamondsTracks = [
+  [55, 1],
+  [66, 18],
+  [109, 2],
+  [145, 11],
+  [163, 1],
+  [252, 14]
+];
+for (const [episodeNo, trackNo] of existingJapaneseDiamondsTracks) {
+  const { episode, track } = findTrack(episodeNo, trackNo);
+  assert(track.title === 'Diamonds' && track.artist === 'プリンセス プリンセス',
+    `existing Diamonds source changed: #${episodeNo} No.${trackNo}`);
+  const result = afterRuntime.resolveAnnualRanking(afterIndex, episode, track);
+  assert(result.text === '要確認',
+    `#306-only Diamonds override leaked to #${episodeNo} No.${trackNo}: ${result.text}`);
+}
+const englishArtistDiamonds = findTrack(1, 3);
+assert(englishArtistDiamonds.track.title === 'Diamonds'
+  && englishArtistDiamonds.track.artist === 'PRINCESS PRINCESS',
+  '#1 English-artist Diamonds source changed');
+const englishArtistDiamondsResult = afterRuntime.resolveAnnualRanking(
+  afterIndex,
+  englishArtistDiamonds.episode,
+  englishArtistDiamonds.track
+);
+assert(englishArtistDiamondsResult.text === '要確認',
+  `#1 English-artist Diamonds must remain outside the #306 override: ${englishArtistDiamondsResult.text}`);
 assert(luckyChanceTracks.length === 3,
   `Lucky Chanceをもう一度 / C-C-B occurrence count must be 3: ${luckyChanceTracks.length}`);
 for (const [episodeNo, puyYear, trackNo, expected] of luckyChancePositiveCases) {
@@ -1592,15 +1661,16 @@ console.log('[OK] CHAGE and ASKA annual search alias: 5 inputs=17 entries; 1980s
 console.log('[OK] UNICORN Set Up List alias: artist/free both spellings=10 episodes/14 tracks; #149 included');
 console.log('[OK] UNICORN annual search alias: both spellings=2 tracks; 1980s=1; 1990s=1; highlight verified');
 console.log('[OK] Yuming Set Up List alias: artist/free both names=44 episodes/58 tracks; #88/#89 included; highlight verified');
-console.log('[OK] Yuming annual search alias: both names=13 entries; 1980s=6; 1990s=7; source spellings=12/1; 5,497 rankings unchanged');
+console.log('[OK] Yuming annual search alias: both names=13 entries; 1980s=6; 1990s=7; source spellings=12/1; 5,514 rankings unchanged');
 console.log('[OK] REBECCA Set Up List alias: artist/free both spellings=14 episodes/18 tracks; #106 No.17 included; source spellings=18/0');
-console.log('[OK] REBECCA annual search alias: both spellings=6 entries; 1980s=5; 1990s=1; source spellings=5/1; 5,497 rankings unchanged');
-console.log('[OK] totals: regular=3386, confirm=331, rankout=1476, foreign=304');
-console.log('[OK] #307 metadata/tracks=18; PUY 1987 tracks=302; image references=263; preparing=14');
+console.log('[OK] REBECCA annual search alias: both spellings=6 entries; 1980s=5; 1990s=1; source spellings=5/1; 5,514 rankings unchanged');
+console.log('[OK] totals: regular=3397, confirm=331, rankout=1481, foreign=305');
+console.log('[OK] #306 metadata/tracks=17; PUY 1996 tracks=281; image references=264; preparing=13; Diamonds override isolated');
+console.log('[OK] #307 metadata/tracks=18; PUY 1987 tracks=302');
 console.log('[OK] required positives=81; untouched groups=7; negative cases=9');
 console.log('[OK] Lucky Chance positives=3; negative groups=7; non-target C-C-B tracks=15');
-console.log('[OK] episode-specific year overrides=6; #307 same-track leakage checks=9');
+console.log('[OK] episode-specific year overrides=7; #306 Diamonds and #307 same-track leakage verified');
 console.log('[OK] existing ranking result changes=0');
-console.log('[OK] debut tracks=2582; 横浜銀蝿 and ルビーの指環 debut states verified');
+console.log('[OK] debut tracks=2587; 横浜銀蝿 and ルビーの指環 debut states verified');
 console.log('[OK] pending display=確認中; placement/touch/hover/focus/click/outside/Escape verified');
 console.log('\nResult: PASS (failures=0)');
