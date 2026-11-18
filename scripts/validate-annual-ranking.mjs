@@ -657,6 +657,147 @@ function searchAnnualRanking(query, decade = 'all') {
   return { normalizedQuery, artistTerms, entries };
 }
 
+const expectedChageAndAskaRankingRecords = [
+  [1981, 26, '万里の河', 'チャゲ＆飛鳥'],
+  [1986, 68, 'モーニングムーン', 'チャゲ＆飛鳥'],
+  [1991, 2, 'SAY YES', 'CHAGE＆ASKA'],
+  [1991, 28, '太陽と埃の中で', 'CHAGE＆ASKA'],
+  [1992, 8, 'if', 'CHAGE＆ASKA'],
+  [1992, 19, '僕はこの瞳で嘘をつく', 'CHAGE＆ASKA'],
+  [1992, 26, "no no darlin'", 'CHAGE＆ASKA'],
+  [1992, 39, 'LOVE SONG', 'CHAGE＆ASKA'],
+  [1992, 51, 'WALK', 'CHAGE＆ASKA'],
+  [1992, 64, 'SAY YES', 'CHAGE＆ASKA'],
+  [1993, 1, 'YAH YAH YAH／夢の番人', 'CHAGE＆ASKA'],
+  [1993, 32, 'Sons and Daughters～それより君が伝えたいのは', 'CHAGE＆ASKA'],
+  [1994, 14, 'HEART／NATURAL', 'CHAGE＆ASKA'],
+  [1994, 57, 'めぐり逢い', 'CHAGE＆ASKA'],
+  [1995, 41, 'めぐり逢い', 'CHAGE＆ASKA'],
+  [1995, 58, 'Something There', 'CHAGE＆ASKA'],
+  [1996, 76, 'river', 'CHAGE＆ASKA']
+];
+const chageAndAskaRegisteredAliases = [
+  'CHAGE and ASKA',
+  'CHAGE&ASKA',
+  'CHAGE&ASUKA',
+  'チャゲ&飛鳥'
+];
+const chageAndAskaQueries = [
+  'チャゲ&飛鳥',
+  'チャゲ＆飛鳥',
+  'CHAGE＆ASKA',
+  'CHAGE&ASUKA',
+  'CHAGE and ASKA'
+];
+const chageAndAskaRankingGroups = appSearchRuntime.RANKING_SEARCH_ARTIST_ALIAS_GROUPS.filter(group =>
+  group.some(term => chageAndAskaRegisteredAliases.includes(term))
+);
+assert(JSON.stringify(chageAndAskaRankingGroups) ===
+  JSON.stringify([chageAndAskaRegisteredAliases]),
+  'annual ranking search must have exactly one ordered CHAGE and ASKA alias group');
+
+const chageAndAskaQueryKeys = chageAndAskaQueries.map(appSearchRuntime.normalizeSearchText);
+assert(new Set(chageAndAskaQueryKeys).size === 4,
+  `CHAGE and ASKA query normalization key count changed: ${JSON.stringify(chageAndAskaQueryKeys)}`);
+assert(chageAndAskaQueryKeys[0] === chageAndAskaQueryKeys[1],
+  'チャゲ&飛鳥 and チャゲ＆飛鳥 must normalize to the same key');
+assert(rankingSearchIndex.filter(entry => entry.artist === 'ASKA').length === 3,
+  'ASKA solo source record count changed');
+assert(rankingSearchIndex.filter(entry => entry.artist.includes('石川優子とチャゲ')).length === 1,
+  '石川優子とチャゲ source record count changed');
+
+const rankingAliasGroupByNormalizedTerm = new Map();
+appSearchRuntime.RANKING_SEARCH_ARTIST_ALIAS_GROUPS.forEach((group, groupIndex) => {
+  const groupKeys = group.map(appSearchRuntime.normalizeSearchText);
+  assert(new Set(groupKeys).size === groupKeys.length,
+    `annual ranking alias group has duplicate normalized keys: ${JSON.stringify(group)}`);
+  groupKeys.forEach(key => {
+    assert(!rankingAliasGroupByNormalizedTerm.has(key),
+      `annual ranking alias normalized key is shared across groups: ${key}`);
+    rankingAliasGroupByNormalizedTerm.set(key, groupIndex);
+  });
+});
+
+for (const query of chageAndAskaQueries) {
+  const all = searchAnnualRanking(query);
+  const actualRecords = all.entries.map(entry => [entry.year, entry.rank, entry.title, entry.artist]);
+  assert(JSON.stringify(actualRecords) === JSON.stringify(expectedChageAndAskaRankingRecords),
+    `CHAGE and ASKA annual ranking results changed: ${query}`);
+  assert(searchAnnualRanking(query, '1980').entries.length === 2,
+    `CHAGE and ASKA annual ranking 1980s count changed: ${query}`);
+  assert(searchAnnualRanking(query, '1990').entries.length === 15,
+    `CHAGE and ASKA annual ranking 1990s count changed: ${query}`);
+  assert(all.entries.filter(entry => entry.artist === 'チャゲ＆飛鳥').length === 2
+    && all.entries.filter(entry => entry.artist === 'CHAGE＆ASKA').length === 15,
+  `CHAGE and ASKA annual ranking source spelling breakdown changed: ${query}`);
+  assert(all.entries.every(entry => entry.artist !== 'ASKA'
+    && !entry.artist.includes('石川優子とチャゲ')),
+  `CHAGE and ASKA alias included a solo or collaboration result: ${query}`);
+
+  const rows = appSearchRuntime.buildSearchRows(all.entries, all.normalizedQuery, all.artistTerms);
+  assert((rows.match(/<mark class="chart-search-highlight">チャゲ＆飛鳥<\/mark>/g) || []).length === 2
+    && (rows.match(/<mark class="chart-search-highlight">CHAGE＆ASKA<\/mark>/g) || []).length === 15,
+  `CHAGE and ASKA alias result does not highlight only displayed artist spellings: ${query}`);
+  const titleCells = rows.match(/<td class="col-search-title">[\s\S]*?<\/td>/g) || [];
+  assert(titleCells.length === 17
+    && titleCells.every(cell => !cell.includes('<mark class="chart-search-highlight">')),
+    `CHAGE and ASKA artist alias leaked into a title highlight: ${query}`);
+  for (const alias of chageAndAskaQueries) {
+    if (alias === 'チャゲ＆飛鳥' || alias === 'CHAGE＆ASKA') continue;
+    assert(!rows.includes(alias),
+      `CHAGE and ASKA search generated a non-source display spelling: ${query} -> ${alias}`);
+  }
+}
+
+for (const [query, expectedCount] of [
+  ['CHAGE', 15],
+  ['ASKA', 18],
+  ['チャゲ', 3],
+  ['CHAGE and', 0],
+  ['CHAGE＆ASKA特集', 0],
+  ['チャゲ&飛鳥 特集', 0],
+  ['CHAGE＆ASKA チャゲ&飛鳥', 0]
+]) {
+  const normalized = appSearchRuntime.normalizeSearchText(query);
+  assert(!appSearchRuntime.rankingSearchArtistAliasTermsByQuery.has(normalized),
+    `annual ranking CHAGE and ASKA alias must require a complete query match: ${query}`);
+  assert(JSON.stringify(appSearchRuntime.resolveRankingSearchArtistTerms(query)) ===
+    JSON.stringify([normalized]),
+  `annual ranking CHAGE and ASKA shortened/decorated/compound query was expanded: ${query}`);
+  assert(searchAnnualRanking(query).entries.length === expectedCount,
+    `annual ranking ordinary substring matching changed: ${query}`);
+}
+
+const chageAndAskaSyntheticTitleEntry = {
+  year: 1992,
+  rank: 1,
+  title: 'CHAGE&ASUKA',
+  artist: '別アーティスト',
+  normalizedTitle: appSearchRuntime.normalizeSearchText('CHAGE&ASUKA'),
+  normalizedArtist: appSearchRuntime.normalizeSearchText('別アーティスト')
+};
+const differentChageAndAskaAliasQuery = appSearchRuntime.normalizeSearchText('CHAGE and ASKA');
+assert(!appSearchRuntime.rankingSearchEntryMatches(
+  chageAndAskaSyntheticTitleEntry,
+  differentChageAndAskaAliasQuery,
+  appSearchRuntime.resolveRankingSearchArtistTerms(differentChageAndAskaAliasQuery),
+  'all'
+), 'annual ranking CHAGE and ASKA artist alias must not expand the title condition');
+const matchingChageAndAskaTitleQuery = appSearchRuntime.normalizeSearchText('CHAGE&ASUKA');
+assert(appSearchRuntime.rankingSearchEntryMatches(
+  chageAndAskaSyntheticTitleEntry,
+  matchingChageAndAskaTitleQuery,
+  appSearchRuntime.resolveRankingSearchArtistTerms(matchingChageAndAskaTitleQuery),
+  'all'
+), 'annual ranking ordinary title matching changed for an alias-shaped title');
+
+const setupListChageAndAskaGroups = afterRuntime.ARTIST_SEARCH_AND_ANNUAL_RANKING_ALIAS_GROUPS.filter(
+  group => group.some(term => chageAndAskaRegisteredAliases.includes(term))
+);
+assert(JSON.stringify(setupListChageAndAskaGroups) ===
+  JSON.stringify([chageAndAskaRegisteredAliases]),
+  'Set Up List CHAGE and ASKA shared alias group changed');
+
 for (const query of ['UNICORN', 'ユニコーン']) {
   const all = searchAnnualRanking(query);
   assert(all.entries.length === 2,
@@ -1447,6 +1588,7 @@ console.log('[OK] approved destinations=76; newly ranked=190; controlled canonic
 console.log('[OK] 横浜銀蝿 exact artist alias: newly ranked=3; existing changes=0');
 console.log('[OK] Lucky Chanceをもう一度 exact track alias: newly ranked=3; existing changes=0');
 console.log('[OK] artist/free search: 横浜銀蝿=3; T.C.R.横浜銀蝿R.S.=3; 嶋大輔=separate');
+console.log('[OK] CHAGE and ASKA annual search alias: 5 inputs=17 entries; 1980s=2; 1990s=15; source spellings=2/15; solo/collaboration excluded; highlight verified');
 console.log('[OK] UNICORN Set Up List alias: artist/free both spellings=10 episodes/14 tracks; #149 included');
 console.log('[OK] UNICORN annual search alias: both spellings=2 tracks; 1980s=1; 1990s=1; highlight verified');
 console.log('[OK] Yuming Set Up List alias: artist/free both names=44 episodes/58 tracks; #88/#89 included; highlight verified');

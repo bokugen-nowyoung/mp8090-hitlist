@@ -73,6 +73,7 @@ function renderYearButtons() {
    Search
    -------------------------------------------------------- */
 const RANKING_SEARCH_ARTIST_ALIAS_GROUPS = [
+  ['CHAGE and ASKA', 'CHAGE&ASKA', 'CHAGE&ASUKA', 'チャゲ&飛鳥'],
   ['UNICORN', 'ユニコーン'],
   ['松任谷由実', '荒井由実'],
   ['REBECCA', 'レベッカ']
