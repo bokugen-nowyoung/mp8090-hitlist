@@ -134,6 +134,7 @@ function compileRankingRuntime({
       ANNUAL_RANKING_ARTIST_ALIAS_GROUPS,
       ANNUAL_RANKING_TRACK_ALIAS_GROUPS,
       ANNUAL_RANKING_TRACK_YEAR_OVERRIDES,
+      ANNUAL_RANKING_EPISODE_TRACK_ALIAS_DESTINATIONS,
       artistSearchAliasTermsByQuery,
       searchNormalize,
       resolveArtistSearchTerms,
@@ -444,14 +445,48 @@ assert(episode307.puy_year === 1987 && episode307.air_date === '2026-08-11'
 assert(JSON.stringify(episode307.tracks) === JSON.stringify(
   episode307ExpectedTracks.map(([no, title, artist, note]) => ({ no, title, artist, note }))
 ), '#307 tracks do not exactly match the approved 18 tracks');
-assert(episodes.length === 315, `unexpected episode count: ${episodes.length}`);
+const episode317ExpectedTracks = [
+  [1, '風は秋色', '松田聖子', null, '14位'],
+  [2, '秋止符', 'アリス', null, '―'],
+  [3, '唇よ、熱く君を語れ', '渡辺真知子', null, '24位'],
+  [4, 'ビューティフル・エネルギー', '甲斐バンド', null, '58位'],
+  [5, 'ジェニーはご機嫌ななめ', 'ジューシィ・フルーツ', null, '37位'],
+  [6, 'C調言葉に御用心', 'サザンオールスターズ', null, '60位'],
+  [7, '後から前から', '畑中葉子', null, '―'],
+  [8, 'セレブレーション (Celebration)', 'クール＆ザ・ギャング (Kool & The Gang)', '洋楽枠', '―'],
+  [9, 'DOWN TOWN', 'EPO', null, '―'],
+  [10, 'TOKIO', '沢田研二', null, '39位'],
+  [11, 'Winter,again', 'GLAY', '特集枠', '1999年 3位'],
+  [12, 'LAT.43° N ～forty-three degrees north latitude～', 'DREAMS COME TRUE', '特集枠', '―'],
+  [13, 'ワインレッドの心', '安全地帯', '特集枠', '1984年 2位'],
+  [14, '糸', '中島みゆき', '特集枠', '―'],
+  [15, '大空と大地の中で', '松山千春', '特集枠', '―'],
+  [16, '日本全国酒飲み音頭', 'バラクーダ', null, '92位'],
+  [17, 'おもいで酒', '小林幸子', null, '31位'],
+  [18, 'さよなら', 'オフコース', null, '9位']
+];
+const episode317Matches = episodes.filter(episode => episode.episode_no === 317);
+assert(episode317Matches.length === 1, `#317 occurrence count must be 1: ${episode317Matches.length}`);
+const [episode317] = episode317Matches;
+assert(episode317.puy_year === 1980 && episode317.air_date === '2026-10-20'
+  && episode317.special_feature === 'ご当地ソング特集～北海道編～'
+  && episode317.image_file === '1980.317.png' && !Object.hasOwn(episode317, 'status'),
+  '#317 metadata or completed status is unexpected');
+assert(JSON.stringify(episode317.tracks) === JSON.stringify(
+  episode317ExpectedTracks.map(([no, title, artist, note]) => ({ no, title, artist, note }))
+), '#317 tracks do not exactly match the approved 18 tracks');
+assert(!episodes.some(episode => episode.episode_no === 316), '#316 must remain unregistered');
+assert(episodes.length === 316, `unexpected episode count: ${episodes.length}`);
+assert(episodes.filter(episode => episode.puy_year === 1980)
+  .reduce((sum, episode) => sum + episode.tracks.length, 0) === 311,
+  'unexpected PUY 1980 track count');
 assert(episodes.filter(episode => episode.puy_year === 1987)
   .reduce((sum, episode) => sum + episode.tracks.length, 0) === 302,
   'unexpected PUY 1987 track count');
 assert(episodes.filter(episode => episode.puy_year === 1996)
   .reduce((sum, episode) => sum + episode.tracks.length, 0) === 281,
   'unexpected PUY 1996 track count');
-assert(episodes.filter(episode => episode.image_file).length === 264,
+assert(episodes.filter(episode => episode.image_file).length === 265,
   'unexpected episode image reference count');
 assert(episodes.filter(episode => episode.status === 'preparing').length === 13,
   'unexpected preparing episode count');
@@ -1015,7 +1050,7 @@ assert(expectedRebeccaRankingRecords.filter(([, , , artist]) => artist.includes(
 const debutTrackCount = episodes.reduce((sum, episode) => sum + (episode.tracks || []).filter(
   track => debutRuntime.isDebutTrack(episode, track)
 ).length, 0);
-assert(debutTrackCount === 2587,
+assert(debutTrackCount === 2591,
   `unexpected debut track count: ${debutTrackCount}`);
 for (const [episodeNo, trackNo, expected] of [
   [14, 5, true],
@@ -1215,7 +1250,7 @@ for (const episode of episodes) {
     yumingSearchAliasRankingComparisonCount += 1;
   }
 }
-assert(yumingSearchAliasRankingComparisonCount === 5514,
+assert(yumingSearchAliasRankingComparisonCount === 5532,
   `unexpected Yuming annual ranking comparison count: ${yumingSearchAliasRankingComparisonCount}`);
 
 assert(preRebeccaSearchAliasRuntime.ANNUAL_RANKING_ARTIST_ALIAS_GROUPS.filter(group =>
@@ -1239,7 +1274,7 @@ for (const episode of episodes) {
     rebeccaSearchAliasRankingComparisonCount += 1;
   }
 }
-assert(rebeccaSearchAliasRankingComparisonCount === 5514,
+assert(rebeccaSearchAliasRankingComparisonCount === 5532,
   `unexpected REBECCA annual ranking comparison count: ${rebeccaSearchAliasRankingComparisonCount}`);
 
 const beforeTotals = { regular: 0, confirm: 0, rankout: 0, foreign: 0 };
@@ -1289,15 +1324,15 @@ for (const episode of episodes) {
   }
 }
 
-assert(episodes.reduce((sum, episode) => sum + episode.tracks.length, 0) === 5514,
+assert(episodes.reduce((sum, episode) => sum + episode.tracks.length, 0) === 5532,
   'unexpected Set Up List track count');
-assert(JSON.stringify(beforeTotals) === JSON.stringify({ regular: 3207, confirm: 331, rankout: 1671, foreign: 305 }),
+assert(JSON.stringify(beforeTotals) === JSON.stringify({ regular: 3218, confirm: 331, rankout: 1677, foreign: 306 }),
   `unexpected pre-alias totals: ${JSON.stringify(beforeTotals)}`);
-assert(JSON.stringify(preYokohamaGinbaeTotals) === JSON.stringify({ regular: 3394, confirm: 331, rankout: 1484, foreign: 305 }),
+assert(JSON.stringify(preYokohamaGinbaeTotals) === JSON.stringify({ regular: 3405, confirm: 331, rankout: 1490, foreign: 306 }),
   `unexpected pre-横浜銀蝿 totals: ${JSON.stringify(preYokohamaGinbaeTotals)}`);
-assert(JSON.stringify(preLuckyChanceTotals) === JSON.stringify({ regular: 3394, confirm: 331, rankout: 1484, foreign: 305 }),
+assert(JSON.stringify(preLuckyChanceTotals) === JSON.stringify({ regular: 3405, confirm: 331, rankout: 1490, foreign: 306 }),
   `unexpected pre-Lucky Chance alias totals: ${JSON.stringify(preLuckyChanceTotals)}`);
-assert(JSON.stringify(afterTotals) === JSON.stringify({ regular: 3397, confirm: 331, rankout: 1481, foreign: 305 }),
+assert(JSON.stringify(afterTotals) === JSON.stringify({ regular: 3408, confirm: 331, rankout: 1487, foreign: 306 }),
   `unexpected post-alias totals: ${JSON.stringify(afterTotals)}`);
 assert(afterRuntime.ANNUAL_RANKING_TRACK_ALIAS_GROUPS.length === 76,
   `unexpected approved alias destination count: ${afterRuntime.ANNUAL_RANKING_TRACK_ALIAS_GROUPS.length}`);
@@ -1371,7 +1406,15 @@ const episode306DiamondsOverrideKey = afterRuntime.annualRankingTrackYearOverrid
 );
 assert(afterRuntime.ANNUAL_RANKING_TRACK_YEAR_OVERRIDES.get(episode306DiamondsOverrideKey) === 1989,
   '#306 Diamonds year override must be limited to #306 and 1989');
-assert(afterRuntime.ANNUAL_RANKING_TRACK_YEAR_OVERRIDES.size === 7,
+const episode317WindOverrideKey = afterRuntime.annualRankingTrackYearOverrideKey(317, '風は秋色', '松田聖子');
+assert(afterRuntime.ANNUAL_RANKING_TRACK_YEAR_OVERRIDES.get(episode317WindOverrideKey) === 1980,
+  '#317 風は秋色 override must be limited to #317 and 1980');
+const episode317BaracudaAliasKey = afterRuntime.annualRankingTrackYearOverrideKey(317, '日本全国酒飲み音頭', 'バラクーダ');
+assert(afterRuntime.ANNUAL_RANKING_EPISODE_TRACK_ALIAS_DESTINATIONS.size === 1
+  && afterRuntime.ANNUAL_RANKING_EPISODE_TRACK_ALIAS_DESTINATIONS.get(episode317BaracudaAliasKey)
+    === afterRuntime.annualRankingTrackKey('日本全国酒飲み音頭', 'バラクーダー'),
+  '#317 バラクーダ alias must point only to the approved canonical ranking track');
+assert(afterRuntime.ANNUAL_RANKING_TRACK_YEAR_OVERRIDES.size === 8,
   `unexpected year override count: ${afterRuntime.ANNUAL_RANKING_TRACK_YEAR_OVERRIDES.size}`);
 
 const luckyChancePositiveCases = [
@@ -1443,7 +1486,8 @@ const positiveCases = [
   [297, 17, '17位'],
   [297, 18, '86位'],
   ...episode306ExpectedTracks.map(([trackNo, , , , expected]) => [306, trackNo, expected]),
-  ...episode307ExpectedTracks.map(([trackNo, , , , expected]) => [307, trackNo, expected])
+  ...episode307ExpectedTracks.map(([trackNo, , , , expected]) => [307, trackNo, expected]),
+  ...episode317ExpectedTracks.map(([trackNo, , , , expected]) => [317, trackNo, expected])
 ];
 for (const [episodeNo, trackNo, expected] of positiveCases) {
   const { episode, track } = findTrack(episodeNo, trackNo);
@@ -1453,6 +1497,19 @@ for (const [episodeNo, trackNo, expected] of positiveCases) {
 }
 
 const luckyChanceTracks = [];
+for (const episode of episodes.filter(episode => episode.episode_no !== 317)) {
+  for (const track of episode.tracks) {
+    if (track.title === '風は秋色' && track.artist === '松田聖子') {
+      assert(afterRuntime.resolveAnnualRanking(afterIndex, episode, track).text === '要確認',
+        `#317 風は秋色 override leaked to #${episode.episode_no} No.${track.no}`);
+    }
+  }
+}
+const existingBaracuda = findTrack(49, 21);
+assert(existingBaracuda.track.title === '日本全国酒飲み音頭' && existingBaracuda.track.artist === 'バラクーダ',
+  '#49 バラクーダ source data unexpectedly changed');
+assert(afterRuntime.resolveAnnualRanking(afterIndex, existingBaracuda.episode, existingBaracuda.track).text === '―',
+  '#317 バラクーダ alias leaked to #49');
 for (const episode of episodes) {
   for (const track of episode.tracks || []) {
     if (track.title === 'Lucky Chanceをもう一度' && track.artist === 'C-C-B') {
@@ -1661,16 +1718,17 @@ console.log('[OK] CHAGE and ASKA annual search alias: 5 inputs=17 entries; 1980s
 console.log('[OK] UNICORN Set Up List alias: artist/free both spellings=10 episodes/14 tracks; #149 included');
 console.log('[OK] UNICORN annual search alias: both spellings=2 tracks; 1980s=1; 1990s=1; highlight verified');
 console.log('[OK] Yuming Set Up List alias: artist/free both names=44 episodes/58 tracks; #88/#89 included; highlight verified');
-console.log('[OK] Yuming annual search alias: both names=13 entries; 1980s=6; 1990s=7; source spellings=12/1; 5,514 rankings unchanged');
+console.log('[OK] Yuming annual search alias: both names=13 entries; 1980s=6; 1990s=7; source spellings=12/1; 5,532 rankings unchanged');
 console.log('[OK] REBECCA Set Up List alias: artist/free both spellings=14 episodes/18 tracks; #106 No.17 included; source spellings=18/0');
-console.log('[OK] REBECCA annual search alias: both spellings=6 entries; 1980s=5; 1990s=1; source spellings=5/1; 5,514 rankings unchanged');
-console.log('[OK] totals: regular=3397, confirm=331, rankout=1481, foreign=305');
-console.log('[OK] #306 metadata/tracks=17; PUY 1996 tracks=281; image references=264; preparing=13; Diamonds override isolated');
+console.log('[OK] REBECCA annual search alias: both spellings=6 entries; 1980s=5; 1990s=1; source spellings=5/1; 5,532 rankings unchanged');
+console.log('[OK] totals: regular=3408, confirm=331, rankout=1487, foreign=306');
+console.log('[OK] #306 metadata/tracks=17; PUY 1996 tracks=281; Diamonds override isolated');
+console.log('[OK] #317 metadata/tracks=18; PUY 1980 tracks=311; image references=265; preparing=13; #316 absent');
 console.log('[OK] #307 metadata/tracks=18; PUY 1987 tracks=302');
 console.log('[OK] required positives=81; untouched groups=7; negative cases=9');
 console.log('[OK] Lucky Chance positives=3; negative groups=7; non-target C-C-B tracks=15');
-console.log('[OK] episode-specific year overrides=7; #306 Diamonds and #307 same-track leakage verified');
+console.log('[OK] episode-specific year overrides=8; #306, #307 and #317 same-track leakage verified; #317 バラクーダ alias isolated');
 console.log('[OK] existing ranking result changes=0');
-console.log('[OK] debut tracks=2587; 横浜銀蝿 and ルビーの指環 debut states verified');
+console.log('[OK] debut tracks=2591; 横浜銀蝿 and ルビーの指環 debut states verified');
 console.log('[OK] pending display=確認中; placement/touch/hover/focus/click/outside/Escape verified');
 console.log('\nResult: PASS (failures=0)');
